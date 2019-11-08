@@ -1,9 +1,12 @@
-using System;
+using System.IO;
 
-namespace Yhsb 
+namespace Yhsb.Util
 {
-    public static class Util
+    public static class StreamExtension
     {
-        public static void Say(string word) => Console.WriteLine(word);
+        public static void Write(this Stream stream, byte[] buffer)
+        {
+            stream.Write(buffer, 0, buffer.Length);
+        }
     }
 }
