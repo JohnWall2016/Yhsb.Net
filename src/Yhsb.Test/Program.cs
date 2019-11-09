@@ -4,12 +4,15 @@ using System.Text.RegularExpressions;
 
 namespace Yhsb.Test
 {
-
     public class TestRunner
     {
         public static void Main(string[] args)
         {
-            if (args.Length < 0) return;
+            if (args.Length <= 0)
+            {
+                Console.WriteLine("dotnet run --project src/Yhsb.Test/ [-l] <method>");
+                return;
+            }
             var list = false;
             string pattern = null;
 

@@ -4,7 +4,6 @@ using System.Text;
 using System.Net.Sockets;
 using System.Collections;
 using System.Collections.Generic;
-using Yhsb.Util;
 
 namespace Yhsb.Net
 {
