@@ -42,9 +42,7 @@ namespace Yhsb.Net
             }
         }
 
-        public void Write(byte[] buffer) => _stream.Write(buffer, 0, buffer.Length);
-
-        public void Write(String s) => Write(_encoding.GetBytes(s));
+        public void Write(String s) => _stream.Write(_encoding.GetBytes(s));
 
         public (byte[] buffer, int length) Read(int size)
         {
@@ -159,12 +157,12 @@ namespace Yhsb.Net
                 .AddHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8")
                 .AddHeader("Accept-Encoding", "gzip, deflate")
                 .AddHeader("Accept-Language", "zh-CN,zh;q=0.9");
-            Write(request.ToArray());
+            _stream.Write(request.ToArray());
             return ReadBody();
         }
     }
 
-    public class HttpHeader : IEnumerable<KeyValuePair<string, List<string>>>
+    public class HttpHeader : IEnumerable<(string, string)>
     {
         readonly Dictionary<string, List<string>> _header = new Dictionary<string, List<string>>();
 
@@ -189,13 +187,22 @@ namespace Yhsb.Net
 
         public void Add(HttpHeader header)
         {
-            foreach (var entry in header._header)
+            foreach ((var key, var value) in header)
             {
-                entry.Value.ForEach(value => Add(entry.Key, value));
+                Add(key, value);
             }
         }
 
-        public IEnumerator<KeyValuePair<string, List<string>>> GetEnumerator() => _header.GetEnumerator();
+        public IEnumerator<(string, string)> GetEnumerator()
+        {
+            foreach (var entry in _header)
+            {
+                foreach (var value in entry.Value)
+                {
+                    yield return (entry.Key, value);
+                }
+            }
+        }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
@@ -236,12 +243,9 @@ namespace Yhsb.Net
         {
             using var buffer = new MemoryStream(512);
             buffer.Write(_encoding.GetBytes($"{_method} {_path} HTTP/1.1\r\n"));
-            foreach (var entry in _header)
+            foreach ((var key, var value) in _header)
             {
-                entry.Value.ForEach(value =>
-                {
-                    buffer.Write(_encoding.GetBytes($"{entry.Key}: {value}\r\n"));
-                });
+                buffer.Write(_encoding.GetBytes($"{key}: {value}\r\n"));
             }
             if (_body.Length > 0)
             {
