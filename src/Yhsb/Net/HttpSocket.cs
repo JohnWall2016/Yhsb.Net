@@ -17,7 +17,8 @@ namespace Yhsb.Net
 
         public string Url => $"{_host}:{_port}";
 
-        public HttpSocket(string host, int port, string encoding = "utf-8")
+        public HttpSocket(
+            string host, int port, string encoding = "utf-8")
         {
             _host = host;
             _port = port;
@@ -40,6 +41,8 @@ namespace Yhsb.Net
                 _client = null;
             }
         }
+
+        public void Write(byte[] buffer) => _stream.Write(buffer);
 
         public void Write(String s) => _stream.Write(_encoding.GetBytes(s));
 
@@ -84,7 +87,8 @@ namespace Yhsb.Net
                     stream.WriteByte((byte)c);
                 }
             }
-            return _encoding.GetString(stream.GetBuffer(), 0, (int)stream.Length);
+            return _encoding.GetString(
+                stream.GetBuffer(), 0, (int)stream.Length);
         }
 
         public HttpHeader ReadHeader()
@@ -97,7 +101,9 @@ namespace Yhsb.Net
                 var i = line.IndexOf(':');
                 if (i > 0)
                 {
-                    header.Add(line.Substring(0, i).Trim(), line.Substring(i + 1).Trim());
+                    header.Add(
+                        line.Substring(0, i).Trim(), 
+                        line.Substring(i + 1).Trim());
                 }
             }
             return header;
@@ -118,7 +124,8 @@ namespace Yhsb.Net
                 }
             }
 
-            if (header.TryGetValue("Transfer-Encoding", out var values) && values.Contains("chunked"))
+            if (header.TryGetValue("Transfer-Encoding", out var values)
+                    && values.Contains("chunked"))
             {
                 while (true)
                 {
@@ -163,7 +170,8 @@ namespace Yhsb.Net
 
     public class HttpHeader : IEnumerable<(string, string)>
     {
-        readonly Dictionary<string, List<string>> _header = new Dictionary<string, List<string>>();
+        readonly Dictionary<string, List<string>> _header
+            = new Dictionary<string, List<string>>();
 
         public List<string> this[string key]
         {
@@ -171,7 +179,9 @@ namespace Yhsb.Net
             set { _header[key.ToLower()] = value; }
         }
 
-        public bool TryGetValue(string key, out List<string> values) => _header.TryGetValue(key.ToLower(), out values);
+        public bool TryGetValue(
+            string key, out List<string> values)
+                => _header.TryGetValue(key.ToLower(), out values);
 
 
         public void Add(string name, string value)
@@ -217,7 +227,9 @@ namespace Yhsb.Net
 
         readonly Encoding _encoding;
 
-        public HttpRequest(string path, string method = "GET", HttpHeader header = null, string encoding = "utf-8")
+        public HttpRequest(
+            string path, string method = "GET", 
+            HttpHeader header = null, string encoding = "utf-8")
         {
             _path = path;
             _method = method;
