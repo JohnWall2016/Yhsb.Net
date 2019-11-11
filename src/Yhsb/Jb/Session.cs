@@ -1,5 +1,6 @@
-using System.Text.RegularExpressions;
+using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Json = Newtonsoft.Json.JsonPropertyAttribute;
 using Yhsb.Net;
@@ -103,6 +104,19 @@ namespace Yhsb.Jb
         {
             SendService("syslogout");
             return ReadBody();
+        }
+
+        public static void Use(
+            Action<Session> action, string user = "002")
+        {
+            using var session = new Session(
+                _internal.Session.Host,
+                _internal.Session.Port,
+                _internal.Session.Users[user].ID,
+                _internal.Session.Users[user].Pwd);
+            session.Login();
+            action(session);
+            session.Logout();
         }
     }
 
