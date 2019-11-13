@@ -2,10 +2,8 @@ using System;
 using Newtonsoft.Json;
 using Yhsb.Jb;
 
-
 public class JsonTest
 {
- 
     public static void TestToJson()
     {
         var service = new Service(new Parameters("abc"), "efg", "1234");
@@ -16,5 +14,4 @@ public class JsonTest
         json = JsonConvert.SerializeObject(service);
         Console.WriteLine(json);
     }
-
 }

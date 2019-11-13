@@ -10,7 +10,8 @@ namespace Yhsb.Test
         {
             if (args.Length <= 0)
             {
-                Console.WriteLine("dotnet run --project src/Yhsb.Test/ [-l|-a] <method>");
+                Console.WriteLine(
+                    "dotnet run --project src/Yhsb.Test/ [-l|-a] <method>");
                 return;
             }
             var list = false;
@@ -29,38 +30,46 @@ namespace Yhsb.Test
                 }
             }
 
-            Console.WriteLine($"Arguments: [List: {list}, MatchAll: {matchAll}, Pattern: {pattern}]");
+            Console.WriteLine(
+                $"Arguments: [List: {list}, MatchAll: {matchAll}, Pattern: {pattern}]");
 
             var type = typeof(TestRunner);
             foreach (var t in type.Assembly.GetTypes())
             {
                 if (t.IsClass)
                 {
-                    if (list) Console.WriteLine(t.Name + ":");
-                    foreach (var m in t.GetMethods(BindingFlags.Public | BindingFlags.Static))
+                    string ns = t.Namespace != null ? t.Namespace + "." : "";
+                    if (list) Console.WriteLine(ns + t.Name + ":");
+                    foreach (var m in t.GetMethods(
+                        BindingFlags.Public | BindingFlags.Static))
                     {
                         if (list) Console.WriteLine("  " + m.Name);
                         if (pattern != null)
                         {
                             try
                             {
-                                var match = Regex.Match(t.Name + "." + m.Name, pattern, RegexOptions.IgnoreCase);
+                                var match = Regex.Match(
+                                    ns + t.Name + "." + m.Name, pattern, 
+                                    RegexOptions.IgnoreCase);
                                 if (match.Success)
                                 {
                                     if (!list)
                                     {
-                                        Console.WriteLine(t.Name + ":");
+                                        Console.WriteLine(ns + t.Name + ":");
                                         Console.WriteLine("  " + m.Name);
                                     }
-                                    Console.WriteLine("".PadLeft(27, '-') + "OUTPUT" + "".PadLeft(27, '-'));
+                                    Console.WriteLine(
+                                        "".PadLeft(27, '-') + "OUTPUT" + "".PadLeft(27, '-'));
                                     m.Invoke(null, null);
                                     Console.WriteLine("".PadLeft(60, '-'));
+                                    
+                                    if (!matchAll) return;
                                 }
-                                if (!matchAll) return;
                             }
                             catch (Exception ex)
                             {
-                                Console.WriteLine("".PadLeft(27, '-') + "ERROR" + "".PadLeft(28, '-'));
+                                Console.WriteLine(
+                                    "".PadLeft(27, '-') + "ERROR" + "".PadLeft(28, '-'));
                                 Console.WriteLine($"{ex}");
                                 Console.WriteLine("".PadLeft(60, '-'));
                                 return;

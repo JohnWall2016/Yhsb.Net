@@ -1,9 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+
 using Newtonsoft.Json;
-using Json = Newtonsoft.Json.JsonPropertyAttribute;
+
 using Yhsb.Net;
+using Yhsb.Util;
+using Yhsb.Json;
+
+using JsonAt = Newtonsoft.Json.JsonPropertyAttribute;
 
 namespace Yhsb.Jb
 {
@@ -132,7 +137,7 @@ namespace Yhsb.Jb
     {
         public int page;
 
-        [Json("pagesize")]
+        [JsonAt("pagesize")]
         public int pageSize;
 
         public List<Dictionary<string, string>> filtering
@@ -160,23 +165,23 @@ namespace Yhsb.Jb
 
     public class Service
     {
-        [Json("serviceid")]
+        [JsonAt("serviceid")]
         public string serviceID;
 
         public string target = "";
 
-        [Json("sessionid")]
+        [JsonAt("sessionid")]
         public string sessionID;
 
-        [Json("loginname")]
+        [JsonAt("loginname")]
         public string loginName;
 
         public string password;
 
-        [Json("params")]
+        [JsonAt("params")]
         public Parameters parameters;
 
-        [Json("datas")]
+        [JsonAt("datas")]
         public List<Parameters> data = new List<Parameters>();
 
         public Service(
@@ -194,30 +199,30 @@ namespace Yhsb.Jb
 
     public class Result<T>
     {
-        [Json("rowcount")]
+        [JsonAt("rowcount")]
         public int rowCount;
 
         public int page;
 
-        [Json("pagesize")]
+        [JsonAt("pagesize")]
         public int pageSize;
 
-        [Json("serviceid")]
+        [JsonAt("serviceid")]
         public string serviceID;
 
         public string type;
         public string vcode;
         public string message;
 
-        [Json("messagedetail")]
+        [JsonAt("messagedetail")]
         public string messageDetail;
 
-        [Json("datas")]
+        [JsonAt("datas")]
         public List<T> data;
 
         [JsonIgnore]
         public List<T> Data
-            => data != null ? data : (data = new List<T>());
+            => data ?? (data = new List<T>());
 
         public T this[int index] => Data[index];
 
@@ -229,10 +234,10 @@ namespace Yhsb.Jb
 
     public class Syslogin : Parameters
     {
-        [Json("username")]
+        [JsonAt("username")]
         public readonly string userName;
 
-        [Json("passwd")]
+        [JsonAt("passwd")]
         public readonly string password;
 
         public Syslogin(
@@ -242,4 +247,54 @@ namespace Yhsb.Jb
             this.password = password;
         }
     }
+
+    /// 省内参保缴费信息查询
+    public class JfxxQuery : PageParameters
+    {
+        [JsonAt("aac002")]
+        public string idCard = "";
+
+        public JfxxQuery(string idCard)
+            : base("executeSncbqkcxjfxxQ", page: 1, pageSize: 500)
+        {
+            this.idCard = idCard;
+        }
+    }
+
+    /// 省内参保缴费信息
+    public class Jfxx
+    {
+        /// 缴费年度
+        [JsonAt("aae003")]
+        public int year;
+
+        /// 备注
+        [JsonAt("aae013")]
+        public string memo;
+
+        /// 金额
+        [JsonAt("aae022")]
+        public decimal amount;
+
+        [JsonConverter(typeof(FieldConverter<string, Type>))]
+        public class Type : Field<string>
+        {
+            public override string Name
+            {
+                get
+                {
+                    return Value switch
+                    {
+                        "10" => "正常应缴",
+                        "31" => "补缴",
+                        _ => $"未知值: {Value}"
+                    };
+                }
+            }
+        }
+
+        [JsonAt("aaa115")]
+        public Type type;
+    }
+
 }
