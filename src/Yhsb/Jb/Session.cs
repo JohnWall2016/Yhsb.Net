@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 using Yhsb.Net;
-using Yhsb.Util;
 using Yhsb.Json;
-
-using JsonAt = Newtonsoft.Json.JsonPropertyAttribute;
 
 namespace Yhsb.Jb
 {
@@ -73,7 +71,7 @@ namespace Yhsb.Jb
             Request(service.ToJson());
         }
 
-        public Result<T> GetResult<T>()
+        public Result<T> GetResult<T>() where T : ResultData
         {
             var result = ReadBody();
             return Result<T>.FromJson(result);
@@ -137,7 +135,7 @@ namespace Yhsb.Jb
     {
         public int page;
 
-        [JsonAt("pagesize")]
+        [JsonProperty("pagesize")]
         public int pageSize;
 
         public List<Dictionary<string, string>> filtering
@@ -165,23 +163,23 @@ namespace Yhsb.Jb
 
     public class Service
     {
-        [JsonAt("serviceid")]
+        [JsonProperty("serviceid")]
         public string serviceID;
 
         public string target = "";
 
-        [JsonAt("sessionid")]
+        [JsonProperty("sessionid")]
         public string sessionID;
 
-        [JsonAt("loginname")]
+        [JsonProperty("loginname")]
         public string loginName;
 
         public string password;
 
-        [JsonAt("params")]
+        [JsonProperty("params")]
         public Parameters parameters;
 
-        [JsonAt("datas")]
+        [JsonProperty("datas")]
         public List<Parameters> data = new List<Parameters>();
 
         public Service(
@@ -197,27 +195,54 @@ namespace Yhsb.Jb
         public string ToJson() => JsonConvert.SerializeObject(this);
     }
 
-    public class Result<T>
+    public class ResultData
     {
-        [JsonAt("rowcount")]
+        class Resolver : DefaultContractResolver
+        {
+            protected override IList<JsonProperty> CreateProperties(
+                Type type, MemberSerialization memberSerialization)
+            {
+                IList<JsonProperty> list = base.CreateProperties(
+                    type, memberSerialization);
+
+                foreach (JsonProperty prop in list)
+                {
+                    prop.PropertyName = prop.UnderlyingName;
+                }
+
+                return list;
+            }
+        }
+
+        public string ToJson(bool orignalName = true)
+        {
+            var settings = new JsonSerializerSettings();
+            if (orignalName) settings.ContractResolver = new Resolver();
+            return JsonConvert.SerializeObject(this, settings);
+        }
+    }
+
+    public class Result<T> where T : ResultData
+    {
+        [JsonProperty("rowcount")]
         public int rowCount;
 
         public int page;
 
-        [JsonAt("pagesize")]
+        [JsonProperty("pagesize")]
         public int pageSize;
 
-        [JsonAt("serviceid")]
+        [JsonProperty("serviceid")]
         public string serviceID;
 
         public string type;
         public string vcode;
         public string message;
 
-        [JsonAt("messagedetail")]
+        [JsonProperty("messagedetail")]
         public string messageDetail;
 
-        [JsonAt("datas")]
+        [JsonProperty("datas")]
         public List<T> data;
 
         [JsonIgnore]
@@ -234,10 +259,10 @@ namespace Yhsb.Jb
 
     public class Syslogin : Parameters
     {
-        [JsonAt("username")]
+        [JsonProperty("username")]
         public readonly string userName;
 
-        [JsonAt("passwd")]
+        [JsonProperty("passwd")]
         public readonly string password;
 
         public Syslogin(
@@ -251,7 +276,7 @@ namespace Yhsb.Jb
     /// 省内参保缴费信息查询
     public class JfxxQuery : PageParameters
     {
-        [JsonAt("aac002")]
+        [JsonProperty("aac002")]
         public string idCard = "";
 
         public JfxxQuery(string idCard)
@@ -262,21 +287,23 @@ namespace Yhsb.Jb
     }
 
     /// 省内参保缴费信息
-    public class Jfxx
+    public class Jfxx : ResultData
     {
         /// 缴费年度
-        [JsonAt("aae003")]
+        [JsonProperty("aae003")]
         public int year;
 
         /// 备注
-        [JsonAt("aae013")]
+        [JsonProperty("aae013")]
         public string memo;
 
         /// 金额
-        [JsonAt("aae022")]
+        [JsonProperty("aae022")]
         public decimal amount;
 
-        [JsonConverter(typeof(FieldConverter<string, Type>))]
+        /// 缴费类型
+        [JsonConverter(
+            typeof(FieldConverter<string, Type>))]
         public class Type : Field<string>
         {
             public override string Name
@@ -293,8 +320,70 @@ namespace Yhsb.Jb
             }
         }
 
-        [JsonAt("aaa115")]
+        [JsonProperty("aaa115")]
         public Type type;
+
+        /// 缴费项目
+        [JsonConverter(
+            typeof(FieldConverter<string, Item>))]
+        public class Item : Field<string>
+        {
+            public override string Name
+            {
+                get
+                {
+                    return Value switch
+                    {
+                        "1" => "个人缴费",
+                        "3" => "省级财政补贴",
+                        "4" => "市级财政补贴",
+                        "5" => "县级财政补贴",
+                        "11" => "政府代缴",
+                        _ => $"未知值: {Value}"
+                    };
+                }
+            }
+        }
+
+        [JsonProperty("aae341")]
+        public Item item;
+
+        /// 缴费方式
+        [JsonConverter(
+            typeof(FieldConverter<string, Method>))]
+        public class Method : Field<string>
+        {
+            public override string Name
+            {
+                get
+                {
+                    return Value switch
+                    {
+                        "2" => "银行代收",
+                        "3" => "经办机构自收",
+                        _ => $"未知值: {Value}"
+                    };
+                }
+            }
+        }
+
+        [JsonProperty("aab033")]
+        public Method method;
+
+        /// 划拨日期
+        [JsonProperty("aae006")]
+        public string payedOffDay;
+
+        /// 是否已划拨
+        public bool IsPayedOff => payedOffDay != null;
+
+        /// 社保机构
+        [JsonProperty("aaa027")]
+        public string agent;
+
+        /// 行政区划代码
+        [JsonProperty("aaf101")]
+        public string xzqh;
     }
 
 }

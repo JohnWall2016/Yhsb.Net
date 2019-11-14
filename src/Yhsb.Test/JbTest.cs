@@ -20,8 +20,9 @@ public class JbTest
 
             foreach (var info in result.Data)
             {
-                Console.WriteLine(info.year);
-                Console.WriteLine(info.type);
+                /*Console.WriteLine(info.year);
+                Console.WriteLine(info.type);*/
+                Console.WriteLine(info.ToJson());
             }
         });
     }
