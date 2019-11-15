@@ -169,13 +169,13 @@
     <value>A value not bound to option name is defined with a bad format.</value>
   </data>
   <data name="SentenceBadFormatTokenError" xml:space="preserve">
-    <value>Token '{0}' is not recognized.</value>
+    <value>标记 '{0}' 无法识别.</value>
   </data>
   <data name="SentenceBadVerbSelectedError" xml:space="preserve">
-    <value>Verb '{0}' is not recognized.</value>
+    <value>子命令 '{0}' 无法识别.</value>
   </data>
   <data name="SentenceErrorsHeadingText" xml:space="preserve">
-    <value>ERROR(S):</value>
+    <value>错误:</value>
   </data>
   <data name="SentenceHelpCommandTextOption" xml:space="preserve">
     <value>显示此帮助</value>
@@ -184,7 +184,7 @@
     <value>显示命令帮助</value>
   </data>
   <data name="SentenceMissingRequiredOptionError" xml:space="preserve">
-    <value>Required option '{0}' is missing.</value>
+    <value>必须选项 '{0}' 未找到.</value>
   </data>
   <data name="SentenceMissingRequiredValueError" xml:space="preserve">
     <value>A required value not bound to option name is missing.</value>
@@ -214,7 +214,7 @@
     <value>Error setting value to option '{0}': {1}</value>
   </data>
   <data name="SentenceUnknownOptionError" xml:space="preserve">
-    <value>Option '{0}' is unknown.</value>
+    <value>选项 '{0}' 未知.</value>
   </data>
   <data name="SentenceUsageHeadingText" xml:space="preserve">
     <value>USAGE:</value>
