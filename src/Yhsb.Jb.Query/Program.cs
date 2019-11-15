@@ -67,11 +67,11 @@ namespace Yhsb.Jb.Query
                         case "5":
                             record.xjbt += data.amount;
                             break;
-                        case "11":
-                            record.zfdj += data.amount;
-                            break;
                         case "6":
                             record.jtbz += data.amount;
+                            break;
+                        case "11":
+                            record.zfdj += data.amount;
                             break;
                         default:
                             Console.WriteLine(
@@ -110,7 +110,7 @@ namespace Yhsb.Jb.Query
             Console.WriteLine("个人信息:");
             Console.WriteLine(
                 $"{info.name} {info.idCard} {info.JBState} " +
-                $"{info.JBClass} {info.czName} {info.agency} " +
+                $"{info.JBClass} {info.agency} {info.czName} " +
                 $"{info.dealDate}\n"
             );
         }
