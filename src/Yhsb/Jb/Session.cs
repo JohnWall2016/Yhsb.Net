@@ -251,7 +251,9 @@ namespace Yhsb.Jb
 
         public T this[int index] => Data[index];
 
-        public int Count => data.Count;
+        public int Count => Data.Count;
+
+        public bool IsEmpty => Count <= 0;
 
         public static Result<T> FromJson(string json)
             => JsonConvert.DeserializeObject<Result<T>>(json);
@@ -291,7 +293,7 @@ namespace Yhsb.Jb
     {
         /// 缴费年度
         [JsonProperty("aae003")]
-        public int year;
+        public int? year;
 
         /// 备注
         [JsonProperty("aae013")]
@@ -379,11 +381,165 @@ namespace Yhsb.Jb
 
         /// 社保机构
         [JsonProperty("aaa027")]
-        public string agent;
+        public string agency;
 
         /// 行政区划代码
         [JsonProperty("aaf101")]
-        public string xzqh;
+        public string xzqhCode;
+    }
+
+    /// 省内参保信息查询
+    public class CbxxQuery : Parameters
+    {
+        [JsonProperty("aac002")]
+        public string idCard = "";
+
+        public CbxxQuery(string idCard) : base("executeSncbxxConQ")
+        {
+            this.idCard = idCard;
+        }
+    }
+
+    /// 省内参保信息
+    public class Cbxx : ResultData
+    {
+        /// 个人编号
+        [JsonProperty("aac001")]
+        public int pid;
+
+        /// 身份证号码
+        [JsonProperty("aac002")]
+        public string idCard;
+
+        [JsonProperty("aac003")]
+        public string name;
+
+        /// 参保状态
+        [JsonConverter(
+            typeof(FieldConverter<string, CBState>))]
+        public class CBState : Field<string>
+        {
+            public override string Name
+            {
+                get
+                {
+                    return Value switch
+                    {
+                        "0" => "未参保",
+                        "1" => "正常参保",
+                        "2" => "暂停参保",
+                        "4" => "终止参保",
+                        _ => $"未知值: {Value}"
+                    };
+                }
+            }
+        }
+
+        [JsonProperty("aac008")]
+        public CBState cbState;
+
+        /// 缴费状态
+        [JsonConverter(
+            typeof(FieldConverter<string, JFState>))]
+        public class JFState : Field<string>
+        {
+            public override string Name
+            {
+                get
+                {
+                    return Value switch
+                    {
+                        "1" => "参保缴费",
+                        "2" => "暂停缴费",
+                        "3" => "终止缴费",
+                        _ => $"未知值: {Value}"
+                    };
+                }
+            }
+        }
+
+        [JsonProperty("aac031")]
+        public JFState jfState;
+
+        /// 参保时间
+        [JsonProperty("aac049")]
+        public int cbDate;
+
+        /// 参保身份编码
+        [JsonProperty("aac066")]
+        public string sfCode;
+
+        /// 社保机构
+        [JsonProperty("aaa129")]
+        public string agency;
+
+        /// 经办时间
+        [JsonProperty("aae036")]
+        public string dealDate;
+
+        /// 行政区划编码
+        [JsonProperty("aaf101")]
+        public string xzqhCode;
+
+        /// 村组名称
+        [JsonProperty("aaf102")]
+        public string czName;
+
+        /// 村社区名称
+        [JsonProperty("aaf103")]
+        public string csName;
+
+        /// 居保状态
+        public string JBState
+        {
+            get
+            {
+                return jfState.Value switch
+                {
+                    "1" => cbState.Value switch
+                    {
+                        "1" => "正常缴费人员",
+                        _ => $"未知类型参保缴费人员: {cbState.Value}"
+                    },
+                    "2" => cbState.Value switch
+                    {
+                        "2" => "暂停缴费人员",
+                        _ => $"未知类型暂停缴费人员: {cbState.Value}"
+                    },
+                    "3" => cbState.Value switch
+                    {
+                        "1" => "正常待遇人员",
+                        "2" => "暂停待遇人员",
+                        "4" => "终止参保人员",
+                        _ => $"未知类型终止缴费人员: {cbState.Value}"
+                    },
+                    _ => $"未知类型人员: {jfState.Value}, {cbState.Value}",
+                };
+            }
+        }
+
+        /// 参保身份类型
+        public string JBClass
+        {
+            get
+            {
+                return sfCode switch
+                {
+                    "011" => "普通参保人员",
+                    "021" => "残一级",
+                    "022" => "残二级",
+                    "031" => "特困一级",
+                    "051" => "贫困人口一级",
+                    "061" => "低保对象一级",
+                    "062" => "低保对象二级",
+                    _ => $"未知身份类型: {sfCode}"
+                };
+            }
+        }
+
+        public bool Valid => idCard != null;
+
+        public bool Invalid => !Valid;
     }
 
 }
