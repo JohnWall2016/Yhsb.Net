@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using CommandLine;
 using Yhsb.Util.Command;
+using static System.Console;
 
 namespace Yhsb.Jb.Query
 {
@@ -34,7 +35,7 @@ namespace Yhsb.Jb.Query
 
         class JfxxTotalRecord : JfxxRecord
         {
-            internal decimal tatal = 0;
+            internal decimal total = 0;
         }
 
         void GetJfxxRecords(
@@ -74,7 +75,7 @@ namespace Yhsb.Jb.Query
                             record.zfdj += data.amount;
                             break;
                         default:
-                            Console.WriteLine(
+                            WriteLine(
                                 $"未知缴费类型{data.item.Value}, 金额{data.amount}");
                             break;
                     };
@@ -98,7 +99,7 @@ namespace Yhsb.Jb.Query
                 total.zfdj += r.zfdj;
                 total.jtbz += r.jtbz;
             });
-            total.tatal =
+            total.total =
                 total.grjf + total.sjbt + total.sqbt +
                 total.xjbt + total.zfdj + total.jtbz;
             results.Add(total);
@@ -107,8 +108,8 @@ namespace Yhsb.Jb.Query
 
         void PrintInfo(Cbxx info)
         {
-            Console.WriteLine("个人信息:");
-            Console.WriteLine(
+            WriteLine("个人信息:");
+            WriteLine(
                 $"{info.name} {info.idCard} {info.JBState} " +
                 $"{info.JBClass} {info.agency} {info.czName} " +
                 $"{info.dealDate}\n"
@@ -117,38 +118,26 @@ namespace Yhsb.Jb.Query
 
         void PrintJfxxRecords(List<JfxxRecord> records, String message)
         {
-            Console.WriteLine(message);
+            WriteLine(message);
 
-            Console.WriteLine(
-                "序号".PadLeft(2) +
-                "年度".PadLeft(3) +
-                "个人缴费".PadLeft(6) +
-                "省级补贴".PadLeft(5) +
-                "市级补贴".PadLeft(5) +
-                "县级补贴".PadLeft(5) +
-                "政府代缴".PadLeft(5) +
-                "集体补助".PadLeft(5) +
+            WriteLine(
+                $"{"序号",2}{"年度",3}{"个人缴费",6}{"省级补贴",5}" +
+                $"{"市级补贴",5}{"县级补贴",5}{"政府代缴",5}{"集体补助",5}" +
                 "  社保经办机构 划拨时间");
 
             static string format(JfxxRecord r)
             {
-                return (r is JfxxTotalRecord ? "合计" : $"{r.year}".PadLeft(4)) +
-                    $"{r.grjf}".PadLeft(9) +
-                    $"{r.sjbt}".PadLeft(9) +
-                    $"{r.sqbt}".PadLeft(9) +
-                    $"{r.xjbt}".PadLeft(9) +
-                    $"{r.zfdj}".PadLeft(9) +
-                    $"{r.jtbz}".PadLeft(9) +
-                    (r is JfxxTotalRecord
-                        ? $"   总计: {(r as JfxxTotalRecord).tatal}".PadLeft(9)
-                        : $"   {string.Join('|', r.sbjg)} {string.Join('|', r.hbrq)}");
+                return (r is JfxxTotalRecord ? "合计" : $"{r.year,4}") +
+                    $"{r.grjf,9}{r.sjbt,9}{r.sqbt,9}{r.xjbt,9}{r.zfdj,9}{r.jtbz,9}   " +
+                    (r is JfxxTotalRecord ? $"总计: {(r as JfxxTotalRecord).total,9}" 
+                        : $"{string.Join('|', r.sbjg)} {string.Join('|', r.hbrq)}");
             }
 
             var i = 1;
             foreach (var r in records)
             {
-                var title = r is JfxxTotalRecord ? "" : $"{i++}";
-                Console.WriteLine($"{title}".PadLeft(3) + "  " + format(r));
+                WriteLine(
+                    $"{(r is JfxxTotalRecord ? "" : $"{i++}"),3}  ${format(r)}");
             }
         }
 
@@ -171,7 +160,7 @@ namespace Yhsb.Jb.Query
 
             if (info == null)
             {
-                Console.WriteLine("未查到参保记录");
+                WriteLine("未查到参保记录");
                 return;
             }
 
@@ -179,7 +168,7 @@ namespace Yhsb.Jb.Query
 
             if (jfxx == null)
             {
-                Console.WriteLine("未查询到缴费信息");
+                WriteLine("未查询到缴费信息");
                 return;
             }
 
@@ -208,7 +197,7 @@ namespace Yhsb.Jb.Query
 
         public void Execute()
         {
-            Console.WriteLine(Xlsx);
+            WriteLine(Xlsx);
         }
     }
 }
