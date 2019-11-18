@@ -137,7 +137,7 @@ namespace Yhsb.Jb.Query
             foreach (var r in records)
             {
                 WriteLine(
-                    $"{(r is JfxxTotalRecord ? "" : $"{i++}"),3}  ${format(r)}");
+                    $"{(r is JfxxTotalRecord ? "" : $"{i++}"),3}  {format(r)}");
             }
         }
 
