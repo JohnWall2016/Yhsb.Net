@@ -308,18 +308,12 @@ namespace Yhsb.Jb
             typeof(FieldConverter<string, Type>))]
         public class Type : Field<string>
         {
-            public override string Name
+            public override string Name => Value switch
             {
-                get
-                {
-                    return Value switch
-                    {
-                        "10" => "正常应缴",
-                        "31" => "补缴",
-                        _ => $"未知值: {Value}"
-                    };
-                }
-            }
+                "10" => "正常应缴",
+                "31" => "补缴",
+                _ => $"未知值: {Value}"
+            };
         }
 
         [JsonProperty("aaa115")]
@@ -330,21 +324,15 @@ namespace Yhsb.Jb
             typeof(FieldConverter<string, Item>))]
         public class Item : Field<string>
         {
-            public override string Name
+            public override string Name => Value switch
             {
-                get
-                {
-                    return Value switch
-                    {
-                        "1" => "个人缴费",
-                        "3" => "省级财政补贴",
-                        "4" => "市级财政补贴",
-                        "5" => "县级财政补贴",
-                        "11" => "政府代缴",
-                        _ => $"未知值: {Value}"
-                    };
-                }
-            }
+                "1" => "个人缴费",
+                "3" => "省级财政补贴",
+                "4" => "市级财政补贴",
+                "5" => "县级财政补贴",
+                "11" => "政府代缴",
+                _ => $"未知值: {Value}"
+            };
         }
 
         [JsonProperty("aae341")]
@@ -355,18 +343,12 @@ namespace Yhsb.Jb
             typeof(FieldConverter<string, Method>))]
         public class Method : Field<string>
         {
-            public override string Name
+            public override string Name => Value switch
             {
-                get
-                {
-                    return Value switch
-                    {
-                        "2" => "银行代收",
-                        "3" => "经办机构自收",
-                        _ => $"未知值: {Value}"
-                    };
-                }
-            }
+                "2" => "银行代收",
+                "3" => "经办机构自收",
+                _ => $"未知值: {Value}"
+            };
         }
 
         [JsonProperty("aab033")]
@@ -419,20 +401,14 @@ namespace Yhsb.Jb
             typeof(FieldConverter<string, CBState>))]
         public class CBState : Field<string>
         {
-            public override string Name
+            public override string Name => Value switch
             {
-                get
-                {
-                    return Value switch
-                    {
-                        "0" => "未参保",
-                        "1" => "正常参保",
-                        "2" => "暂停参保",
-                        "4" => "终止参保",
-                        _ => $"未知值: {Value}"
-                    };
-                }
-            }
+                "0" => "未参保",
+                "1" => "正常参保",
+                "2" => "暂停参保",
+                "4" => "终止参保",
+                _ => $"未知值: {Value}"
+            };
         }
 
         [JsonProperty("aac008")]
@@ -443,19 +419,13 @@ namespace Yhsb.Jb
             typeof(FieldConverter<string, JFState>))]
         public class JFState : Field<string>
         {
-            public override string Name
+            public override string Name => Value switch
             {
-                get
-                {
-                    return Value switch
-                    {
-                        "1" => "参保缴费",
-                        "2" => "暂停缴费",
-                        "3" => "终止缴费",
-                        _ => $"未知值: {Value}"
-                    };
-                }
-            }
+                "1" => "参保缴费",
+                "2" => "暂停缴费",
+                "3" => "终止缴费",
+                _ => $"未知值: {Value}"
+            };
         }
 
         [JsonProperty("aac031")]
@@ -490,52 +460,40 @@ namespace Yhsb.Jb
         public string csName;
 
         /// 居保状态
-        public string JBState
+        public string JBState => jfState.Value switch
         {
-            get
+            "1" => cbState.Value switch
             {
-                return jfState.Value switch
-                {
-                    "1" => cbState.Value switch
-                    {
-                        "1" => "正常缴费人员",
-                        _ => $"未知类型参保缴费人员: {cbState.Value}"
-                    },
-                    "2" => cbState.Value switch
-                    {
-                        "2" => "暂停缴费人员",
-                        _ => $"未知类型暂停缴费人员: {cbState.Value}"
-                    },
-                    "3" => cbState.Value switch
-                    {
-                        "1" => "正常待遇人员",
-                        "2" => "暂停待遇人员",
-                        "4" => "终止参保人员",
-                        _ => $"未知类型终止缴费人员: {cbState.Value}"
-                    },
-                    _ => $"未知类型人员: {jfState.Value}, {cbState.Value}",
-                };
-            }
-        }
+                "1" => "正常缴费人员",
+                _ => $"未知类型参保缴费人员: {cbState.Value}"
+            },
+            "2" => cbState.Value switch
+            {
+                "2" => "暂停缴费人员",
+                _ => $"未知类型暂停缴费人员: {cbState.Value}"
+            },
+            "3" => cbState.Value switch
+            {
+                "1" => "正常待遇人员",
+                "2" => "暂停待遇人员",
+                "4" => "终止参保人员",
+                _ => $"未知类型终止缴费人员: {cbState.Value}"
+            },
+            _ => $"未知类型人员: {jfState.Value}, {cbState.Value}",
+        };
 
         /// 参保身份类型
-        public string JBClass
+        public string JBClass => sfCode switch
         {
-            get
-            {
-                return sfCode switch
-                {
-                    "011" => "普通参保人员",
-                    "021" => "残一级",
-                    "022" => "残二级",
-                    "031" => "特困一级",
-                    "051" => "贫困人口一级",
-                    "061" => "低保对象一级",
-                    "062" => "低保对象二级",
-                    _ => $"未知身份类型: {sfCode}"
-                };
-            }
-        }
+            "011" => "普通参保人员",
+            "021" => "残一级",
+            "022" => "残二级",
+            "031" => "特困一级",
+            "051" => "贫困人口一级",
+            "061" => "低保对象一级",
+            "062" => "低保对象二级",
+            _ => $"未知身份类型: {sfCode}"
+        };
 
         public bool Valid => idCard != null;
 
