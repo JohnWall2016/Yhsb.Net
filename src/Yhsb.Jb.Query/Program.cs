@@ -3,6 +3,8 @@ using System.Linq;
 using System.Collections.Generic;
 using CommandLine;
 using Yhsb.Util.Command;
+using Yhsb.Util.Excel;
+
 using static System.Console;
 
 namespace Yhsb.Jb.Query
@@ -166,24 +168,66 @@ namespace Yhsb.Jb.Query
 
             PrintInfo(info);
 
+            List<JfxxRecord> records = null;
+            List<JfxxRecord> unrecords = null;
+
             if (jfxx == null)
             {
                 WriteLine("未查询到缴费信息");
-                return;
+            }
+            else
+            {
+                var payedRecords = new Dictionary<int, JfxxRecord>();
+                var unpayedRecords = new Dictionary<int, JfxxRecord>();
+
+                GetJfxxRecords(jfxx, payedRecords, unpayedRecords);
+
+                records = OrderAndTotal(payedRecords);
+                unrecords = OrderAndTotal(unpayedRecords);
+
+                PrintJfxxRecords(records, "已拨付缴费历史记录:");
+                if (unpayedRecords.Count > 0)
+                {
+                    PrintJfxxRecords(unrecords, "\n未拨付补录入记录:");
+                }
             }
 
-            var payedRecords = new Dictionary<int, JfxxRecord>();
-            var unpayedRecords = new Dictionary<int, JfxxRecord>();
-
-            GetJfxxRecords(jfxx, payedRecords, unpayedRecords);
-
-            var records = OrderAndTotal(payedRecords);
-            var unrecords = OrderAndTotal(unpayedRecords);
-
-            PrintJfxxRecords(records, "已拨付缴费历史记录:");
-            if (unpayedRecords.Count > 0)
+            if (Export)
             {
-                PrintJfxxRecords(unrecords, "\n未拨付补录入记录:");
+                var path = @"D:\征缴管理";
+                var xlsx = $@"{path}\雨湖区城乡居民基本养老保险缴费查询单模板.xlsx";
+                var workbook = ExcelExtension.LoadExcel(xlsx);
+                var sheet = workbook.GetSheetAt(0);
+                sheet.Cell("A5").SetValue(info.name);
+                sheet.Cell("C5").SetValue(info.idCard);
+                sheet.Cell("E5").SetValue(info.agency);
+                sheet.Cell("G5").SetValue(info.czName);
+                sheet.Cell("K5").SetValue(info.dealDate);
+
+                if (records != null)
+                {
+                    int index = 8, copyIndex = 8;
+                    foreach (var r in records)
+                    {
+                        var row = sheet.GetOrCopyRowTo(copyIndex, index++);
+                        row.Cell("A").SetValue(
+                            r is JfxxTotalRecord ? "" : $"{index - copyIndex}");
+                        row.Cell("B").SetValue(
+                            r is JfxxTotalRecord ? "合计" : $"{r.year}");
+                        row.Cell("C").SetValue(r.grjf);
+                        row.Cell("D").SetValue(r.sjbt);
+                        row.Cell("E").SetValue(r.sqbt);
+                        row.Cell("F").SetValue(r.xjbt);
+                        row.Cell("G").SetValue(r.zfdj);
+                        row.Cell("H").SetValue(r.jtbz);
+                        row.Cell("I").SetValue(
+                            r is JfxxTotalRecord ? "总计" : string.Join('|', r.sbjg));
+                        row.Cell("K").SetValue(
+                            r is JfxxTotalRecord ? (r as JfxxTotalRecord).total.ToString() 
+                                : string.Join('|', r.hbrq));
+                    }
+                }
+                workbook.Save($@"{path}\{info.name}缴费查询单.xlsx");
             }
         }
     }
