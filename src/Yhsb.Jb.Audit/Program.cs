@@ -28,8 +28,8 @@ namespace Yhsb.Jb.Audit
 
         public void Execute()
         {
-            var startDate = StartDate != null ? ConvertToDashedDay(StartDate) : "";
-            var endDate = EndDate != null ? ConvertToDashedDay(EndDate) : "";
+            var startDate = StartDate != null ? ConvertToDashedDate(StartDate) : "";
+            var endDate = EndDate != null ? ConvertToDashedDate(EndDate) : "";
 
             WriteLine($"'{startDate}' - '{endDate}'");
 

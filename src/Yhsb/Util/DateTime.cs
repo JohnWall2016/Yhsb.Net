@@ -5,7 +5,7 @@ namespace Yhsb.Util
 {
     public class DateTime
     {
-        public static string ConvertToDashedDay(
+        public static string ConvertToDashedDate(
             string date, string format = @"^(\d\d\d\d)(\d\d)(\d\d)$")
         {
             var match = Regex.Match(date, format);
