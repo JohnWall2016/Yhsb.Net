@@ -1,8 +1,10 @@
 ﻿using System.Linq;
 using CommandLine;
+using CommandLine.Text;
 using Yhsb.Util.Command;
 using Yhsb.Util.Excel;
-using Yhsb.Jb;
+using Yhsb.Jb.Network;
+using Yhsb.Jb.Database;
 
 using static Yhsb.Util.DateTime;
 using static System.Console;
@@ -13,11 +15,11 @@ namespace Yhsb.Jb.Audit
     {
         static void Main(string[] args)
         {
-            Command.Parse<Cbsh>(args);
+            Command.Parse<Audit>(args);
         }
     }
 
-    class Cbsh : ICommand
+    class Audit : ICommand
     {
         [Value(0, HelpText = "起始审核时间, 例如: 20190429",
             Required = true)]
@@ -36,11 +38,11 @@ namespace Yhsb.Jb.Audit
             // var path = @"D:\精准扶贫\";
             // var xlsx = "批量信息变更模板.xls";
 
-            Result<Jb.Cbsh> result = null;
+            Result<Cbsh> result = null;
             Session.Use(session =>
             {
                 session.SendService(new CbshQuery(startDate, endDate));
-                result = session.GetResult<Jb.Cbsh>();
+                result = session.GetResult<Cbsh>();
             });
 
             if (result != null)

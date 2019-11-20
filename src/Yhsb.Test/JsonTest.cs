@@ -1,6 +1,6 @@
 using System;
 using Newtonsoft.Json;
-using Yhsb.Jb;
+using Yhsb.Jb.Network;
 
 public class JsonTest
 {

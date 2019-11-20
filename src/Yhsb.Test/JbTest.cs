@@ -1,5 +1,5 @@
 using System;
-using Yhsb.Jb;
+using Yhsb.Jb.Network;
 
 public class JbTest
 {

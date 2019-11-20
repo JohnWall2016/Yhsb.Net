@@ -1,5 +1,5 @@
 using System;
-using Yhsb.Jb;
+using Yhsb.Jb.Database;
 using System.Linq;
 
 public class DbTest

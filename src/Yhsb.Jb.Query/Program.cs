@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using CommandLine;
 using Yhsb.Util.Command;
 using Yhsb.Util.Excel;
+using Yhsb.Jb.Network;
+using JbJfxx = Yhsb.Jb.Network.Jfxx;
 
 using static System.Console;
 
@@ -41,7 +43,7 @@ namespace Yhsb.Jb.Query
         }
 
         void GetJfxxRecords(
-            Result<Jb.Jfxx> jfxx,
+            Result<JbJfxx> jfxx,
             Dictionary<int, JfxxRecord> payedRecords,
             Dictionary<int, JfxxRecord> unpayedRecords)
         {
@@ -146,7 +148,7 @@ namespace Yhsb.Jb.Query
         public void Execute()
         {
             Cbxx info = null;
-            Result<Jb.Jfxx> jfxx = null;
+            Result<JbJfxx> jfxx = null;
             Session.Use(session =>
             {
                 session.SendService(new CbxxQuery(IDCard));
@@ -154,7 +156,7 @@ namespace Yhsb.Jb.Query
                 if (infos.IsEmpty || infos[0].Invalid) return;
                 info = infos[0];
                 session.SendService(new JfxxQuery(IDCard));
-                var result = session.GetResult<Jb.Jfxx>();
+                var result = session.GetResult<JbJfxx>();
                 if (result.IsEmpty ||
                     (result.Count == 1 && result[0].year == null)) return;
                 jfxx = result;

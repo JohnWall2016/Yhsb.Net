@@ -8,7 +8,7 @@ using Newtonsoft.Json.Serialization;
 using Yhsb.Net;
 using Yhsb.Json;
 
-namespace Yhsb.Jb
+namespace Yhsb.Jb.Network
 {
     public class Session : HttpSocket
     {
@@ -246,8 +246,7 @@ namespace Yhsb.Jb
         public List<T> data;
 
         [JsonIgnore]
-        public List<T> Data
-            => data ?? (data = new List<T>());
+        public List<T> Data => data ?? (data = new List<T>());
 
         public T this[int index] => Data[index];
 
@@ -255,8 +254,8 @@ namespace Yhsb.Jb
 
         public bool IsEmpty => Count <= 0;
 
-        public static Result<T> FromJson(string json)
-            => JsonConvert.DeserializeObject<Result<T>>(json);
+        public static Result<T> FromJson(string json) =>            
+            JsonConvert.DeserializeObject<Result<T>>(json);
     }
 
     public class Syslogin : Parameters

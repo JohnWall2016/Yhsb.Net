@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
-namespace Yhsb.Jb
+namespace Yhsb.Jb.Database
 {
     [Table("2019年度扶贫历史数据底册")]
     public class FPTable2019
