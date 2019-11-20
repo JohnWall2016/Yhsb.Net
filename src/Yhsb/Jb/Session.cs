@@ -396,6 +396,9 @@ namespace Yhsb.Jb
         [JsonProperty("aac003")]
         public string name;
 
+        [JsonProperty("aac006")]
+        public string birthDay;
+
         /// 参保状态
         [JsonConverter(
             typeof(FieldConverter<string, CBState>))]
@@ -498,6 +501,51 @@ namespace Yhsb.Jb
         public bool Valid => idCard != null;
 
         public bool Invalid => !Valid;
+    }
+
+    /// 参保审核查询
+    public class CbshQuery : PageParameters
+    {
+        public string aaf013 = "",
+            aaf030 = "",
+            aae011 = "",
+            aae036 = "",
+            aae036s = "",
+            aae014 = "",
+            aac009 = "",
+            aac002 = "",
+            aac003 = "",
+            sfccb = "";
+
+        [JsonProperty("aae015")]
+        public string startDate = ""; // "2019-04-29"
+
+        [JsonProperty("aae015s")]
+        public string endDate = "";
+
+        [JsonProperty("aae016")]
+        public string shzt = "1";
+
+        public CbshQuery(string startDate = "", string endDate = "",
+            string shzt = "") : base("cbshQuery", pageSize: 500)
+        {
+            this.startDate = startDate;
+            this.endDate = endDate;
+            this.shzt = shzt;
+        }
+    }
+
+    public class Cbsh : ResultData
+    {
+        /// 身份证号码
+        [JsonProperty("aac002")]
+        public string idCard;
+
+        [JsonProperty("aac003")]
+        public string name;
+
+        [JsonProperty("aac006")]
+        public string birthDay;
     }
 
 }
