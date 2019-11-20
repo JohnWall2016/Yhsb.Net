@@ -180,8 +180,8 @@ namespace Yhsb.Net
         }
 
         public bool TryGetValue(
-            string key, out List<string> values)
-                => _header.TryGetValue(key.ToLower(), out values);
+            string key, out List<string> values) =>
+                _header.TryGetValue(key.ToLower(), out values);
 
 
         public void Add(string name, string value)

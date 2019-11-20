@@ -20,8 +20,8 @@ namespace Yhsb.Jb.Database
     public class JzfpContext : DbContext
     {
         protected override void OnConfiguring(
-            DbContextOptionsBuilder optionsBuilder)
-            => optionsBuilder.UseMySql(_internal.Database.DBConnectString);
+            DbContextOptionsBuilder optionsBuilder) => 
+                optionsBuilder.UseMySql(_internal.Database.DBConnectString);
 
         public DbSet<FPTable2019> FPTable2019 { get; set; }
     }

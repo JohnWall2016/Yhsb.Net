@@ -25,8 +25,8 @@ namespace Yhsb.Util
     {
         public string Description { get; }
 
-        public DescriptionAttribute(string description)
-            => Description = description;
+        public DescriptionAttribute(string description) =>
+            Description = description;
     }
 
     public static class EnumExtension

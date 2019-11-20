@@ -131,11 +131,12 @@ namespace Yhsb.Util.Excel
             wb.Write(stream);
         }
 
-        public static IRow Row(this ISheet sheet, int row)
-            => sheet.GetRow(row);
+        public static IRow Row(
+            this ISheet sheet, int row) => sheet.GetRow(row);
 
-        public static ICell Cell(this ISheet sheet, int row, int col)
-            => sheet.GetRow(row).GetCell(col);
+        public static ICell Cell(
+            this ISheet sheet, int row, int col) =>
+                sheet.GetRow(row).GetCell(col);
 
         public static ICell Cell(this ISheet sheet, string address)
         {
@@ -143,23 +144,24 @@ namespace Yhsb.Util.Excel
             return sheet.GetRow(cell.Row - 1).GetCell(cell.Column - 1);
         }
 
-        public static ICell Cell(this IRow row, int col)
-            => row.GetCell(col);
+        public static ICell Cell(
+            this IRow row, int col) => row.GetCell(col);
 
-        public static ICell Cell(this IRow row, string columnName)
-            => row.GetCell(CellRef.ColumnNameToNumber(columnName) - 1);
+        public static ICell Cell(
+            this IRow row, string columnName) =>
+                row.GetCell(CellRef.ColumnNameToNumber(columnName) - 1);
 
-        public static void SetValue(this ICell cell, string value)
-            => cell.SetCellValue(value);
+        public static void SetValue(
+            this ICell cell, string value) => cell.SetCellValue(value);
 
-        public static void SetValue(this ICell cell, double value)
-            => cell.SetCellValue(value);
+        public static void SetValue(
+            this ICell cell, double value) => cell.SetCellValue(value);
 
-        public static void SetValue(this ICell cell, decimal value)
-            => cell.SetCellValue(value.ToString());
+        public static void SetValue(
+            this ICell cell, decimal value) => cell.SetCellValue(value.ToString());
 
-        public static string CellValue(this ICell cell)
-            => cell.CellType switch
+        public static string CellValue(this ICell cell) =>
+            cell.CellType switch
             {
                 CellType.String => cell.StringCellValue,
                 CellType.Numeric => cell.NumericCellValue.ToString(),

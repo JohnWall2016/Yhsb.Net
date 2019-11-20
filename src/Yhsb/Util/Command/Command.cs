@@ -13,8 +13,8 @@ namespace Yhsb.Util.Command
     {
         static Command()
         {
-            SentenceBuilder.Factory =
-                () => new LocalizableSentenceBuilder();
+            SentenceBuilder.Factory = () =>
+                new LocalizableSentenceBuilder();
         }
 
         public static ParserResult<T> Parse<T>(IEnumerable<string> args)
