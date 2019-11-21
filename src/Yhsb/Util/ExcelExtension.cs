@@ -124,8 +124,10 @@ namespace Yhsb.Util.Excel
             };
         }
 
-        public static void Save(this IWorkbook wb, string fileName)
+        public static void Save(
+            this IWorkbook wb, string fileName, bool overwrite = false)
         {
+            if (File.Exists(fileName) && overwrite) File.Delete(fileName);
             using var stream = new FileStream(fileName, FileMode.CreateNew);
             wb.Write(stream);
         }

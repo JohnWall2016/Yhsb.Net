@@ -98,9 +98,8 @@ namespace Yhsb.Jb.Audit
                     }
                     if (export)
                     {
-                        var path = Path.Join(dir, $"批量信息变更{timeSpan}.xls");
-                        if (File.Exists(path)) File.Delete(path);
-                        workbook.Save(path);
+                        workbook.Save(
+                            Path.Join(dir, $"批量信息变更{timeSpan}.xls"), true);
                     }
                 }
             }
