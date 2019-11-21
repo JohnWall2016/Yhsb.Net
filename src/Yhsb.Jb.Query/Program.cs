@@ -211,7 +211,7 @@ namespace Yhsb.Jb.Query
                     int index = 8, copyIndex = 8;
                     foreach (var r in records)
                     {
-                        var row = sheet.GetOrCopyRowTo(copyIndex, index++);
+                        var row = sheet.GetOrCopyRow(index++, copyIndex);
                         row.Cell("A").SetValue(
                             r is JfxxTotalRecord ? "" : $"{index - copyIndex}");
                         row.Cell("B").SetValue(

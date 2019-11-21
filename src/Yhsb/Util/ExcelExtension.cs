@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 using NPOI.HSSF.UserModel;
@@ -170,28 +169,22 @@ namespace Yhsb.Util.Excel
                 _ => throw new InvalidOperationException(),
             };
 
-        public static IRow GetOrCopyRowTo(
-            this ISheet sheet, int copyIndex, int toIndex)
+        public static IRow GetOrCopyRow(
+            this ISheet sheet, int index, int copyIndex, bool clearValue = true)
         {
-            if (copyIndex == toIndex)
-                return sheet.GetRow(copyIndex);
+            IRow dstRow = null;
+            if (copyIndex == index)
+            {
+                dstRow = sheet.GetRow(copyIndex);
+            }
             else
             {
-                if (sheet.LastRowNum >= toIndex)
+                if (sheet.LastRowNum >= index)
                     sheet.ShiftRows(
-                        toIndex, sheet.LastRowNum, 1, true, false);
-                var dstRow = sheet.CreateRow(toIndex);
+                        index, sheet.LastRowNum, 1, true, false);
+                dstRow = sheet.CopyRow(copyIndex, index);
                 var srcRow = sheet.GetRow(copyIndex);
                 dstRow.Height = srcRow.Height;
-                for (var idx = (int)srcRow.FirstCellNum; 
-                    idx < srcRow.PhysicalNumberOfCells; idx++)
-                {
-                    var dstCell = dstRow.CreateCell(idx);
-                    var srcCell = srcRow.GetCell(idx);
-                    dstCell.SetCellType(srcCell.CellType);
-                    dstCell.CellStyle = srcCell.CellStyle;
-                    dstCell.SetValue("");
-                }
                 var merged = new CellRangeAddressList();
                 for (var i = 0; i < sheet.NumMergedRegions; i++)
                 {
@@ -200,14 +193,17 @@ namespace Yhsb.Util.Excel
                         && copyIndex == address.LastRow)
                     {
                         merged.AddCellRangeAddress(
-                            toIndex, address.FirstColumn, toIndex, address.LastColumn);
+                            index, address.FirstColumn, index, address.LastColumn);
                     }
                 }
                 for (var i = 0; i < merged.CellRangeAddresses.Length; i++)
                     sheet.AddMergedRegion(merged.CellRangeAddresses[i]);
-
-                return dstRow;
             }
+            if (clearValue)
+            {
+                dstRow.Cells.ForEach(c => c.SetValue(null));
+            }
+            return dstRow;
         }
     }
 }
