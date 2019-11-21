@@ -1,17 +1,20 @@
 ﻿using System.IO;
 using System.Linq;
+using System.Collections.Generic;
+
 using CommandLine;
 using Yhsb.Util.Command;
 using Yhsb.Util.Excel;
 using Yhsb.Jb.Network;
 using Yhsb.Jb.Database;
 
-using Map = System.Collections.Generic.Dictionary<string, string>;
 using static Yhsb.Util.DateTime;
 using static System.Console;
 
 namespace Yhsb.Jb.Audit
 {
+    using Map = Dictionary<string, string>;
+
     class Program
     {
         static void Main(string[] args)
