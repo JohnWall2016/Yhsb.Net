@@ -43,4 +43,11 @@ class CsharpTest
         f("1");
         f("2");
     }
+
+    public static void TestParameters(string s = "abc")
+    {
+        WriteLine(s);
+        s = "efg";
+        WriteLine(s);
+    }
 }
