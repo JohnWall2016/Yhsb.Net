@@ -10,7 +10,7 @@ namespace Yhsb.Json
     {
         public object Value { get; set; } = default;
 
-        public virtual string Name { get; }
+        public virtual string Name => $"{Value}";
 
         public override string ToString() => Name;
     }
