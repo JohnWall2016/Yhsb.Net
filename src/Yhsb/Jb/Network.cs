@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 
 using Yhsb.Net;
 using Yhsb.Json;
@@ -192,34 +191,13 @@ namespace Yhsb.Jb.Network
             data.Add(parameters);
         }
 
-        public string ToJson() => JsonConvert.SerializeObject(this);
+        public string ToJson() => JsonExtension.Serialize(this);
     }
 
     public class ResultData
     {
-        class Resolver : DefaultContractResolver
-        {
-            protected override IList<JsonProperty> CreateProperties(
-                Type type, MemberSerialization memberSerialization)
-            {
-                IList<JsonProperty> list = base.CreateProperties(
-                    type, memberSerialization);
-
-                foreach (JsonProperty prop in list)
-                {
-                    prop.PropertyName = prop.UnderlyingName;
-                }
-
-                return list;
-            }
-        }
-
-        public string ToJson(bool orignalName = true)
-        {
-            var settings = new JsonSerializerSettings();
-            if (orignalName) settings.ContractResolver = new Resolver();
-            return JsonConvert.SerializeObject(this, settings);
-        }
+        public string ToJson(bool orignalName = true) =>
+            JsonExtension.Serialize(this, orignalName);
     }
 
     public class Result<T> where T : ResultData
@@ -254,8 +232,8 @@ namespace Yhsb.Jb.Network
 
         public bool IsEmpty => Count <= 0;
 
-        public static Result<T> FromJson(string json) =>            
-            JsonConvert.DeserializeObject<Result<T>>(json);
+        public static Result<T> FromJson(string json) =>
+            JsonExtension.Deserialize<Result<T>>(json);
     }
 
     public class Syslogin : Parameters
@@ -303,9 +281,7 @@ namespace Yhsb.Jb.Network
         public decimal amount;
 
         /// 缴费类型
-        [JsonConverter(
-            typeof(FieldConverter<string, Type>))]
-        public class Type : Field<string>
+        public class Type : JsonField
         {
             public override string Name => Value switch
             {
@@ -319,9 +295,7 @@ namespace Yhsb.Jb.Network
         public Type type;
 
         /// 缴费项目
-        [JsonConverter(
-            typeof(FieldConverter<string, Item>))]
-        public class Item : Field<string>
+        public class Item : JsonField
         {
             public override string Name => Value switch
             {
@@ -338,9 +312,7 @@ namespace Yhsb.Jb.Network
         public Item item;
 
         /// 缴费方式
-        [JsonConverter(
-            typeof(FieldConverter<string, Method>))]
-        public class Method : Field<string>
+        public class Method : JsonField
         {
             public override string Name => Value switch
             {
@@ -399,9 +371,7 @@ namespace Yhsb.Jb.Network
         public string birthDay;
 
         /// 参保状态
-        [JsonConverter(
-            typeof(FieldConverter<string, CBState>))]
-        public class CBState : Field<string>
+        public class CBState : JsonField
         {
             public override string Name => Value switch
             {
@@ -417,9 +387,7 @@ namespace Yhsb.Jb.Network
         public CBState cbState;
 
         /// 缴费状态
-        [JsonConverter(
-            typeof(FieldConverter<string, JFState>))]
-        public class JFState : Field<string>
+        public class JFState : JsonField
         {
             public override string Name => Value switch
             {
