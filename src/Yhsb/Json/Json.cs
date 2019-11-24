@@ -71,7 +71,7 @@ namespace Yhsb.Json
 
         public static string Serialize(object obj, bool underlyingName = false)
         {
-            var writer = new StringWriter();
+            using var writer = new StringWriter();
             if (!underlyingName)
             {
                 _serializer.Serialize(writer, obj);
@@ -95,8 +95,8 @@ namespace Yhsb.Json
 
         public static T Deserialize<T>(string json)
         {
-            return _serializer.Deserialize<T>(
-                new JsonTextReader(new StringReader(json)));
+            using var reader = new JsonTextReader(new StringReader(json));
+            return _serializer.Deserialize<T>(reader);
         }
     }
 
