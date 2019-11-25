@@ -1,10 +1,12 @@
+using System;
+using System.Linq.Expressions;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
 namespace Yhsb.Jb.Database
 {
-    public class FPTable
+    public class FpData
     {
         [Column("序号"), Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -83,6 +85,40 @@ namespace Yhsb.Jb.Database
         public string JbcbqkDate { get; set; }
     }
 
+    public class FpRawData
+    {
+        [Column("序号"), Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int NO { get; set; }
+
+        [Column("乡镇街")]
+        public string Xzj { get; set; }
+
+        [Column("村社区")]
+        public string Csq { get; set; }
+
+        [Column("地址")]
+        public string Address { get; set; }
+
+        [Column("姓名")]
+        public string Name { get; set; }
+
+        [Key, Column("身份证号码")]
+        public string IDCard { get; set; }
+
+        [Column("出生日期")]
+        public string BirthDay { get; set; }
+
+        [Column("人员类型")]
+        public string Type { get; set; }
+
+        [Column("类型细节")]
+        public string Detail { get; set; }
+
+        [Column("数据月份")]
+        public string Date { get; set; }
+    }
+
     public class FpDbContext : DbContext
     {
         protected override void OnConfiguring(
@@ -90,22 +126,33 @@ namespace Yhsb.Jb.Database
                 optionsBuilder.UseMySql(_internal.Database.DBConnectString);
     }
 
-    public class FPTableContext : FpDbContext
+    public class FpEntityContext<TEntity> : FpDbContext where TEntity : class
     {
         readonly string _tableName;
+        readonly Expression<Func<TEntity, object>> _hasKey;
 
-        public FPTableContext(string tableName)
+        public FpEntityContext(string tableName, 
+            Expression<Func<TEntity, object>> hasKey = null)
         {
             _tableName = tableName;
+            _hasKey = hasKey;
         }
         
-        public DbSet<FPTable> FPTable { get; set; }
+        public DbSet<TEntity> FPTable { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<FPTable>()
-                .ToTable(_tableName)
-                .HasKey(c => new { c.NO, c.IDCard });
+            var builder = modelBuilder.Entity<TEntity>();
+            builder.ToTable(_tableName);
+            if (_hasKey != null) builder.HasKey(_hasKey);
+        }
+    }
+
+    public class FpDataContext : FpEntityContext<FpData>
+    {
+        public FpDataContext(string tableName)
+            : base(tableName, c => new { c.NO, c.IDCard })
+        {
         }
     }
 }

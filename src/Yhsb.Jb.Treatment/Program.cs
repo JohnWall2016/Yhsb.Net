@@ -1,5 +1,6 @@
 ﻿using CommandLine;
 using Yhsb.Jb.Network;
+using Yhsb.Jb.Database;
 using Yhsb.Util;
 using Yhsb.Util.Excel;
 using Yhsb.Util.Command;
@@ -44,7 +45,7 @@ namespace Yhsb.Jb.Treatment
             
             if (result != null && result.Data.Count > 0)
             {
-                
+                using var context = new FpDataContext("2019年度扶贫历史数据底册");
             }
         }
     }
