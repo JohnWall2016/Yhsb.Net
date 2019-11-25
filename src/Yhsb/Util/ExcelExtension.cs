@@ -156,6 +156,9 @@ namespace Yhsb.Util.Excel
             this ICell cell, string value) => cell.SetCellValue(value);
 
         public static void SetValue(
+            this ICell cell, int value) => cell.SetCellValue(value);
+
+        public static void SetValue(
             this ICell cell, double value) => cell.SetCellValue(value);
 
         public static void SetValue(

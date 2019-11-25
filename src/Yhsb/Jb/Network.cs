@@ -623,7 +623,8 @@ namespace Yhsb.Jb.Network
         public string JBState => Util.JBState(cbState.Value, jfState.Value);
 
         /// 性别
-        public Sex xb;
+        [JsonProperty("xb")]
+        public Sex sex;
 
         [JsonProperty("aac009")]
         public HJClass hJClass;

@@ -79,7 +79,7 @@ namespace Yhsb.Jb.Audit
                     using var context = new FpDataContext("2019年度扶贫历史数据底册");
                     foreach (var cbsh in result.Data)
                     {
-                        var data = from fpData in context.FPTable
+                        var data = from fpData in context.Entity
                                    where fpData.IDCard == cbsh.idCard
                                    select fpData;
                         if (data.Any())

@@ -138,7 +138,7 @@ namespace Yhsb.Jb.Database
             _hasKey = hasKey;
         }
         
-        public DbSet<TEntity> FPTable { get; set; }
+        public DbSet<TEntity> Entity { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -151,6 +151,14 @@ namespace Yhsb.Jb.Database
     public class FpDataContext : FpEntityContext<FpData>
     {
         public FpDataContext(string tableName)
+            : base(tableName, c => new { c.NO, c.IDCard })
+        {
+        }
+    }
+
+    public class FpRawDataContext : FpEntityContext<FpRawData>
+    {
+        public FpRawDataContext(string tableName)
             : base(tableName, c => new { c.NO, c.IDCard })
         {
         }
