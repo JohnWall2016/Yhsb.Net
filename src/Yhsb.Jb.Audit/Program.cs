@@ -78,20 +78,20 @@ namespace Yhsb.Jb.Audit
                     var export = false;
                     foreach (var cbsh in result.Data)
                     {
-                        using var context = new JzfpContext();
-                        var data = from fpData in context.FPTable2019
+                        using var context = new FPTableContext("2019年度扶贫历史数据底册");
+                        var data = from fpData in context.FPTable
                                    where fpData.IDCard == cbsh.idCard
                                    select fpData;
                         if (data.Any())
                         {
                             var info = data.First();
                             WriteLine(
-                                $"{cbsh.idCard} {cbsh.name} {cbsh.birthDay} {info.JBClass} " +
+                                $"{cbsh.idCard} {cbsh.name} {cbsh.birthDay} {info.Jbrdsf} " +
                                 $"{(info.Name != cbsh.name ? info.Name : "")}");
                             var row = sheet.GetOrCopyRow(index++, copyIndex, false);
                             row.Cell("A").SetValue(cbsh.idCard);
                             row.Cell("C").SetValue(cbsh.name);
-                            row.Cell("H").SetValue(_jbClassMap[info.JBClass]);
+                            row.Cell("H").SetValue(_jbClassMap[info.Jbrdsf]);
                             export = true;
                         }
                         else

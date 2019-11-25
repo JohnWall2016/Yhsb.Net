@@ -26,4 +26,19 @@ public class JbTest
             }
         });
     }
+
+    public static void TestDyryQuery()
+    {
+        Console.WriteLine(
+            new Service(new DyryQuery("2019-11-31"), "abc", "123").ToJson());
+        Session.Use(session => {
+            session.SendService(new DyryQuery("2019-11-31"));
+            // Console.WriteLine(session.ReadBody());
+            var result = session.GetResult<Dyry>();
+            foreach (var info in result.Data)
+            {
+                Console.WriteLine(info.ToJson());
+            }
+        });
+    }
 }

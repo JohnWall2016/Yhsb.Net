@@ -137,20 +137,17 @@ namespace Yhsb.Jb.Network
         [JsonProperty("pagesize")]
         public int pageSize;
 
-        public List<Dictionary<string, string>> filtering
-            = new List<Dictionary<string, string>>();
+        public Dictionary<string, string>[] filtering = { };
 
-        public List<Dictionary<string, string>> sorting
-            = new List<Dictionary<string, string>>();
+        public Dictionary<string, string>[] sorting = { };
 
-        public List<Dictionary<string, string>> totals
-            = new List<Dictionary<string, string>>();
+        public Dictionary<string, string>[] totals = { };
 
         public PageParameters(
             string id, int page = 1, int pageSize = 15,
-            List<Dictionary<string, string>> filtering = null,
-            List<Dictionary<string, string>> sorting = null,
-            List<Dictionary<string, string>> totals = null) : base(id)
+            Dictionary<string, string>[] filtering = null,
+            Dictionary<string, string>[] sorting = null,
+            Dictionary<string, string>[] totals = null) : base(id)
         {
             this.page = page;
             this.pageSize = pageSize;
@@ -353,6 +350,57 @@ namespace Yhsb.Jb.Network
         }
     }
 
+    /// 参保状态
+    public class CBState : JsonField
+    {
+        public override string Name => Value switch
+        {
+            "0" => "未参保",
+            "1" => "正常参保",
+            "2" => "暂停参保",
+            "4" => "终止参保",
+            _ => $"未知值: {Value}"
+        };
+    }
+
+    /// 缴费状态
+    public class JFState : JsonField
+    {
+        public override string Name => Value switch
+        {
+            "1" => "参保缴费",
+            "2" => "暂停缴费",
+            "3" => "终止缴费",
+            _ => $"未知值: {Value}"
+        };
+    }
+
+    /// 居保状态
+    public class Util
+    {
+        public static string JBState(object jfState, object cbState) =>
+            jfState switch
+            {
+                "1" => cbState switch
+                {
+                    "1" => "正常缴费人员",
+                    _ => $"未知类型参保缴费人员: {cbState}"
+                },
+                "2" => cbState switch
+                {
+                    "2" => "暂停缴费人员",
+                    _ => $"未知类型暂停缴费人员: {cbState}"
+                },
+                "3" => cbState switch
+                {
+                    "1" => "正常待遇人员",
+                    "2" => "暂停待遇人员",
+                    "4" => "终止参保人员",
+                    _ => $"未知类型终止缴费人员: {cbState}"
+                },
+                _ => $"未知类型人员: {jfState}, {cbState}",
+            };
+    }
     /// 省内参保信息
     public class Cbxx : ResultData
     {
@@ -370,33 +418,8 @@ namespace Yhsb.Jb.Network
         [JsonProperty("aac006")]
         public string birthDay;
 
-        /// 参保状态
-        public class CBState : JsonField
-        {
-            public override string Name => Value switch
-            {
-                "0" => "未参保",
-                "1" => "正常参保",
-                "2" => "暂停参保",
-                "4" => "终止参保",
-                _ => $"未知值: {Value}"
-            };
-        }
-
         [JsonProperty("aac008")]
         public CBState cbState;
-
-        /// 缴费状态
-        public class JFState : JsonField
-        {
-            public override string Name => Value switch
-            {
-                "1" => "参保缴费",
-                "2" => "暂停缴费",
-                "3" => "终止缴费",
-                _ => $"未知值: {Value}"
-            };
-        }
 
         [JsonProperty("aac031")]
         public JFState jfState;
@@ -430,27 +453,7 @@ namespace Yhsb.Jb.Network
         public string csName;
 
         /// 居保状态
-        public string JBState => jfState.Value switch
-        {
-            "1" => cbState.Value switch
-            {
-                "1" => "正常缴费人员",
-                _ => $"未知类型参保缴费人员: {cbState.Value}"
-            },
-            "2" => cbState.Value switch
-            {
-                "2" => "暂停缴费人员",
-                _ => $"未知类型暂停缴费人员: {cbState.Value}"
-            },
-            "3" => cbState.Value switch
-            {
-                "1" => "正常待遇人员",
-                "2" => "暂停待遇人员",
-                "4" => "终止参保人员",
-                _ => $"未知类型终止缴费人员: {cbState.Value}"
-            },
-            _ => $"未知类型人员: {jfState.Value}, {cbState.Value}",
-        };
+        public string JBState => Util.JBState(jfState.Value, cbState.Value);
 
         /// 参保身份类型
         public string JBClass => sfCode switch
@@ -515,4 +518,132 @@ namespace Yhsb.Jb.Network
         public string birthDay;
     }
 
+    /// 待遇人员审核查询
+    public class DyryQuery : PageParameters
+    {
+        public string aaf013 = "", aaf030 = "";
+
+        /// 预算到龄日期
+        /// 2019-04-30
+        public string dlny = "";
+
+        /// 预算后待遇起始时间: '1'-到龄次月
+        public string yssj = "";
+
+        public string aac009 = "";
+
+        /// 是否欠费
+        public string qfbz = "";
+
+        public string aac002 = "";
+
+        /// 参保状态: '1'-正常参保
+        [JsonProperty("aac008")]
+        public string cbzt = "";
+
+        /// 是否和社保比对: '1'-是 '2'-否
+        [JsonProperty("sb_type")]
+        public string sbbd = "";
+
+        public DyryQuery(string dlny, string yssj = "1",
+            string cbzt = "1", string sbbd = "1")
+            : base("dyryQuery", pageSize: 500,
+                sorting: new[]
+                {
+                    new Dictionary<string, string>
+                    {
+                        ["dataKey"] = "xzqh",
+                        ["sortDirection"] = "ascending"
+                    }
+                })
+        {
+            this.dlny = dlny;
+            this.yssj = yssj;
+            this.cbzt = cbzt;
+            this.sbbd = sbbd;
+        }
+    }
+
+    /// 性别
+    public class Sex : JsonField
+    {
+        public override string Name => Value switch
+        {
+            "1" => "男",
+            "2" => "女",
+            _ => $"未知值: {Value}"
+        };
+    }
+
+    /// 户藉性质
+    public class HJClass : JsonField
+    {
+        public override string Name => Value switch
+        {
+            "10" => "城市户籍",
+            "20" => "农村户籍",
+            _ => $"未知值: {Value}"
+        };
+    }
+
+    public class Dyry : ResultData
+    {
+        [JsonProperty("xm")]
+        public string name;
+
+        [JsonProperty("sfz")]
+        public string idcard;
+
+        [JsonProperty("csrq")]
+        public int birthDay;
+
+        [JsonProperty("rycbzt")]
+        public CBState cbState;
+
+        [JsonProperty("aac031")]
+        public JFState jfState;
+
+        /// 企保参保
+        [JsonProperty("qysb_type")]
+        public string qbzt;
+
+        /// 共缴年限
+        public string gjnx;
+
+        /// 待遇领取年月
+        public string lqny;
+
+        /// 备注
+        public string bz;
+
+        /// 行政区划
+        public string xzqh;
+
+        /// 居保状态
+        public string JBState => Util.JBState(cbState.Value, jfState.Value);
+
+        /// 性别
+        public Sex xb;
+
+        [JsonProperty("aac009")]
+        public HJClass hJClass;
+
+        /// 应缴年限
+        public int Yjnx
+        {
+            get 
+            {
+                var year = birthDay / 10000;
+                var month = birthDay / 100 - year * 100;
+                year -= 1951;
+                if (year >= 15) return 15;
+                else if (year < 0) return 0;
+                else if (year == 0 && month >= 7) return 1;
+                else return year;
+            }
+        }
+
+        /// 实缴年限
+        public int Sjnx => int.Parse(gjnx);
+    }
 }

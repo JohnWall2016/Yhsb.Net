@@ -30,7 +30,8 @@ namespace Yhsb.Json
             var constructor = objectType.GetConstructor(new Type[0]);
             if (constructor != null)
             {
-                var field = constructor.Invoke(null, null) as JsonField;
+                // Console.WriteLine(objectType);
+                var field = constructor.Invoke(null) as JsonField;
                 field.Value = reader.Value;
                 return field;
             }
