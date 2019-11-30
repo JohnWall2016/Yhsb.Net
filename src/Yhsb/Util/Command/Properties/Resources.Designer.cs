@@ -26,7 +26,8 @@ namespace Yhsb.Util.Command.Properties {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
-        private static global::System.Globalization.CultureInfo resourceCulture;
+        private static global::System.Globalization.CultureInfo resourceCulture =
+            global::System.Globalization.CultureInfo.CurrentCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         internal Resources() {
@@ -39,7 +40,13 @@ namespace Yhsb.Util.Command.Properties {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Yhsb.Util.Command.Properties.Resources", typeof(Resources).Assembly);
+                    var baseName = "Yhsb.Util.Command.Properties.Resources";
+                    if (global::System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
+                        global::System.Runtime.InteropServices.OSPlatform.OSX))
+                    {
+                        baseName += "." + Culture.Name;
+                    }
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager(baseName, typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

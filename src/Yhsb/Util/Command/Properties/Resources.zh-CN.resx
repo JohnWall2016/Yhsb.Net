@@ -196,7 +196,7 @@
     <value>Options: {0} are not compatible with {1}.</value>
   </data>
   <data name="SentenceNoVerbSelectedError" xml:space="preserve">
-    <value>No verb selected.</value>
+    <value>未选择命令.</value>
   </data>
   <data name="SentenceRepeatedOptionError" xml:space="preserve">
     <value>Option '{0}' is defined multiple times.</value>

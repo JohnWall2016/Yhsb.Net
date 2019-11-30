@@ -5,6 +5,7 @@ using Yhsb.Util;
 using Yhsb.Util.Excel;
 using Yhsb.Util.Command;
 using System.Linq;
+using System.Globalization;
 
 using static System.Console;
 
@@ -19,7 +20,7 @@ namespace Yhsb.Jb.Treatment
 
         static void Main(string[] args)
         {
-            Command.Parse<Fphd>(args);
+            Command.Parse<Fphd, Download>(args);
         }
     }
 
@@ -89,6 +90,16 @@ namespace Yhsb.Jb.Treatment
                 }
             }
             workbook.Save(saveXlsx);
+        }
+    }
+
+    [Verb("download",
+        HelpText = "从业务系统下载信息核对报告表")]
+    class Download : ICommand
+    {
+        public void Execute()
+        {
+
         }
     }
 }
