@@ -1,4 +1,5 @@
 using System;
+using System.Web;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
@@ -646,5 +647,188 @@ namespace Yhsb.Jb.Network
 
         /// 实缴年限
         public int Sjnx => int.Parse(gjnx);
+    }
+
+    /// 待遇复核查询
+    public class DyfhQuery : PageParameters
+    {
+        public string aaf013 = "", aaf030 = "";
+
+        [JsonProperty("aae016")]
+        public string shzt = "";
+
+        public string aae011 = "", aae036 = "", aae036s = "";
+        public string aae014 = "";
+
+        [JsonProperty("aae015")]
+        public string qsshsj = "";
+
+        [JsonProperty("aae015s")]
+        public string jzshsj = "";
+
+        public string aac009 = "", aac003 = "";
+
+        [JsonProperty("aac002")]
+        public string idcard = "";
+
+        public DyfhQuery(
+            string idcard = "", string shzt = "0",
+            string qsshsj = "", string jzshsj = "",
+            int page = 1, int pageSize = 500,
+            Dictionary<string, string>[] sorting = null)
+            : base("dyfhQuery", page: page, pageSize: pageSize,
+                sorting: sorting ?? new[]
+                {
+                    new Dictionary<string, string>
+                    {
+                        ["dataKey"] = "aaa027",
+                        ["sortDirection"] = "ascending"
+                    }
+                })
+        {
+            this.idcard = idcard;
+            this.shzt = shzt;
+            this.qsshsj = qsshsj;
+            this.jzshsj = jzshsj;
+        }
+    }
+
+    public class Dyfh : ResultData
+    {
+        /// 个人编号
+        [JsonProperty("aac001")]
+        public int grbh;
+
+        /// 身份证号码
+        [JsonProperty("aac002")]
+        public string idCard;
+
+        [JsonProperty("aac003")]
+        public string name;
+
+        /// 行政区划
+        [JsonProperty("aaa027")]
+        public string xzqh;
+
+        /// 单位名称
+        [JsonProperty("aaa129")]
+        public string dwmc;
+
+        /// 月养老金
+        [JsonProperty("aic166")]
+        public decimal payAmount;
+
+        /// 财务月份
+        [JsonProperty("aae211")]
+        public int accountMonth;
+
+        /// 实际待遇开始月份
+        [JsonProperty("aic160")]
+        public int payMonth;
+
+        public string bz = "", fpName = "",
+            fpType = "", fpDate = "";
+
+        public int aaz170, aaz159, aaz157;
+
+        public Match PaymentInfo
+        {
+            get 
+            {
+                static string Escape(object str) => 
+                    HttpUtility.UrlEncode(str.ToString());
+
+                var path = 
+                    "/hncjb/reports?method=htmlcontent&name=yljjs&" +
+                    $"aaz170={Escape(aaz170)}&aaz159={Escape(aaz159)}&aac001={Escape(grbh)}&" +
+                    $"aaz157={Escape(aaz157)}&aaa129={Escape(dwmc)}&aae211={Escape(accountMonth)}";
+
+                using var sock = new HttpSocket(
+                    _internal.Session.Host, _internal.Session.Port);
+                var content = sock.GetHttp(path);           
+                return Regex.Match(content, _regexPaymentInfo);
+            }
+        }
+
+        static readonly string _regexPaymentInfo = 
+   @"<tr>
+        <td height=""32"" align=""center"">姓名</td>
+        <td align=""center"">性别</td>
+        <td align=""center"" colspan=""3"">身份证</td>
+        <td align=""center"" colspan=""2"">困难级别</td>
+        <td align=""center"" colspan=""3"">户籍所在地</td>
+        <td align=""center"" colspan=""2"">所在地行政区划编码</td>
+      </tr>
+      <tr class=""detail"" component=""detail"">
+        <td height=""39"" align=""center"">(.+?)</td>
+        <td align=""center"">(.+?)</td>
+        <td align=""center"" colspan=""3"">(.+?)</td>
+        <td align=""center"" colspan=""2"">(.+?)</td>
+        <td align=""center"" colspan=""3""(?:/>|>(.+?)</td>)
+        <td align=""center"" colspan=""2"">(.+?)</td>
+      </tr>
+      <tr>
+        <td height=""77"" align=""center"" rowspan=""2"">缴费起始年月</td>
+        <td align=""center"" rowspan=""2"">累计缴费年限</td>
+        <td align=""center"" rowspan=""2"" colspan=""2"">个人账户累计存储额</td>
+        <td height=""25"" align=""center"" colspan=""8"">其中</td>
+      </tr>
+      <tr>
+        <td height=""30"" align=""center"">个人缴费</td>
+        <td align=""center"">省级补贴</td>
+        <td align=""center"">市级补贴</td>
+        <td align=""center"">县级补贴</td>
+        <td align=""center"">集体补助</td>
+        <td align=""center"">被征地补助</td>
+        <td align=""center"">政府代缴</td>
+        <td align=""center"">利息</td>
+      </tr>
+      <tr class=""detail"" component=""detail"">
+        <td height=""40"" align=""center"">(.+?)</td>
+        <td align=""center"">(.+?)</td>
+        <td align=""center"" colspan=""2"">(.+?)</td>
+        <td align=""center"">(.+?)</td>
+        <td align=""center"">(.+?)</td>
+        <td align=""center"">(.+?)</td>
+        <td align=""center"">(.+?)</td>
+        <td align=""center"">(.+?)</td>
+        <td align=""center"">(.+?)</td>
+        <td align=""center"">(.+?)</td>
+        <td align=""center"">(.+?)</td>
+      </tr>
+      <tr>
+        <td align=""center"" rowspan=""2"">
+          <p>领取养老金起始时间</p>
+        </td>
+        <td align=""center"" rowspan=""2"">月养老金</td>
+        <td height=""29"" align=""center"" colspan=""5"">其中：基础养老金</td>
+        <td align=""center"" colspan=""5"">个人账户养老金</td>
+      </tr>
+      <tr>
+        <td height=""31"" align=""center"">国家补贴</td>
+        <td height=""31"" align=""center"">省级补贴</td>
+        <td align=""center"">市级补贴</td>
+        <td align=""center"">县级补贴</td>
+        <td align=""center"">加发补贴</td>
+        <td align=""center"">个人实缴部分</td>
+        <td align=""center"">缴费补贴部分</td>
+        <td align=""center"">集体补助部分</td>
+        <td align=""center"">被征地补助部分</td>
+        <td align=""center"">政府代缴部分</td>
+      </tr>
+      <tr class=""detail"" component=""detail"">
+        <td height=""40"" align=""center"">(.+?)</td>
+        <td align=""center"">(.+?)</td>
+        <td align=""center"">(.+?)</td>
+        <td align=""center"">(.+?)</td>
+        <td align=""center"">(.+?)</td>
+        <td align=""center"">(.+?)</td>
+        <td align=""center"">(.+?)</td>
+        <td align=""center"">(.+?)</td>
+        <td align=""center"">(.+?)</td>
+        <td align=""center"">(.+?)</td>
+        <td align=""center"">(.+?)</td>
+        <td align=""center"">(.+?)</td>
+      </tr>".Replace("\r\n", "\n");
     }
 }

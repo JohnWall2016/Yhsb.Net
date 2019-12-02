@@ -31,13 +31,33 @@ public class JbTest
     {
         Console.WriteLine(
             new Service(new DyryQuery("2019-11-31"), "abc", "123").ToJson());
-        Session.Use(session => {
+        Session.Use(session => 
+        {
             session.SendService(new DyryQuery("2019-11-31"));
             // Console.WriteLine(session.ReadBody());
             var result = session.GetResult<Dyry>();
             foreach (var info in result.Data)
             {
                 Console.WriteLine(info.ToJson());
+            }
+        });
+    }
+
+    public static void TestDyfhQuery()
+    {
+        Session.Use(sessoin =>
+        {
+            // sessoin.SendService(new DyfhQuery(shzt: "1", qsshsj: "20191031"));
+            // Console.WriteLine(sessoin.ReadBody());
+            sessoin.SendService(new DyfhQuery(idcard: "430302195908151522", shzt: "1", qsshsj: "20191031"));
+            Console.WriteLine(sessoin.ReadBody());
+            sessoin.SendService(new DyfhQuery(idcard: "430302195908151522", shzt: "1", qsshsj: "20191031"));
+            var result = sessoin.GetResult<Dyfh>();
+            if (!result.IsEmpty)
+            {
+                var dyfh = result.Data[0];
+                Console.WriteLine(dyfh.PaymentInfo.Success);
+                Console.WriteLine(dyfh.PaymentInfo.Groups[1]);
             }
         });
     }

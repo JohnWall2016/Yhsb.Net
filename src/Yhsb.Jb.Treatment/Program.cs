@@ -97,9 +97,26 @@ namespace Yhsb.Jb.Treatment
         HelpText = "从业务系统下载信息核对报告表")]
     class Download : ICommand
     {
+        
+        [Value(0, HelpText = "报表生成日期，格式：yyyymmdd",
+            Required = true)]
+        public string Date { get; set; }
+
         public void Execute()
         {
+            var saveXlsx = $@"{Program.rootDir}\信息核对报告表{Date}.xlsx";
+            
+            Result<Dyfh> result = null;
+            Session.Use(session =>
+            {
+                session.SendService(new DyfhQuery());
+                result = session.GetResult<Dyfh>();
+            });
 
+            if (!result.IsEmpty)
+            {
+                
+            }
         }
     }
 }
