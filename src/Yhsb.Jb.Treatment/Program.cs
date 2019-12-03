@@ -53,7 +53,7 @@ namespace Yhsb.Jb.Treatment
                 using var context = new FpRawDataContext("2019年度扶贫办民政残联历史数据");
                 foreach (var data in result.Data)
                 {
-                    var idcard = data.idcard;
+                    var idcard = data.idCard;
                     var fpData = from e in context.Entity
                                  where e.IDCard == idcard &&
                                  (e.Type == "贫困人口" ||
@@ -63,7 +63,7 @@ namespace Yhsb.Jb.Treatment
                                  select e;
                     if (fpData.Any())
                     {
-                        WriteLine($"{currentRow - startRow + 1} {data.idcard} {data.name}");
+                        WriteLine($"{currentRow - startRow + 1} {data.idCard} {data.name}");
 
                         var qjns = data.Yjnx - data.Sjnx;
                         if (qjns < 0) qjns = 0;
@@ -73,7 +73,7 @@ namespace Yhsb.Jb.Treatment
                         row.Cell("A").SetValue(currentRow - startRow);
                         row.Cell("B").SetValue(data.xzqh);
                         row.Cell("C").SetValue(data.name);
-                        row.Cell("D").SetValue(data.idcard);
+                        row.Cell("D").SetValue(data.idCard);
                         row.Cell("E").SetValue(data.birthDay);
                         row.Cell("F").SetValue(data.sex.ToString());
                         row.Cell("G").SetValue(data.hJClass.ToString());
@@ -115,8 +115,53 @@ namespace Yhsb.Jb.Treatment
 
             if (!result.IsEmpty)
             {
-                
+                using var context = new FpRawDataContext("2019年度扶贫办民政残联历史数据");
+                foreach (var data in result.Data)
+                {
+                    var idcard = data.idCard;
+                    var fpData = from e in context.Entity
+                                 where e.IDCard == idcard &&
+                                 (e.Type == "贫困人口" ||
+                                 e.Type == "特困人员" ||
+                                 e.Type == "全额低保人员" ||
+                                 e.Type == "差额低保人员")
+                                 select e;
+                    if (fpData.Any())
+                    {
+                        var record = fpData.First();
+                        data.bz = "按人社厅发〔2018〕111号文办理";
+                        data.fpName = record.Name;
+                        data.fpType = record.Type;
+                        data.fpDate = record.Date;
+                    }
+                }
             }
+
+            var workbook = ExcelExtension.LoadExcel(Program.infoXlsx);
+            var sheet = workbook.GetSheetAt(0);
+            int startRow = 3, currentRow = 3;
+
+            foreach (var data in result.Data)
+            {
+                var index = currentRow - startRow + 1;
+                WriteLine($"{index} {data.idCard} {data.name} {data.bz} {data.fpType}");
+                var row = sheet.GetOrCopyRow(currentRow++, startRow);
+                row.Cell("A").SetValue(index);
+                row.Cell("B").SetValue(data.name);
+                row.Cell("C").SetValue(data.idCard);
+                row.Cell("D").SetValue(data.xzqh);
+                row.Cell("E").SetValue(data.payAmount);
+                row.Cell("F").SetValue(data.payMonth);
+                row.Cell("G").SetValue("是 [ ]");
+                row.Cell("H").SetValue("否 [ ]");
+                row.Cell("I").SetValue("是 [ ]");
+                row.Cell("J").SetValue("否 [ ]");
+                row.Cell("L").SetValue(data.bz);
+                row.Cell("M").SetValue(data.fpType);
+                row.Cell("N").SetValue(data.fpDate);
+                row.Cell("O").SetValue(data.fpName);
+            }
+            workbook.Save(saveXlsx);
         }
     }
 }

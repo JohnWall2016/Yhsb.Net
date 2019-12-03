@@ -593,7 +593,7 @@ namespace Yhsb.Jb.Network
         public string name;
 
         [JsonProperty("sfz")]
-        public string idcard;
+        public string idCard;
 
         [JsonProperty("csrq")]
         public int birthDay;
@@ -669,7 +669,7 @@ namespace Yhsb.Jb.Network
         public string aac009 = "", aac003 = "";
 
         [JsonProperty("aac002")]
-        public string idcard = "";
+        public string idCard = "";
 
         public DyfhQuery(
             string idcard = "", string shzt = "0",
@@ -686,7 +686,7 @@ namespace Yhsb.Jb.Network
                     }
                 })
         {
-            this.idcard = idcard;
+            this.idCard = idcard;
             this.shzt = shzt;
             this.qsshsj = qsshsj;
             this.jzshsj = jzshsj;
