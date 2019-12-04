@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace Yhsb.Util
 {
@@ -48,6 +49,15 @@ namespace Yhsb.Util
                 : null;
 
             return attribute != null ? attribute.Description : name;
+        }
+    }
+
+    public static class EnumerateExtension
+    {
+        public static string ToLiteral<T>(this IEnumerable<T> enumerator)
+        {
+            var list = enumerator.Select(t => t.ToString());
+            return "[" + string.Join(',', list) + "]";
         }
     }
 

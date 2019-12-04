@@ -1,6 +1,7 @@
 ﻿using CommandLine;
 using Yhsb.Jb.Network;
 using Yhsb.Jb.Database;
+using Yhsb.Util;
 using Yhsb.Util.Excel;
 using Yhsb.Util.Command;
 using System;
@@ -148,7 +149,7 @@ namespace Yhsb.Jb.Treatment
                 var index = currentRow - startRow + 1;
 
                 WriteLine($"{index} {data.idCard} {data.name} {data.bz} {data.fpType}");
-                
+
                 var row = sheet.GetOrCopyRow(currentRow++, startRow);
                 row.Cell("A").SetValue(index);
                 row.Cell("B").SetValue(data.name);
@@ -212,8 +213,8 @@ namespace Yhsb.Jb.Treatment
                 }
                 else
                 {
-                    var xzj = match.Groups[0].Value;
-                    var csq = match.Groups[1].Value;
+                    var xzj = match.Groups[2].Value;
+                    var csq = match.Groups[3].Value;
                     if (!map.ContainsKey(xzj))
                     {
                         map[xzj] = new Dictionary<string, List<int>>();
@@ -243,7 +244,7 @@ namespace Yhsb.Jb.Treatment
 
                 foreach (var csq in map[xzj].Keys)
                 {
-                    WriteLine($"  {csq}: {map[xzj][csq]}");
+                    WriteLine($"  {csq}: {map[xzj][csq].ToLiteral()}");
                     Directory.CreateDirectory(Path.Join(outputDir, xzj, csq));
 
                     var outWorkbook = ExcelExtension.LoadExcel(Program.infoXlsx);
@@ -360,7 +361,7 @@ namespace Yhsb.Jb.Treatment
                 sheet.Cell("K11").SetValue(payInfo.Groups[28].Value);
                 sheet.Cell("L11").SetValue(payInfo.Groups[29].Value);
                 sheet.Cell("H12").SetValue(
-                    DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                    System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
 
                 if (!bankInfoResult.IsEmpty)
                 {
