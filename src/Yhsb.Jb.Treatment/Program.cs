@@ -31,7 +31,7 @@ namespace Yhsb.Jb.Treatment
         HelpText = "从业务系统下载生成到龄贫困人员待遇核定情况表")]
     class Fphd : ICommand
     {
-        [Value(0, HelpText = "截至到龄日期，格式：yyyymmdd",
+        [Value(0, HelpText = "截止到龄日期，格式：yyyymmdd",
             Required = true)]
         public string Date { get; set; }
 

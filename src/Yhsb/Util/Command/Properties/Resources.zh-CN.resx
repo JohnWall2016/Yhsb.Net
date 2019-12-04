@@ -217,7 +217,10 @@
     <value>选项 '{0}' 未知.</value>
   </data>
   <data name="SentenceUsageHeadingText" xml:space="preserve">
-    <value>USAGE:</value>
+    <value>使用:</value>
+  </data>
+  <data name="SentenceCommandHeadingText" xml:space="preserve">
+    <value>命令:</value>
   </data>
   <data name="SentenceVersionCommandText" xml:space="preserve">
     <value>显示版本信息</value>

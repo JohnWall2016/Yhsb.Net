@@ -717,8 +717,11 @@ namespace CommandLine.Text
                         optionsHelp != null && optionsHelp.Length > 0,
                         Environment.NewLine,
                         Environment.NewLine,
+                        SentenceBuilder.CommandHeadingText(),
+                        Environment.NewLine,
                         optionsHelp.SafeToString())
                     .AppendWhen(postOptionsHelp.Length > 0, Environment.NewLine, postOptionsHelp.ToString())
+                    .Append(Environment.NewLine)
                 .ToString();
         }
 
@@ -801,8 +804,6 @@ namespace CommandLine.Text
             int maximumLength)
         {
             var maxLength = GetMaxLength(specifications);
-            
-            
 
             optionsHelp = new StringBuilder(BuilderCapacity);
 
@@ -817,7 +818,6 @@ namespace CommandLine.Text
                     return ToComparableOption(s, i);
                 }).ToList();
                 comparables.Sort(OptionComparison);
-
 
                 foreach (var comparable in comparables)
                 {
@@ -898,7 +898,7 @@ namespace CommandLine.Text
           
             optionsHelp
                 .Append(indented)
-                .Append(Environment.NewLine)
+                //.Append(Environment.NewLine)
                 .AppendWhen(additionalNewLineAfterOption, Environment.NewLine);
 
             return this;
@@ -957,7 +957,6 @@ namespace CommandLine.Text
                     return Math.Max(length, specLength);
                 });
         }
-
 
         private int GetMaxOptionLength(OptionSpecification spec)
         {
@@ -1036,8 +1035,5 @@ namespace CommandLine.Text
                 ? builder.ToString(0, builder.Length - 1)
                 : string.Empty;
         }
-
-      
-
     }
 }

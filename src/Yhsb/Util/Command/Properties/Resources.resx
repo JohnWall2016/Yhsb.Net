@@ -219,6 +219,9 @@
   <data name="SentenceUsageHeadingText" xml:space="preserve">
     <value>USAGE:</value>
   </data>
+  <data name="SentenceCommandHeadingText" xml:space="preserve">
+    <value>COMMANDS:</value>
+  </data>
   <data name="SentenceVersionCommandText" xml:space="preserve">
     <value>Display version information.</value>
   </data>

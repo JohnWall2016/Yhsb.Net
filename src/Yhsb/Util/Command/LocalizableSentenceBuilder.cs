@@ -25,6 +25,11 @@ namespace Yhsb.Util.Command
             get { return () => Properties.Resources.SentenceUsageHeadingText; }
         }
 
+        public override Func<string> CommandHeadingText
+        {
+            get { return () => Properties.Resources.SentenceCommandHeadingText; }
+        }
+
         public override Func<bool, string> HelpCommandText
         {
             get

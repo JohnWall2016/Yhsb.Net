@@ -41,7 +41,8 @@ namespace Yhsb.Util.Command.Properties {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     var baseName = "Yhsb.Util.Command.Properties.Resources";
-                    if (global::System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
+                    if (Culture.Name != "en-US" &&
+                        global::System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
                         global::System.Runtime.InteropServices.OSPlatform.OSX))
                     {
                         baseName += "." + Culture.Name;
@@ -370,6 +371,12 @@ namespace Yhsb.Util.Command.Properties {
         public static string SentenceUsageHeadingText {
             get {
                 return ResourceManager.GetString("SentenceUsageHeadingText", resourceCulture);
+            }
+        }
+
+        public static string SentenceCommandHeadingText {
+            get {
+                return ResourceManager.GetString("SentenceCommandHeadingText", resourceCulture);
             }
         }
         
