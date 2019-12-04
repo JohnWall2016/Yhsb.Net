@@ -633,7 +633,7 @@ namespace Yhsb.Jb.Network
         /// 应缴年限
         public int Yjnx
         {
-            get 
+            get
             {
                 var year = birthDay / 10000;
                 var month = birthDay / 100 - year * 100;
@@ -693,6 +693,22 @@ namespace Yhsb.Jb.Network
         }
     }
 
+    public class Xzqh
+    {
+        public static string[] regex =
+            {
+                "湘潭市雨湖区((.*?乡)(.*?村))",
+                "湘潭市雨湖区((.*?乡)(.*?政府机关))",
+                "湘潭市雨湖区((.*?街道)办事处(.*?社区))",
+                "湘潭市雨湖区((.*?街道)办事处(.*?政府机关))",
+                "湘潭市雨湖区((.*?镇)(.*?社区))",
+                "湘潭市雨湖区((.*?镇)(.*?居委会))",
+                "湘潭市雨湖区((.*?镇)(.*?村))",
+                "湘潭市雨湖区((.*?街道)办事处(.*?村))",
+                "湘潭市雨湖区((.*?镇)(.*?政府机关)",
+            };
+    }
+
     public class Dyfh : ResultData
     {
         /// 个人编号
@@ -733,24 +749,24 @@ namespace Yhsb.Jb.Network
 
         public Match PaymentInfo
         {
-            get 
+            get
             {
-                static string Escape(object str) => 
+                static string Escape(object str) =>
                     HttpUtility.UrlEncode(str.ToString());
 
-                var path = 
+                var path =
                     "/hncjb/reports?method=htmlcontent&name=yljjs&" +
                     $"aaz170={Escape(aaz170)}&aaz159={Escape(aaz159)}&aac001={Escape(grbh)}&" +
                     $"aaz157={Escape(aaz157)}&aaa129={Escape(dwmc)}&aae211={Escape(accountMonth)}";
 
                 using var sock = new HttpSocket(
                     _internal.Session.Host, _internal.Session.Port);
-                var content = sock.GetHttp(path);           
+                var content = sock.GetHttp(path);
                 return Regex.Match(content, _regexPaymentInfo);
             }
         }
 
-        static readonly string _regexPaymentInfo = 
+        static readonly string _regexPaymentInfo =
    @"<tr>
         <td height=""32"" align=""center"">姓名</td>
         <td align=""center"">性别</td>
@@ -830,5 +846,45 @@ namespace Yhsb.Jb.Network
         <td align=""center"">(.+?)</td>
         <td align=""center"">(.+?)</td>
       </tr>".Replace("\r\n", "\n");
+    }
+
+    public class BankInfoQuery : Parameters
+    {
+        [JsonProperty("aac002")]
+        public string idCard = "";
+
+        public BankInfoQuery(string idCard) 
+            : base("executeSncbgrBankinfoConQ")
+        {
+            this.idCard = idCard;
+        }
+    }
+
+    public class BankInfo : ResultData
+    {
+        /// 银行类型
+        [JsonProperty("bie013")]
+        public string bankType;
+
+        /// 户名
+        [JsonProperty("aae009")]
+        public string name;
+
+        /// 卡号
+        [JsonProperty("aae010")]
+        public string cardNumber;
+
+        public string BankName =>
+            bankType switch
+            {
+                "LY" => "中国农业银行",
+                "ZG" => "中国银行",
+                "JS" => "中国建设银行",
+                "NH" => "农村信用合作社",
+                "YZ" => "邮政",
+                "JT" => "交通银行",
+                "GS" => "中国工商银行",
+                _ => ""
+            };
     }
 }

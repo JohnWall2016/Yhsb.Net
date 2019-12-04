@@ -139,6 +139,10 @@ namespace Yhsb.Util.Excel
             this ISheet sheet, int row, int col) =>
                 sheet.GetRow(row).GetCell(col);
 
+        public static ICell Cell(
+            this ISheet sheet, int row, string columnName) =>
+                sheet.GetRow(row).Cell(columnName);
+
         public static ICell Cell(this ISheet sheet, string address)
         {
             var cell = CellRef.FromAddress(address);
@@ -164,7 +168,7 @@ namespace Yhsb.Util.Excel
         public static void SetValue(
             this ICell cell, decimal value) => cell.SetCellValue(value.ToString());
 
-        public static string CellValue(this ICell cell) =>
+        public static string Value(this ICell cell) =>
             cell.CellType switch
             {
                 CellType.String => cell.StringCellValue,
