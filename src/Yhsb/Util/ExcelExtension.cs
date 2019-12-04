@@ -137,7 +137,7 @@ namespace Yhsb.Util.Excel
 
         public static ICell Cell(
             this ISheet sheet, int row, int col) =>
-                sheet.GetRow(row).GetCell(col);
+                sheet.GetRow(row).Cell(col);
 
         public static ICell Cell(
             this ISheet sheet, int row, string columnName) =>
@@ -146,15 +146,21 @@ namespace Yhsb.Util.Excel
         public static ICell Cell(this ISheet sheet, string address)
         {
             var cell = CellRef.FromAddress(address);
-            return sheet.GetRow(cell.Row - 1).GetCell(cell.Column - 1);
+            return sheet.GetRow(cell.Row - 1).Cell(cell.Column - 1);
         }
 
-        public static ICell Cell(
-            this IRow row, int col) => row.GetCell(col);
-
-        public static ICell Cell(
-            this IRow row, string columnName) =>
-                row.GetCell(CellRef.ColumnNameToNumber(columnName) - 1);
+        public static ICell Cell(this IRow row, string columnName) =>
+            row.Cell(CellRef.ColumnNameToNumber(columnName) - 1);
+        
+        public static ICell Cell(this IRow row, int col)
+        {
+            var cell = row.GetCell(col);
+            if (cell == null)
+            {
+                cell = row.CreateCell(col);
+            }
+            return cell;
+        }
 
         public static void SetValue(
             this ICell cell, string value) => cell.SetCellValue(value);
@@ -198,8 +204,8 @@ namespace Yhsb.Util.Excel
                 for (var i = 0; i < sheet.NumMergedRegions; i++)
                 {
                     var address = sheet.GetMergedRegion(i);
-                    if (copyIndex == address.FirstRow 
-                        && copyIndex == address.LastRow)
+                    if (copyIndex == address?.FirstRow 
+                        && copyIndex == address?.LastRow)
                     {
                         merged.AddCellRangeAddress(
                             index, address.FirstColumn, index, address.LastColumn);

@@ -12,5 +12,5 @@
   <ItemGroup>
     <ProjectReference Include="..\Yhsb\Yhsb.csproj" />
   </ItemGroup>
-  
+
 </Project>

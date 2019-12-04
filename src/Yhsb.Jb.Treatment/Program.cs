@@ -22,7 +22,7 @@ namespace Yhsb.Jb.Treatment
 
         static void Main(string[] args)
         {
-            Command.Parse<Fphd, Download>(args);
+            Command.Parse<Fphd, Download, Split>(args);
         }
     }
 
@@ -146,7 +146,9 @@ namespace Yhsb.Jb.Treatment
             foreach (var data in result.Data)
             {
                 var index = currentRow - startRow + 1;
+
                 WriteLine($"{index} {data.idCard} {data.name} {data.bz} {data.fpType}");
+                
                 var row = sheet.GetOrCopyRow(currentRow++, startRow);
                 row.Cell("A").SetValue(index);
                 row.Cell("B").SetValue(data.name);
@@ -158,10 +160,10 @@ namespace Yhsb.Jb.Treatment
                 row.Cell("H").SetValue("否 [ ]");
                 row.Cell("I").SetValue("是 [ ]");
                 row.Cell("J").SetValue("否 [ ]");
-                row.Cell("L").SetValue(data.bz);
-                row.Cell("M").SetValue(data.fpType);
-                row.Cell("N").SetValue(data.fpDate);
-                row.Cell("O").SetValue(data.fpName);
+                row.Cell("L").SetValue(data.bz ?? "");
+                row.Cell("M").SetValue(data.fpType ?? "");
+                row.Cell("N").SetValue(data.fpDate ?? "");
+                row.Cell("O").SetValue(data.fpName ?? "");
             }
             workbook.Save(saveXlsx);
         }

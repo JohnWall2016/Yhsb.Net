@@ -8,11 +8,9 @@
   <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="2.6.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-    <PackageReference Include="NPOI" Version="2.4.1" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="3.0.0" />
   </ItemGroup>
 
-  
   <ItemGroup>
     <Compile Update="Util\Command\Properties\Resources.Designer.cs">
       <DesignTime>True</DesignTime>
@@ -27,5 +25,9 @@
     </EmbeddedResource>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\NPOI\NPOI\NPOI.csproj" />
+    <ProjectReference Include="..\NPOI\NPOI.OOXML\NPOI.OOXML.csproj" />
+  </ItemGroup>
 
 </Project>
