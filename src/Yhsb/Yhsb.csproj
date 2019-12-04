@@ -26,8 +26,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\NPOI\NPOI\NPOI.csproj" />
-    <ProjectReference Include="..\NPOI\NPOI.OOXML\NPOI.OOXML.csproj" />
+    <ProjectReference Include="..\..\pkg\NPOI\NPOI\NPOI.csproj" />
+    <ProjectReference Include="..\..\pkg\NPOI\NPOI.OOXML\NPOI.OOXML.csproj" />
   </ItemGroup>
 
 </Project>
