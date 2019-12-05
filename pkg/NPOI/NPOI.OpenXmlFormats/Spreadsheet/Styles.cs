@@ -617,10 +617,10 @@ namespace NPOI.OpenXmlFormats.Spreadsheet
             return ctObj;
         }
 
-        internal void Write(StreamWriter sw, string nodeName)
+        internal void Write(StreamWriter sw, string nodeName, bool writeIfBlank = false)
         {
             sw.Write(string.Format("<{0}", nodeName));
-            XmlHelper.WriteAttribute(sw, "val", this.val);
+            XmlHelper.WriteAttribute(sw, "val", this.val, writeIfBlank);
             sw.Write("/>");
         }
     }

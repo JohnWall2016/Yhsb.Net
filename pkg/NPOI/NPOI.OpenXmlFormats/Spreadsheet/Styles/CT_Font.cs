@@ -170,7 +170,7 @@ namespace NPOI.OpenXmlFormats.Spreadsheet
             {
                 foreach (CT_IntProperty x in this.charset)
                 {
-                    x.Write(sw, "charset");
+                    x.Write(sw, "charset", true);
                 }
             }
             if (this.scheme != null)
