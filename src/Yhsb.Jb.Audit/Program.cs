@@ -26,10 +26,11 @@ namespace Yhsb.Jb.Audit
     class Audit : ICommand
     {
         [Value(0, HelpText = "起始审核时间, 例如: 20190429",
-            Required = true)]
+            Required = true, MetaName = "startDate")]
         public string StartDate { get; set; }
 
-        [Value(0, HelpText = "截至审核时间, 例如: 20190505")]
+        [Value(1, HelpText = "截止审核时间, 例如: 20190505",
+            MetaName = "endDate")]
         public string EndDate { get; set; }
 
         readonly static Map _jbClassMap = new Map
