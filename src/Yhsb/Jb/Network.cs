@@ -888,6 +888,107 @@ namespace Yhsb.Jb.Network
             };
     }
 
+    /// 代发人员名单查询
+    public class OtherPersonQuery : PageParameters
+    {
+        public string aaf013 = "", aaf030 = "";
+
+        /// 居保参保状态
+        [JsonProperty("aae100")]
+        public CBState cbState;
+
+        public string aac002 = "", aac003 = "";
+
+        /// 代发状态
+        [JsonProperty("aae116")]
+        public string dfState;
+
+        public string aac082 = "";
+
+        /// 代发类型
+        [JsonProperty("aac066")]
+        public string type;
+
+        public OtherPersonQuery(
+            string type, string cbState, string dfState,
+            int page = 1, int pageSize = 500,
+            Dictionary<string, string>[] sorting = null)
+            : base("executeDfrymdQuery", page: page, pageSize: pageSize,
+                sorting: sorting ?? new[]
+                {
+                    new Dictionary<string, string>
+                    {
+                        ["dataKey"] = "aaf103",
+                        ["sortDirection"] = "ascending"
+                    }
+                })
+        {
+            this.type = type;
+            this.cbState = new CBState { Value = cbState };
+            this.dfState = dfState;
+        }
+    }
+
+    public class OtherPerson : ResultData
+    {
+        #region PersonInfo
+
+        /// 个人编号
+        [JsonProperty("aac001")]
+        public int? grbh;
+
+        /// 身份证号码
+        [JsonProperty("aac002")]
+        public string idCard;
+
+        [JsonProperty("aac003")]
+        public string name;
+
+        /// 村社区名称
+        [JsonProperty("aaf103")]
+        public string region;
+
+        #endregion
+
+        /// 代发开始年月
+        [JsonProperty("aic160")]
+        public int startYearMonth;
+
+        /// 代发标准
+        [JsonProperty("aae019")]
+        public decimal? standard;
+
+        /// 代发类型
+        [JsonProperty("aac066s")]
+        public string type;
+
+        /// 代发状态
+        [JsonProperty("aae116")]
+        public string dfState;
+
+        /// 居保状态
+        [JsonProperty("aac008s")]
+        public CBState jbState;
+
+        /// 代发截至成功发放年月
+        [JsonProperty("aae002jz")]
+        public int? endYearMonth;
+
+        /// 代发截至成功发放金额
+        [JsonProperty("aae019jz")]
+        public decimal totalPayed;
+
+        public static string Name(string type) =>
+            type switch
+            {
+                "801" => "独生子女",
+                "802" => "乡村教师",
+                "803" => "乡村医生",
+                "807" => "电影放映员",
+                _ => ""
+            };
+    }
+
     /// 代发支付单查询
     public class OtherPaymentQuery : PageParameters
     {

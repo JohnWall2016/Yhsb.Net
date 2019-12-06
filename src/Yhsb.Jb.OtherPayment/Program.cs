@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using CommandLine;
 using Yhsb.Util.Command;
 using Yhsb.Util.Excel;
@@ -21,6 +22,8 @@ namespace Yhsb.Jb.OtherPayment
 
         public const string payListXlsx =
             @"D:\代发管理\雨湖区城乡居民基本养老保险代发人员支付明细.xlsx";
+        public const string personListXlsx =
+            @"D:\代发管理\雨湖区城乡居民基本养老保险代发人员名单.xlsx";
     }
 
     [Verb("payList", HelpText = "代发支付明细导出")]
@@ -136,9 +139,95 @@ namespace Yhsb.Jb.OtherPayment
     [Verb("personList", HelpText = "正常代发人员名单导出")]
     class PersonList : ICommand
     {
+        [Value(0, HelpText =
+            "代发类型: 801 - 独生子女, 802 - 乡村教师, " +
+            "803 - 乡村医生, 807 - 电影放映员",
+            Required = true, MetaName = "type")]
+        public string Type { get; set; }
+
+        [Value(1, HelpText =
+            "代发年月: 格式 YYYYMM, 如 201901",
+            Required = true, MetaName = "date")]
+        public string Date { get; set; }
+
         public void Execute()
         {
+            var workbook = ExcelExtension.LoadExcel(Program.personListXlsx);
+            var sheet = workbook.GetSheetAt(0);
 
+            int startRow = 3, currentRow = 3;
+            decimal sum = 0;
+
+            var date = DateTime.Now.ToString("yyyyMMdd");
+            var dateCH = DateTime.Now.ToString("yyyy年M月d日");
+            var reportDate = $"制表时间：{dateCH}";
+            sheet.Cell("G2").SetValue(reportDate);
+
+            Session.Use(session =>
+            {
+                session.SendService(new OtherPersonQuery(Type, "1", "1"));
+                var result = session.GetResult<OtherPerson>();
+                result.Data.ForEach((otherPerson) =>
+                {
+                    if (otherPerson.grbh == null) return;
+
+                    decimal payAmount = 0;
+                    if (otherPerson.standard is decimal standard)
+                    {
+                        var startYear = otherPerson.startYearMonth / 100;
+                        var startMonth = otherPerson.startYearMonth % 100;
+                        startMonth -= 1;
+                        if (startMonth == 0)
+                        {
+                            startYear -= 1;
+                            startMonth = 12;
+                        }
+                        if (otherPerson.endYearMonth is int endYearMonth)
+                        {
+                            startYear = endYearMonth / 100;
+                            startMonth = endYearMonth % 100;
+                        }
+                        var match = Regex.Match(Date, @"^(\d\d\d\d)(\d\d)$");
+                        if (match.Success)
+                        {
+                            var endYear = int.Parse(match.Groups[1].Value);
+                            var endMonth = int.Parse(match.Groups[2].Value);
+                            payAmount =
+                             ((endYear - startYear) * 12 + endMonth - startMonth) * standard;
+                        }
+                    }
+                    else if (Type == "801" && otherPerson.totalPayed == 5000)
+                    {
+                        return;
+                    }
+
+                    var row = sheet.GetOrCopyRow(currentRow++, startRow);
+                    row.Cell("A").SetValue(currentRow - startRow);
+                    row.Cell("B").SetValue(otherPerson.region);
+                    row.Cell("C").SetValue(otherPerson.name);
+                    row.Cell("D").SetValue(otherPerson.idCard);
+                    row.Cell("E").SetValue(otherPerson.startYearMonth);
+                    row.Cell("F").SetValue(otherPerson.standard?.ToString());
+                    row.Cell("G").SetValue(otherPerson.type);
+                    row.Cell("H").SetValue(otherPerson.jbState.Name);
+                    row.Cell("I").SetValue(otherPerson.endYearMonth?.ToString());
+                    row.Cell("J").SetValue(otherPerson.totalPayed);
+                    row.Cell("K").SetValue(payAmount);
+
+                    sum += payAmount;
+                });
+            });
+
+            var trow = sheet.GetOrCopyRow(currentRow, startRow);
+            trow.Cell("A").SetValue("");
+            trow.Cell("C").SetValue("共计");
+            trow.Cell("D").SetValue(currentRow - startRow);
+            trow.Cell("F").SetValue("");
+            trow.Cell("J").SetValue("合计");
+            trow.Cell("K").SetValue(sum);
+
+            workbook.Save(Util.StringEx.AppendToFileName(
+                Program.personListXlsx, $"({OtherPerson.Name(Type)}){date}"));
         }
     }
 }
