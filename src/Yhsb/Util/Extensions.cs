@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Yhsb.Util
 {
-    public static class StreamExtension
+    public static class StreamEx
     {
         public static void Write(this Stream stream, byte[] buffer)
         {
@@ -14,7 +14,7 @@ namespace Yhsb.Util
         }
     }
 
-    public static class PrintExtension
+    public static class PrintEx
     {
         public static void Print<T>(this T obj)
         {
@@ -30,7 +30,7 @@ namespace Yhsb.Util
             Description = description;
     }
 
-    public static class EnumExtension
+    public static class EnumEx
     {
         public static string GetDescription(this Enum This)
         {
@@ -52,12 +52,25 @@ namespace Yhsb.Util
         }
     }
 
-    public static class EnumerateExtension
+    public static class EnumerateEx
     {
         public static string ToLiteral<T>(this IEnumerable<T> enumerator)
         {
             var list = enumerator.Select(t => t.ToString());
             return "[" + string.Join(',', list) + "]";
+        }
+    }
+
+    public static class StringEx
+    {
+        public static string AppendToFileName(string fileName, string appendString)
+        {
+            var index = fileName.LastIndexOf(".");
+            if (index >= 0)
+                return fileName.Substring(0, index) +
+                    appendString + fileName.Substring(index);
+            else
+                return fileName + appendString;
         }
     }
 

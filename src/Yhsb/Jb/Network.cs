@@ -980,7 +980,7 @@ namespace Yhsb.Jb.Network
 
         /// 发放年月
         [JsonProperty("aae002")]
-        public int yearMonth;
+        public int? yearMonth;
 
         /// 付款单号
         [JsonProperty("aaz031")]
@@ -988,7 +988,7 @@ namespace Yhsb.Jb.Network
 
         /// 个人单号
         [JsonProperty("aaz220")]
-        public int personalPayList;
+        public long personalPayList;
 
         /// 支付总金额
         [JsonProperty("aae019")]
@@ -1013,7 +1013,7 @@ namespace Yhsb.Jb.Network
         public string personalPayList;
 
         public OtherPaymentPersonalDetailQuery(
-            int grbh, int payList, int personalPayList,
+            int grbh, int payList, long personalPayList,
             int page = 1, int pageSize = 500)
             : base("dfpayffzfdjgrmxQuery", page: page, pageSize: pageSize)
         {
@@ -1035,7 +1035,7 @@ namespace Yhsb.Jb.Network
 
         /// 发放年月
         [JsonProperty("aae002")]
-        public int yearMonth;
+        public int? yearMonth;
 
         /// 付款单号
         [JsonProperty("aaz031")]

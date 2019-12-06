@@ -208,33 +208,24 @@ namespace Yhsb.Jb.Treatment
                     if (match.Success) break;
                 }
                 if (match == null || !match.Success)
-                {
                     throw new ApplicationException($"未匹配行政区划: {xzqh}");
-                }
                 else
                 {
                     var xzj = match.Groups[2].Value;
                     var csq = match.Groups[3].Value;
                     if (!map.ContainsKey(xzj))
-                    {
                         map[xzj] = new Dictionary<string, List<int>>();
-                    }
+
                     if (!map[xzj].ContainsKey(csq))
-                    {
                         map[xzj][csq] = new List<int>{index};
-                    }
                     else
-                    {
                         map[xzj][csq].Add(index);
-                    }
                 }
             }
 
             WriteLine("生成分组目录并分别生成信息核对报告表");
             if (Directory.Exists(outputDir))
-            {
                 Directory.Move(outputDir, outputDir + ".orig");
-            }
             Directory.CreateDirectory(outputDir);
 
             foreach (var xzj in map.Keys)
@@ -321,13 +312,9 @@ namespace Yhsb.Jb.Treatment
                 while (!payInfo.Success)
                 {
                     if (--retry > 1)
-                    {
                         payInfo = result[0].PaymentInfo;
-                    }
                     else
-                    {
                         throw new ApplicationException("养老金计算信息无效");
-                    }
                 }
                 var workbook = ExcelExtension.LoadExcel(Program.payInfoXlsx);
                 var sheet = workbook.GetSheetAt(0);
