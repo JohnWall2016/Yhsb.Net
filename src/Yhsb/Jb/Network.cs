@@ -887,4 +887,162 @@ namespace Yhsb.Jb.Network
                 _ => ""
             };
     }
+
+    /// 代发支付单查询
+    public class OtherPaymentQuery : PageParameters
+    {
+        /// 代发类型
+        [JsonProperty("aaa121")]
+        public string type;
+
+        /// 支付单号
+        [JsonProperty("aaz031")]
+        public string payList = "";
+
+        /// 发放年月
+        [JsonProperty("aae002")]
+        public string yearMonth;
+
+        [JsonProperty("aae089")]
+        public string state;
+
+        public OtherPaymentQuery(
+            string type, string yearMonth, string state = "0") : base("dfpayffzfdjQuery")
+        {
+            this.type = type;
+            this.yearMonth = yearMonth;
+            this.state = state;
+        }
+    }
+
+    public class OtherPayment : ResultData
+    {
+        /// 业务类型中文名
+        [JsonProperty("aaa121")]
+        public string typeCH;
+
+        /// 付款单号
+        [JsonProperty("aaz031")]
+        public int payList;
+
+        public static string Name(string type) =>
+            type switch
+            {
+                "DF0001" => "独生子女",
+                "DF0002" => "乡村教师",
+                "DF0003" => "乡村医生",
+                "DF0007" => "电影放映员",
+                _ => ""
+            };
+    }
+
+    /// 代发支付单明细查询
+    public class OtherPaymentDetailQuery : PageParameters
+    {
+        /// 付款单号
+        [JsonProperty("aaz031")]
+        public string payList;
+
+        public OtherPaymentDetailQuery(
+            int payList, int page = 1, int pageSize = 500)
+            : base("dfpayffzfdjmxQuery", page: page, pageSize: pageSize)
+        {
+            this.payList = $"{payList}";
+        }
+    }
+
+    public class OtherPaymentDetail : ResultData
+    {
+        #region PersonInfo
+
+        /// 个人编号
+        [JsonProperty("aac001")]
+        public int grbh;
+
+        /// 身份证号码
+        [JsonProperty("aac002")]
+        public string idCard;
+
+        [JsonProperty("aac003")]
+        public string name;
+
+        /// 村社区名称
+        [JsonProperty("aaf103")]
+        public string region;
+
+        #endregion
+
+        #region OtherPayment
+
+        /// 支付标志
+        [JsonProperty("aae117")]
+        public string flag;
+
+        /// 发放年月
+        [JsonProperty("aae002")]
+        public int yearMonth;
+
+        /// 付款单号
+        [JsonProperty("aaz031")]
+        public int payList;
+
+        /// 个人单号
+        [JsonProperty("aaz220")]
+        public int personalPayList;
+
+        /// 支付总金额
+        [JsonProperty("aae019")]
+        public decimal amount;
+
+        #endregion
+    }
+
+    /// 代发支付单个人明细查询
+    public class OtherPaymentPersonalDetailQuery : PageParameters
+    {
+        /// 个人编号
+        [JsonProperty("aac001")]
+        public string grbh;
+
+        /// 付款单号
+        [JsonProperty("aaz031")]
+        public string payList;
+
+        /// 个人单号
+        [JsonProperty("aaz220")]
+        public string personalPayList;
+
+        public OtherPaymentPersonalDetailQuery(
+            int grbh, int payList, int personalPayList,
+            int page = 1, int pageSize = 500)
+            : base("dfpayffzfdjgrmxQuery", page: page, pageSize: pageSize)
+        {
+            this.grbh = $"{grbh}";
+            this.payList = $"{payList}";
+            this.personalPayList = $"{personalPayList}";
+        }
+    }
+
+    public class OtherPaymentPersonalDetail : ResultData
+    {
+        /// 待遇日期
+        [JsonProperty("aae003")]
+        public int date;
+
+        /// 支付标志
+        [JsonProperty("aae117")]
+        public string flag;
+
+        /// 发放年月
+        [JsonProperty("aae002")]
+        public int yearMonth;
+
+        /// 付款单号
+        [JsonProperty("aaz031")]
+        public int payList;
+
+        /// 支付总金额
+        [JsonProperty("aae019")]
+        public decimal amount;
+    }
 }
