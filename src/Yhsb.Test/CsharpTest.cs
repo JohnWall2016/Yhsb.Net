@@ -50,4 +50,34 @@ class CsharpTest
         s = "efg";
         WriteLine(s);
     }
+
+    struct Angle
+    {
+        public int degrees;
+        public int minutes;
+        public int seconds;
+
+        public override string ToString() => 
+            $"Angle: {degrees}, {minutes}, {seconds}";
+    }
+
+    public static void TestStruct()
+    {
+        var angle = new Angle 
+        {
+            degrees = 1,
+            minutes = 2,
+            seconds = 3,
+        };
+
+        object obj = angle; // Box: copy angle's value to obj's.
+        Angle angle2 = (Angle)obj; // Unbox: copy obj's value to angle2's.
+        angle2.degrees = 4;
+        WriteLine(angle);
+        WriteLine(angle2);
+
+        WriteLine(typeof(Angle).BaseType);
+        WriteLine(typeof(int).BaseType);
+        WriteLine(typeof(ValueType).BaseType);
+    }
 }
