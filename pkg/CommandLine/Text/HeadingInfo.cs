@@ -62,13 +62,15 @@ namespace CommandLine.Text
                     ReflectionHelper.GetAttribute<AssemblyTitleAttribute>()
                      .MapValueOrDefault(
                          titleAttribute => titleAttribute.Title,
-                          ReflectionHelper.GetAssemblyName());
+                         ReflectionHelper.GetAssemblyName());
 
-                var version =  ReflectionHelper.AppAttribute?.Version ??
-                    ReflectionHelper.GetAttribute<AssemblyInformationalVersionAttribute>()
-                     .MapValueOrDefault(
-                          versionAttribute => versionAttribute.InformationalVersion,
-                         ReflectionHelper.GetAssemblyVersion());
+                var version = ReflectionHelper.AppAttribute?.Version;
+                if (version == "@assembly")
+                    version = ReflectionHelper
+                        .GetAttribute<AssemblyInformationalVersionAttribute>()
+                        .MapValueOrDefault(
+                            versionAttribute => versionAttribute.InformationalVersion,
+                            ReflectionHelper.GetAssemblyVersion());
 
                 return new HeadingInfo(title, version);
             }

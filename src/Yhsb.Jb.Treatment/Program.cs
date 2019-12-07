@@ -21,7 +21,7 @@ namespace Yhsb.Jb.Treatment
         public static string payInfoXlsx = $@"{rootDir}\养老金计算表模板.xlsx";
         public static string fphdXlsx = $@"{rootDir}\到龄贫困人员待遇核定情况表模板.xlsx";
 
-        [App(Name = "信息核对报告表和养老金计算表生成程序", Version = "0.0.1")]
+        [App(Name = "信息核对报告表和养老金计算表生成程序")]
         static void Main(string[] args)
         {
             Command.Parse<Fphd, Download, Split>(args);

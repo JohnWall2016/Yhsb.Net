@@ -13,7 +13,7 @@ namespace Yhsb.Jb.Query
 {
     class Program
     {
-        [App(Name = "信息查询程序", Version = "0.0.1")]
+        [App(Name = "信息查询程序")]
         static void Main(string[] args)
         {
             Command.Parse<Jfxx, Doc>(args);
