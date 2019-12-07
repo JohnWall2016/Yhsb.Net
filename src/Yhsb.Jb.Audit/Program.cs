@@ -17,6 +17,7 @@ namespace Yhsb.Jb.Audit
 
     class Program
     {
+        [App(Name = "特殊参保人员身份信息变更导出程序", Version = "0.0.1")]
         static void Main(string[] args)
         {
             Command.Parse<Audit>(args);

@@ -63,7 +63,7 @@ namespace Yhsb.Util.Command
                             var errMisssing = ((MissingRequiredOptionError)error);
                             return errMisssing.NameInfo.Equals(NameInfo.EmptyName)
                                        ? Properties.Resources.SentenceMissingRequiredOptionError
-                                       : String.Format(Properties.Resources.SentenceMissingRequiredOptionError, errMisssing.NameInfo.NameText);
+                                       : String.Format(Properties.Resources.SentenceMissingRequiredOptionErrorWithName, errMisssing.NameInfo.NameText);
                         case ErrorType.BadFormatConversionError:
                             var badFormat = ((BadFormatConversionError)error);
                             return badFormat.NameInfo.Equals(NameInfo.EmptyName)

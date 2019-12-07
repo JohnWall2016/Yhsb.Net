@@ -103,7 +103,7 @@ namespace CommandLine.Infrastructure
             return Assembly.GetEntryAssembly() ?? Assembly.GetCallingAssembly();
         }
 
-       public static IEnumerable<string> GetNamesOfEnum(Type t)
+        public static IEnumerable<string> GetNamesOfEnum(Type t)
         {
             if (t.IsEnum)
                 return Enum.GetNames(t);
@@ -111,6 +111,15 @@ namespace CommandLine.Infrastructure
             if (u != null && u.IsEnum)
                 return Enum.GetNames(u);
             return Enumerable.Empty<string>();
+        }
+
+        
+        public static AppAttribute AppAttribute = GetAppAttribute();
+
+        private static AppAttribute GetAppAttribute()
+        {
+            return Assembly.GetEntryAssembly()?.
+                EntryPoint?.GetCustomAttribute<AppAttribute>();
         }
     }
 }

@@ -15,6 +15,7 @@ namespace Yhsb.Jb.OtherPayment
 {
     class Program
     {
+        [App(Name = "代发数据导出制表程序", Version = "0.0.1")]
         static void Main(string[] args)
         {
             Command.Parse<PersonList, PayList>(args);

@@ -184,6 +184,9 @@
     <value>显示命令帮助</value>
   </data>
   <data name="SentenceMissingRequiredOptionError" xml:space="preserve">
+    <value>必须选项未找到.</value>
+  </data>
+  <data name="SentenceMissingRequiredOptionErrorWithName" xml:space="preserve">
     <value>必须选项 '{0}' 未找到.</value>
   </data>
   <data name="SentenceMissingRequiredValueError" xml:space="preserve">

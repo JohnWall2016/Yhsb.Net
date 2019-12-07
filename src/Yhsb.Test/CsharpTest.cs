@@ -1,5 +1,6 @@
 using System;
 using static System.Console;
+using System.Reflection;
 
 class CsharpTest
 {
@@ -79,5 +80,11 @@ class CsharpTest
         WriteLine(typeof(Angle).BaseType);
         WriteLine(typeof(int).BaseType);
         WriteLine(typeof(ValueType).BaseType);
+    }
+
+    public static void TestEntryPoint()
+    {
+        WriteLine(Assembly.GetEntryAssembly().EntryPoint.Name);
+        WriteLine(Assembly.GetEntryAssembly().EntryPoint.ToString());
     }
 }

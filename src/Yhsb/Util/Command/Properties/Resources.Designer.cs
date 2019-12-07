@@ -274,6 +274,12 @@ namespace Yhsb.Util.Command.Properties {
                 return ResourceManager.GetString("SentenceMissingRequiredOptionError", resourceCulture);
             }
         }
+
+        public static string SentenceMissingRequiredOptionErrorWithName {
+            get {
+                return ResourceManager.GetString("SentenceMissingRequiredOptionErrorWithName", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to A required value not bound to option name is missing..

@@ -18,8 +18,6 @@ namespace CommandLine.Text
     /// You can assign it in place of a <see cref="System.String"/> instance.
     /// </summary>
     
-    
-    
     public struct ComparableOption
     {
         public bool Required;
@@ -223,7 +221,7 @@ namespace CommandLine.Text
             get { return copyright; }
             set
             {
-                if (value == null) throw new ArgumentNullException("value");
+                // if (value == null) throw new ArgumentNullException("value");
 
                 copyright = value;
             }

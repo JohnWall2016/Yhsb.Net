@@ -18,6 +18,9 @@ namespace CommandLine.Text
         private readonly string programName;
         private readonly string version;
 
+        public string ProgramName => programName;
+        public string Version => version;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CommandLine.Text.HeadingInfo"/> class
         /// specifying program name and version.
@@ -55,15 +58,18 @@ namespace CommandLine.Text
         {
             get
             {
-                var title = ReflectionHelper.GetAttribute<AssemblyTitleAttribute>()
-                    .MapValueOrDefault(
-                        titleAttribute => titleAttribute.Title,
-                        ReflectionHelper.GetAssemblyName());
+                var title = ReflectionHelper.AppAttribute?.Name ??
+                    ReflectionHelper.GetAttribute<AssemblyTitleAttribute>()
+                     .MapValueOrDefault(
+                         titleAttribute => titleAttribute.Title,
+                          ReflectionHelper.GetAssemblyName());
 
-                var version = ReflectionHelper.GetAttribute<AssemblyInformationalVersionAttribute>()
-                    .MapValueOrDefault(
-                        versionAttribute => versionAttribute.InformationalVersion,
-                        ReflectionHelper.GetAssemblyVersion());
+                var version =  ReflectionHelper.AppAttribute?.Version ??
+                    ReflectionHelper.GetAttribute<AssemblyInformationalVersionAttribute>()
+                     .MapValueOrDefault(
+                          versionAttribute => versionAttribute.InformationalVersion,
+                         ReflectionHelper.GetAssemblyVersion());
+
                 return new HeadingInfo(title, version);
             }
         }

@@ -184,6 +184,9 @@
     <value>Display more information on a specific command.</value>
   </data>
   <data name="SentenceMissingRequiredOptionError" xml:space="preserve">
+    <value>Required option is missing.</value>
+  </data>
+  <data name="SentenceMissingRequiredOptionErrorWithName" xml:space="preserve">
     <value>Required option '{0}' is missing.</value>
   </data>
   <data name="SentenceMissingRequiredValueError" xml:space="preserve">

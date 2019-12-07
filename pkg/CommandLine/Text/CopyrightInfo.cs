@@ -108,6 +108,13 @@ namespace CommandLine.Text
         {
             get
             {
+                var copyright = ReflectionHelper.AppAttribute?.Copyright;
+                if (copyright == null)
+                    return null;
+                
+                if (copyright != "@assembly")
+                    return new CopyrightInfo(new AssemblyCopyrightAttribute(copyright));
+
                 // if an exact copyright string has been specified, it takes precedence
                 var copyrightAttr = ReflectionHelper.GetAttribute<AssemblyCopyrightAttribute>();
                 switch (copyrightAttr.Tag)
@@ -140,7 +147,7 @@ namespace CommandLine.Text
         /// <returns>The <see cref="System.String"/> that contains the copyright.</returns>
         public static implicit operator string(CopyrightInfo info)
         {
-            return info.ToString();
+            return info?.ToString();
         }
 
         /// <summary>
