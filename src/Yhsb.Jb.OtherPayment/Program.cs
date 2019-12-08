@@ -127,11 +127,13 @@ namespace Yhsb.Jb.OtherPayment
                 row.Cell("H").SetValue(item.endDate?.ToString());
                 row.Cell("I").SetValue(item.amount); ;
             }
+
             var trow = sheet.GetOrCopyRow(currentRow, startRow);
             trow.Cell("C").SetValue("共计");
             trow.Cell("D").SetValue(currentRow - startRow);
             trow.Cell("H").SetValue("合计");
             trow.Cell("I").SetValue(total);
+            
             workbook.Save(Util.StringEx.AppendToFileName(
                 Program.payListXlsx, $"({typeCH}){date}"));
         }
