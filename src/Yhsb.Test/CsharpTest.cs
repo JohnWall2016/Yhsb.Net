@@ -87,4 +87,62 @@ class CsharpTest
         WriteLine(Assembly.GetEntryAssembly().EntryPoint.Name);
         WriteLine(Assembly.GetEntryAssembly().EntryPoint.ToString());
     }
+
+    public class Coordinate : IEquatable<Coordinate>
+    {
+        readonly int _x, _y;
+
+        public Coordinate(int x, int y)
+        {
+            _x = x; _y = y;
+        }
+
+        public bool Equals(Coordinate other)
+        {
+            if (other is null) return false;
+            return (_x, _y).Equals((other._x, other._y));
+        }
+
+        public override bool Equals(object other)
+        {
+            return Equals(other as Coordinate);
+        }
+
+        public override int GetHashCode()
+        {
+            return (_x, _y).GetHashCode();
+        }
+
+        public static bool operator ==(Coordinate a, Coordinate b)
+        {
+            if (a is null)
+            {
+                if (b is null)
+                    return true;
+                else
+                    return false;
+            }
+            else
+            {
+                return a.Equals(b);
+            }
+        }
+
+        public static bool operator !=(Coordinate a, Coordinate b)
+        {
+            return !(a == b);
+        }
+    }
+
+    public static void TestEqual()
+    {
+        var a = new Coordinate(10, 11);
+        var b = a;
+        var c = new Coordinate(10, 11);
+        var d = new Coordinate(11, 11);
+
+        WriteLine(a == b);
+        WriteLine(a == c);
+        WriteLine(a == d);
+    }
 }
