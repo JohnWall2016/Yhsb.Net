@@ -24,7 +24,7 @@ namespace Yhsb.Util
         public static (string year, string month, string day)
             SplitDate(string date)
         {
-            var match = Regex.Match(date,  @"^(\d\d\d\d)(\d\d)(\d\d)$");
+            var match = Regex.Match(date,  @"^(\d\d\d\d)(\d\d)(\d\d)?$");
             if (match.Success)
             {
                 return (match.Groups[1].Value,

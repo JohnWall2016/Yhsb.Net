@@ -874,8 +874,10 @@ namespace Yhsb.Jb.Network
         [JsonProperty("aae010")]
         public string cardNumber;
 
-        public string BankName =>
-            bankType switch
+        public string BankName => GetBankName(bankType);
+
+        public static string GetBankName(string type) =>
+            type switch
             {
                 "LY" => "中国农业银行",
                 "ZG" => "中国银行",
@@ -1145,5 +1147,298 @@ namespace Yhsb.Jb.Network
         /// 支付总金额
         [JsonProperty("aae019")]
         public decimal amount;
+    }
+
+    /// 财务支付管理查询
+    public class PaymentQuery  : PageParameters
+    {
+        public string aaa121 = "", aaz031 = "";
+
+        /// 发放年月
+        [JsonProperty("aae002")]
+        public string yearMonth;
+
+        [JsonProperty("aae089")]
+        public string state;
+
+        public string bie013 = "";
+
+        public PaymentQuery(string yearMonth, string state)
+            : base("cwzfglQuery", page: 1, pageSize: 1000,
+                totals: new[]
+                {
+                    new Dictionary<string, string>
+                    {
+                        ["dataKey"] = "aae169",
+                        ["aggregate"] = "sum"
+                    }
+                })
+        {
+            this.yearMonth = yearMonth;
+            this.state = state;
+        }
+    }
+
+    public class Payment : ResultData
+    {
+        /// 支付对象类型: "3" - 个人支付
+        [JsonProperty("aaa079")]
+        public string payType;
+
+        /// 支付单号
+        [JsonProperty("aaz031")]
+        public int NO;
+
+        /// 支付状态
+        [JsonProperty("aae088")]
+        public string state;
+
+        /// 业务类型: "F10004" - 重复缴费退费; "F10007" - 缴费调整退款;
+        ///     "F10006" - 享受终止退保
+        [JsonProperty("aaa121")]
+        public string type;
+
+        /// 发放年月
+        [JsonProperty("aae002")]
+        public int yearMonth;
+
+        /// 支付对象银行户名
+        [JsonProperty("aae009")]
+        public string name;
+
+        /// 支付对象编码（身份证号码）
+        [JsonProperty("bie013")]
+        public string code;
+
+        /// 支付对象银行账号
+        [JsonProperty("aae010")]
+        public string account;
+    }
+
+    public class PaymentDetailQuery : PageParameters
+    {
+        public string aaf015 = "";
+
+        /// 身份证号码
+        [JsonProperty("aac002")]
+        public string idCard = "";
+
+        [JsonProperty("aac003")]
+        public string name = "";
+
+        /// 支付单号
+        [JsonProperty("aaz031")]
+        public string NO;
+
+        /// 支付状态
+        [JsonProperty("aae088")]
+        public string state;
+
+        /// 业务类型: "F10004" - 重复缴费退费; "F10007" - 缴费调整退款;
+        ///     "F10006" - 享受终止退保
+        [JsonProperty("aaa121")]
+        public string type;
+
+        /// 发放年月
+        [JsonProperty("aae002")]
+        public string yearMonth;        
+
+        public PaymentDetailQuery(
+            string NO = "", string yearMonth = "", 
+            string state = "", string paidType = "")
+            : base("cwzfgl_zfdryQuery", page: 1, pageSize: 1000,
+                totals: new[]
+                {
+                    new Dictionary<string, string>
+                    {
+                        ["dataKey"] = "aae019",
+                        ["aggregate"] = "sum"
+                    }
+                })
+        {
+            this.NO = NO;
+            this.yearMonth = yearMonth;
+            this.state = state;
+            this.type = paidType;
+        }
+    }
+
+    public class PaymentDetail : ResultData
+    {
+        /// 身份证号码
+        [JsonProperty("aac002")]
+        public string idCard;
+
+        [JsonProperty("aac003")]
+        public string name;
+
+        /// 支付单号
+        [JsonProperty("aaz031")]
+        public int payList;
+
+        /// 支付总金额
+        [JsonProperty("aae019")]
+        public decimal amount;
+
+        /// 业务类型: "F10004" - 重复缴费退费; "F10007" - 缴费调整退款;
+        ///     "F10006" - 享受终止退保
+        [JsonProperty("aaa121")]
+        public string type;
+
+        public string TypeCH =>
+            type switch
+            {
+                "F10004" => "重复缴费退费",
+                "F10006" => "享受终止退保",
+                "F10007" => "缴费调整退款",
+                _ => ""
+            };
+    }
+
+    public class CbzzfhQuery : PageParameters
+    {
+        public string aaf013 = "", aaf030 = "", aae016 = "";
+        public string aae011 = "", aae036 = "", aae036s = "";
+        public string aae014 = "", aae015 = "", aae015s = "";
+
+        /// 身份证号码
+        [JsonProperty("aac002")]
+        public string idCard = "";
+
+        public string aac003 = "", aac009 = "", aae0160 = "";
+
+        public CbzzfhQuery(string idCard)
+            : base("cbzzfhPerInfoList")
+        {
+            this.idCard = idCard;
+        }
+    }
+
+    public class Cbzzfh : ResultData
+    {
+        /// 身份证号码
+        [JsonProperty("aac002")]
+        public string idCard;
+
+        [JsonProperty("aac003")]
+        public string name;
+
+        /// 终止年月
+        [JsonProperty("aae031")]
+        public string zzny;
+
+        /// 审核日期
+        [JsonProperty("aae015")]
+        public string shrq;
+
+        public int aaz038, aac001;
+        public string aae160;
+    }
+
+    public class CbzzfhDetailQuery : Parameters
+    {
+        public string aaz038, aac001, aae160;
+
+        public CbzzfhDetailQuery(Cbzzfh cbzzfh)
+            : base("cbzzfhPerinfo")
+        {
+            aaz038 = $"{cbzzfh.aaz038}";
+            aac001 = $"{cbzzfh.aac001}";
+            aae160 = $"{cbzzfh.aae160}";
+        }
+    }
+
+    public class ZzfhReason : JsonField
+    {
+        public override string Name => Value switch
+        {
+            "1401" => "死亡",
+            "1406" => "出外定居",
+            "1407" => "参加职保",
+            "1499" => "其他原因",
+            "6401" => "死亡",
+            "6406" => "出外定居",
+            "6407" => "参加职保",
+            "6499" => "其他原因",
+            _ => $"未知值: {Value}"
+        };
+    }
+
+    public class CbzzfhDetail : ResultData
+    {
+        /// 终止原因
+        [JsonProperty("aae160")]
+        public ZzfhReason reason;
+
+        /// 银行类型
+        [JsonProperty("aaz065")]
+        public string bankType;
+
+        public string BankName => BankInfo.GetBankName(bankType);
+    }
+
+    public class DyzzfhQuery : PageParameters
+    {
+        public string aaf013 = "", aaf030 = "", aae016 = "";
+        public string aae011 = "", aae036 = "", aae036s = "";
+        public string aae014 = "", aae015 = "", aae015s = "";
+
+        /// 身份证号码
+        [JsonProperty("aac002")]
+        public string idCard = "";
+
+        public string aac003 = "", aac009 = "", aae0160 = "";
+
+        public string aic301 = "";
+
+        public DyzzfhQuery(string idCard)
+            : base("dyzzfhPerInfoList")
+        {
+            this.idCard = idCard;
+        }
+    }
+
+    public class Dyzzfh : ResultData
+    {
+        /// 身份证号码
+        [JsonProperty("aac002")]
+        public string idCard;
+
+        [JsonProperty("aac003")]
+        public string name;
+
+        /// 终止年月
+        [JsonProperty("aae031")]
+        public string zzny;
+
+        /// 审核日期
+        [JsonProperty("aae015")]
+        public string shrq;
+
+        public int aaz176;
+    }
+
+    public class DyzzfhDetailQuery : Parameters
+    {
+        public string aaz176;
+
+        public DyzzfhDetailQuery(Dyzzfh dyzzfh)
+            : base("dyzzfhPerinfo")
+        {
+            aaz176 = $"{dyzzfh.aaz176}";
+        }
+    }
+
+    public class DyzzfhDetail : ResultData
+    {
+        /// 终止原因
+        [JsonProperty("aae160")]
+        public ZzfhReason reason;
+
+        /// 银行类型
+        [JsonProperty("aaz065")]
+        public string bankType;
+
+        public string BankName => BankInfo.GetBankName(bankType);
     }
 }
