@@ -172,7 +172,7 @@ namespace Yhsb.Util.Excel
             this ICell cell, double value) => cell.SetCellValue(value);
 
         public static void SetValue(
-            this ICell cell, decimal value) => cell.SetCellValue(value.ToString());
+            this ICell cell, decimal value) => cell.SetCellValue((double)value);
 
         public static string Value(this ICell cell) =>
             cell.CellType switch

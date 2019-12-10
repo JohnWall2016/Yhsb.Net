@@ -1245,7 +1245,7 @@ namespace Yhsb.Jb.Network
 
         public PaymentDetailQuery(
             string NO = "", string yearMonth = "", 
-            string state = "", string paidType = "")
+            string state = "", string type = "")
             : base("cwzfgl_zfdryQuery", page: 1, pageSize: 1000,
                 totals: new[]
                 {
@@ -1259,7 +1259,7 @@ namespace Yhsb.Jb.Network
             this.NO = NO;
             this.yearMonth = yearMonth;
             this.state = state;
-            this.type = paidType;
+            this.type = type;
         }
     }
 
