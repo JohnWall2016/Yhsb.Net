@@ -27,7 +27,7 @@ namespace Yhsb.Jb.Payment
 
         [Value(1, HelpText = "业务状态: 0-待支付(默认), 1-已支付",
             MetaName = "state")]
-        public string State { get; set; }
+        public string State { get; set; } = "0";
 
         public void Execute()
         {
