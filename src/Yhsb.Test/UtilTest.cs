@@ -17,4 +17,10 @@ public class UtilTest
         t = Test.Efg;
         Console.WriteLine(t.GetDescription());
     }
+
+    public static void TestChinseMoney()
+    {
+        Console.WriteLine(StringEx.ConvertToChineseMoney(182739127728.89M));
+        Console.WriteLine(StringEx.ConvertToChineseMoney(182739.80M));
+    }
 }
