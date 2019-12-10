@@ -1,7 +1,6 @@
 ﻿using System;
 
 using CommandLine;
-using Yhsb;
 using Yhsb.Util.Command;
 using Yhsb.Util.Excel;
 using Yhsb.Jb.Network;
@@ -36,13 +35,11 @@ namespace Yhsb.Jb.Payment
             var sheet = workbook.GetSheetAt(0);
 
             var (year, month, _) = Util.DateTime.SplitDate(Date);
-            var title = $"{year}年{month}月个人账户返还表";
-            sheet.Cell("A1").SetValue(title);
+            sheet.Cell("A1").SetValue($"{year}年{month}月个人账户返还表");
 
             var date = DateTime.Now.ToString("yyyyMMdd");
             var dateCH = DateTime.Now.ToString("yyyy年M月d日");
-            var reportDate = $"制表时间：{dateCH}";
-            sheet.Cell("H2").SetValue(reportDate);
+            sheet.Cell("H2").SetValue($"制表时间：{dateCH}");
 
             Session.Use(session =>
             {
