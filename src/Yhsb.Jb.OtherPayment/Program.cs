@@ -7,10 +7,6 @@ using Yhsb.Util.Command;
 using Yhsb.Util.Excel;
 using Yhsb.Jb.Network;
 
-using static System.Console;
-
-using JbOtherPayment = Yhsb.Jb.Network.OtherPayment;
-
 namespace Yhsb.Jb.OtherPayment
 {
     class Program
@@ -53,12 +49,12 @@ namespace Yhsb.Jb.OtherPayment
             var items = new List<Item>();
 
             decimal total = 0;
-            var typeCH = JbOtherPayment.Name(Type);
+            var typeCH = Network.OtherPayment.Name(Type);
 
             Session.Use(session =>
             {
                 session.SendService(new OtherPaymentQuery(Type, Date));
-                var result = session.GetResult<JbOtherPayment>();
+                var result = session.GetResult<Network.OtherPayment>();
                 result.Data.ForEach(payment =>
                 {
                     if (!string.IsNullOrEmpty(payment.typeCH))
@@ -111,8 +107,7 @@ namespace Yhsb.Jb.OtherPayment
 
             var date = DateTime.Now.ToString("yyyyMMdd");
             var dateCH = DateTime.Now.ToString("yyyy年M月d日");
-            var reportDate = $"制表时间：{dateCH}";
-            sheet.Cell("G2").SetValue(reportDate);
+            sheet.Cell("G2").SetValue($"制表时间：{dateCH}");
 
             foreach (var item in items)
             {
@@ -163,8 +158,7 @@ namespace Yhsb.Jb.OtherPayment
 
             var date = DateTime.Now.ToString("yyyyMMdd");
             var dateCH = DateTime.Now.ToString("yyyy年M月d日");
-            var reportDate = $"制表时间：{dateCH}";
-            sheet.Cell("G2").SetValue(reportDate);
+            sheet.Cell("G2").SetValue($"制表时间：{dateCH}");
 
             Session.Use(session =>
             {
