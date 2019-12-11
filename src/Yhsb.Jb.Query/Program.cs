@@ -16,7 +16,7 @@ namespace Yhsb.Jb.Query
         [App(Name = "信息查询程序")]
         static void Main(string[] args)
         {
-            Command.Parse<Jfxx, Doc>(args);
+            Command.Parse<Jfxx, Doc, UpInfo>(args);
         }
     }
 
@@ -239,12 +239,84 @@ namespace Yhsb.Jb.Query
     class Doc : ICommand
     {
         [Value(0, HelpText = "xlsx文件",
-            Required = true)]
+            Required = true, MetaName = "xslx")]
         public string Xlsx { get; set; }
 
         public void Execute()
         {
-            WriteLine(Xlsx);
+            var workbook = ExcelExtension.LoadExcel(Xlsx);
+            var sheet = workbook.GetSheetAt(0);
+
+            Session.Use(session =>
+            {
+                for (var i = 0; i <= sheet.LastRowNum; i++)
+                {
+                    var row = sheet.GetRow(i);
+                    var idCard = row.Cell("A").Value();
+                    var title = row.Cell("D").Value();
+                    session.SendService(new CbxxQuery(idCard));
+                    var result = session.GetResult<Cbxx>();
+                    if (!result.IsEmpty)
+                    {
+                        row.Cell("E").SetValue($"{result[0].name}{title}");
+                    }
+                }
+            });
+
+            workbook.Save(Util.StringEx.AppendToFileName(Xlsx, ".upd"));
         }
+    }
+
+    [Verb("upinfo", HelpText = "更新xlsx中个人居保参保信息")]
+    class UpInfo : ICommand
+    {
+        [Value(0, HelpText = "xlsx文件",
+            Required = true, MetaName = "xslx")]
+        public string Xlsx { get; set; }
+
+        [Value(1, HelpText = "数据开始行, 从1开始",
+            Required = true, MetaName = "beginRow")]
+        public int BeginRow { get; set; }
+
+        [Value(2, HelpText = "数据结束行(包含), 从1开始",
+            Required = true, MetaName = "endRow")]
+        public int EndRow { get; set; }
+
+        [Value(3, HelpText = "身份证号码所在列, 例如：A",
+            Required = true, MetaName = "idCardCol")]
+        public string IdCardCol { get; set; }
+
+        [Value(4, HelpText = "居保参保信息保存列, 例如：A",
+            Required = true, MetaName = "infoSaveCol")]
+        public string InfoSaveCol { get; set; }
+
+        public void Execute()
+        {
+            var workbook = ExcelExtension.LoadExcel(Xlsx);
+            var sheet = workbook.GetSheetAt(0);
+
+            Session.Use(session =>
+            {
+                for (var i = BeginRow; i <= EndRow; i++)
+                {
+                    var row = sheet.GetRow(i);
+                    var idCard = row.Cell(IdCardCol).Value().ToUpper();
+
+                    var jbzt = "";
+                    session.SendService(new CbxxQuery(idCard));
+                    var result = session.GetResult<Cbxx>();
+                    if (!result.IsEmpty)
+                    {
+                        jbzt = result[0].JBState;
+                        row.Cell(InfoSaveCol).SetValue(jbzt);
+                    }
+
+                    WriteLine($"{idCard} ${jbzt ?? ""}");
+                }
+            });
+
+            workbook.Save(Util.StringEx.AppendToFileName(Xlsx, ".upd"));
+        }
+        
     }
 }
