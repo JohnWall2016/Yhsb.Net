@@ -16,7 +16,7 @@ namespace Yhsb.Jb.Query
         [App(Name = "信息查询程序")]
         static void Main(string[] args)
         {
-            Command.Parse<Jfxx, Doc, UpInfo>(args);
+            Command.Parse<Jfxx, UpInfo, Doc>(args);
         }
     }
 
