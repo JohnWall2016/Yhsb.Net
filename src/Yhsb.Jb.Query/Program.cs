@@ -297,7 +297,7 @@ namespace Yhsb.Jb.Query
 
             Session.Use(session =>
             {
-                for (var i = BeginRow; i <= EndRow; i++)
+                for (var i = BeginRow - 1; i < EndRow; i++)
                 {
                     var row = sheet.GetRow(i);
                     var idCard = row.Cell(IdCardCol).Value().ToUpper();

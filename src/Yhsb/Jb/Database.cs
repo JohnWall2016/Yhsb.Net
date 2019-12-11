@@ -1,8 +1,12 @@
 using System;
+using System.IO;
+using System.Text;
 using System.Linq.Expressions;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+using Yhsb.Util.Excel;
 
 namespace Yhsb.Jb.Database
 {
@@ -124,6 +128,44 @@ namespace Yhsb.Jb.Database
         protected override void OnConfiguring(
             DbContextOptionsBuilder optionsBuilder) => 
                 optionsBuilder.UseMySql(_internal.Database.DBConnectString);
+
+        public int LoadExcel(
+            string tableName, string excelFile, int startRow, int endRow,
+            string[] fields, HashSet<string> noQuote = null)
+        {
+            var workbook = ExcelExtension.LoadExcel(excelFile);
+            var sheet = workbook.GetSheetAt(0);
+
+            var buf = new StringBuilder();
+            for (var index = startRow; index <= endRow; index++)
+            {
+                var values = new List<string>();
+                foreach (var row in fields)
+                {
+                    var value = sheet.GetRow(index).Cell(row).Value();
+                    if (noQuote != null && noQuote.Contains(row))
+                        value = $"'{value}'";
+                    values.Add(value);
+                }
+                buf.Append(string.Join(",", values));
+                buf.Append("\n");
+            }
+
+            var tmpFile = Path.GetTempFileName();
+            try
+            {
+                File.WriteAllText(tmpFile, buf.ToString());
+                var loadSql =
+                    $"load data infile '{tmpFile.Replace(@"\", @"\\")}' into table `{tableName}` " +
+                    "CHARACTER SET utf8 FIELDS TERMINATED BY ',' " +
+                    "OPTIONALLY ENCLOSED BY '\\'' LINES TERMINATED BY '\\n'";
+                return Database.ExecuteSqlRaw(loadSql);
+            }
+            finally
+            {
+                File.Delete(tmpFile);
+            }
+        }
     }
 
     public class FpEntityContext<TEntity> : FpDbContext where TEntity : class
