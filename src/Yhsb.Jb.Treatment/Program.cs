@@ -54,11 +54,11 @@ namespace Yhsb.Jb.Treatment
 
             if (result != null && result.Data.Count > 0)
             {
-                using var context = new FpRawDataContext("2019年度扶贫办民政残联历史数据");
+                using var context = new FpDbContext();
                 foreach (var data in result.Data)
                 {
                     var idcard = data.idCard;
-                    var fpData = from e in context.Entity
+                    var fpData = from e in context.FpRawData2019
                                  where e.IDCard == idcard &&
                                  (e.Type == "贫困人口" ||
                                  e.Type == "特困人员" ||
@@ -119,11 +119,11 @@ namespace Yhsb.Jb.Treatment
 
             if (!result.IsEmpty)
             {
-                using var context = new FpRawDataContext("2019年度扶贫办民政残联历史数据");
+                using var context = new FpDbContext();
                 foreach (var data in result.Data)
                 {
                     var idcard = data.idCard;
-                    var fpData = from e in context.Entity
+                    var fpData = from e in context.FpRawData2019
                                  where e.IDCard == idcard &&
                                  (e.Type == "贫困人口" ||
                                  e.Type == "特困人员" ||

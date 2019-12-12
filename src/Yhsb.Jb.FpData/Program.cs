@@ -21,17 +21,20 @@ namespace Yhsb.Jb.FpData
         {
             Command.Parse<Pkrk>(args);
         }
+    }
 
+    class Util
+    {
         public static void ImportFpHistoryData(IEnumerable<FpRawData> records)
         {
-            using var context = new FpRawDataContext("2019年度扶贫办民政残联历史数据");
             var index = 1;
+            using var context = new FpDbContext();
             foreach (var record in records)
             {
                 WriteLine($"{index++} {record.IDCard} ${record.Name} ${record.Type}");
                 if (!string.IsNullOrEmpty(record.IDCard))
                 {
-                    var fpData = from e in context.Entity
+                    var fpData = from e in context.FpRawData2019
                                  where e.IDCard == record.IDCard &&
                                  e.Type == record.Type &&
                                  e.Date == record.Date
@@ -39,6 +42,7 @@ namespace Yhsb.Jb.FpData
                     if (fpData.Any())
                         context.Update(record);
                     context.Add(record);
+                    context.SaveChanges();
                 }
             }
         }
@@ -64,7 +68,7 @@ namespace Yhsb.Jb.FpData
 
         public void Execute()
         {
-
+            
         }
     }
 }

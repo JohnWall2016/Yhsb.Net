@@ -78,10 +78,10 @@ namespace Yhsb.Jb.Audit
                     var sheet = workbook.GetSheetAt(0);
                     int index = 1, copyIndex = 1;
                     var export = false;
-                    using var context = new FpDataContext("2019年度扶贫历史数据底册");
+                    using var context = new FpDbContext();
                     foreach (var cbsh in result.Data)
                     {
-                        var data = from fpData in context.Entity
+                        var data = from fpData in context.FpData2019
                                    where fpData.IDCard == cbsh.idCard
                                    select fpData;
                         if (data.Any())

@@ -123,11 +123,31 @@ namespace Yhsb.Jb.Database
         public string Date { get; set; }
     }
 
+    public class FpData2019 : FpData
+    {
+
+    }
+
     public class FpDbContext : DbContext
     {
         protected override void OnConfiguring(
             DbContextOptionsBuilder optionsBuilder) => 
                 optionsBuilder.UseMySql(_internal.Database.DBConnectString);
+        
+        public DbSet<FpRawData> FpRawData2019 { get; set; }
+
+        public DbSet<FpData2019> FpData2019 { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<FpRawData>()
+                .ToTable("2019年度扶贫办民政残联历史数据")
+                .HasKey(c => new { c.NO, c.IDCard });
+
+            modelBuilder.Entity<FpData2019>()
+                .ToTable("2019年度扶贫历史数据底册")
+                .HasKey(c => new { c.NO, c.IDCard });
+        }
 
         public int LoadExcel(
             string tableName, string excelFile, int startRow, int endRow,
@@ -165,44 +185,6 @@ namespace Yhsb.Jb.Database
             {
                 File.Delete(tmpFile);
             }
-        }
-    }
-
-    public class FpEntityContext<TEntity> : FpDbContext where TEntity : class
-    {
-        readonly string _tableName;
-        readonly Expression<Func<TEntity, object>> _hasKey;
-
-        public FpEntityContext(string tableName, 
-            Expression<Func<TEntity, object>> hasKey = null)
-        {
-            _tableName = tableName;
-            _hasKey = hasKey;
-        }
-        
-        public DbSet<TEntity> Entity { get; set; }
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            var builder = modelBuilder.Entity<TEntity>();
-            builder.ToTable(_tableName);
-            if (_hasKey != null) builder.HasKey(_hasKey);
-        }
-    }
-
-    public class FpDataContext : FpEntityContext<FpData>
-    {
-        public FpDataContext(string tableName)
-            : base(tableName, c => new { c.NO, c.IDCard })
-        {
-        }
-    }
-
-    public class FpRawDataContext : FpEntityContext<FpRawData>
-    {
-        public FpRawDataContext(string tableName)
-            : base(tableName, c => new { c.NO, c.IDCard })
-        {
         }
     }
 }
