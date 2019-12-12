@@ -123,9 +123,14 @@ namespace Yhsb.Jb.Database
         public string Date { get; set; }
     }
 
+    [Table("2019年度扶贫办民政残联历史数据")]
+    public class FpRawData2019 : FpRawData
+    {
+    }
+
+    [Table("2019年度扶贫历史数据底册")]
     public class FpData2019 : FpData
     {
-
     }
 
     public class FpDbContext : DbContext
@@ -134,18 +139,16 @@ namespace Yhsb.Jb.Database
             DbContextOptionsBuilder optionsBuilder) => 
                 optionsBuilder.UseMySql(_internal.Database.DBConnectString);
         
-        public DbSet<FpRawData> FpRawData2019 { get; set; }
+        public DbSet<FpRawData2019> FpRawData2019 { get; set; }
 
         public DbSet<FpData2019> FpData2019 { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<FpRawData>()
-                .ToTable("2019年度扶贫办民政残联历史数据")
+            modelBuilder.Entity<FpRawData2019>()
                 .HasKey(c => new { c.NO, c.IDCard });
 
             modelBuilder.Entity<FpData2019>()
-                .ToTable("2019年度扶贫历史数据底册")
                 .HasKey(c => new { c.NO, c.IDCard });
         }
 
