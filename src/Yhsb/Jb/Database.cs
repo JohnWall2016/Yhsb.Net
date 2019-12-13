@@ -190,4 +190,31 @@ namespace Yhsb.Jb.Database
             }
         }
     }
+
+    public class FpDbContextWith<TEntity> : FpDbContext
+        where TEntity : class
+    {
+        public DbSet<TEntity> Entity { get; set; }
+
+        readonly string _tableName;
+
+        readonly Expression<Func<TEntity, object>> _keyExpression;
+
+
+        public FpDbContextWith(
+            string tableName, 
+            Expression<Func<TEntity, object>> keyExpression = null)
+        {
+            _tableName = tableName;
+            _keyExpression = keyExpression;
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            var builder = modelBuilder.Entity<TEntity>();
+            builder.ToTable(_tableName);
+            if (_keyExpression != null)
+                builder.HasKey(_keyExpression);
+        }
+    }
 }
