@@ -200,7 +200,6 @@ namespace Yhsb.Jb.Database
 
         readonly Expression<Func<TEntity, object>> _keyExpression;
 
-
         public FpDbContextWith(
             string tableName, 
             Expression<Func<TEntity, object>> keyExpression = null)
