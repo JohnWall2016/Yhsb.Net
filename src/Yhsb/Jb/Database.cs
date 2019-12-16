@@ -10,7 +10,7 @@ using Yhsb.Util.Excel;
 
 namespace Yhsb.Jb.Database
 {
-    public class FpData
+    public abstract class FpData
     {
         [Column("序号"), Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -89,7 +89,7 @@ namespace Yhsb.Jb.Database
         public string JbcbqkDate { get; set; }
     }
 
-    public class FpRawData
+    public abstract class FpRawData
     {
         [Column("序号"), Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -130,6 +130,10 @@ namespace Yhsb.Jb.Database
 
     [Table("2019年度扶贫历史数据底册")]
     public class FpData2019 : FpData
+    {
+    }
+
+    public class CustomFpData : FpData
     {
     }
 
@@ -200,7 +204,6 @@ namespace Yhsb.Jb.Database
 
         readonly Expression<Func<TEntity, object>> _keyExpression;
 
-
         public FpDbContextWith(
             string tableName, 
             Expression<Func<TEntity, object>> keyExpression = null)
@@ -211,10 +214,20 @@ namespace Yhsb.Jb.Database
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+            
             var builder = modelBuilder.Entity<TEntity>();
             builder.ToTable(_tableName);
             if (_keyExpression != null)
                 builder.HasKey(_keyExpression);
+        }
+    }
+
+    public class FpDbContextWithFpData : FpDbContextWith<CustomFpData>
+    {
+        public FpDbContextWithFpData(string tableName) 
+            : base(tableName, c => new { c.NO, c.IDCard })
+        {
         }
     }
 }

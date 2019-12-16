@@ -35,5 +35,7 @@ namespace Yhsb.Util
                 throw new ArgumentException("Invalid date format (YYYYMMDD).");
             }
         }
+
+        public static string FormatedDate() => System.DateTime.Now.ToString("yyyyMMdd");
     }
 }
