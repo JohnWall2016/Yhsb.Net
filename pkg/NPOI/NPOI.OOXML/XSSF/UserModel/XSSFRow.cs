@@ -184,12 +184,17 @@ namespace NPOI.XSSF.UserModel
             {
                 ctCell = _row.AddNewC();
             }
+            
+            int style = _sheet.GetColDefaultStyle(columnIndex);
+            if (style >= 0) ctCell.s = (uint)style;
+
             XSSFCell xcell = new XSSFCell(this, ctCell);
             xcell.SetCellNum(columnIndex);
             if (type != CellType.Blank)
             {
                 xcell.SetCellType(type);
             }
+            
             _cells[columnIndex] = xcell;
             return xcell;
         }

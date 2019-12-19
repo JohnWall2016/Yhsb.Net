@@ -833,6 +833,8 @@ namespace NPOI.XSSF.UserModel
             int idx = columnHelper.GetColDefaultStyle(column);
             return Workbook.GetCellStyleAt((short)(idx == -1 ? 0 : idx));
         }
+        
+        public int GetColDefaultStyle(int column) => columnHelper.GetColDefaultStyle(column);
 
         /**
          * Whether the text is displayed in right-to-left mode in the window
