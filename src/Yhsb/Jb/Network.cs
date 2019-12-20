@@ -71,11 +71,13 @@ namespace Yhsb.Jb.Network
             Request(service.ToJson());
         }
 
-        public Result<T> GetResult<T>() where T : ResultData
+        public Result<T> GetResult<T>() where T : Data
         {
             var result = ReadBody();
             return Result<T>.FromJson(result);
         }
+
+        public Result<Data> GetResult() => GetResult<Data>();
 
         public string Login()
         {
@@ -192,13 +194,13 @@ namespace Yhsb.Jb.Network
         public string ToJson() => JsonExtension.Serialize(this);
     }
 
-    public class ResultData
+    public class Data
     {
         public string ToJson(bool orignalName = true) =>
             JsonExtension.Serialize(this, orignalName);
     }
 
-    public class Result<T> where T : ResultData
+    public class Result<T> where T : Data
     {
         [JsonProperty("rowcount")]
         public int rowCount;
@@ -264,7 +266,7 @@ namespace Yhsb.Jb.Network
     }
 
     /// 省内参保缴费信息
-    public class Jfxx : ResultData
+    public class Jfxx : Data
     {
         /// 缴费年度
         [JsonProperty("aae003")]
@@ -404,7 +406,7 @@ namespace Yhsb.Jb.Network
             };
     }
     /// 省内参保信息
-    public class Cbxx : ResultData
+    public class Cbxx : Data
     {
         /// 个人编号
         [JsonProperty("aac001")]
@@ -507,7 +509,7 @@ namespace Yhsb.Jb.Network
         }
     }
 
-    public class Cbsh : ResultData
+    public class Cbsh : Data
     {
         /// 身份证号码
         [JsonProperty("aac002")]
@@ -588,7 +590,7 @@ namespace Yhsb.Jb.Network
         };
     }
 
-    public class Dyry : ResultData
+    public class Dyry : Data
     {
         [JsonProperty("xm")]
         public string name;
@@ -710,7 +712,7 @@ namespace Yhsb.Jb.Network
             };
     }
 
-    public class Dyfh : ResultData
+    public class Dyfh : Data
     {
         /// 个人编号
         [JsonProperty("aac001")]
@@ -861,7 +863,7 @@ namespace Yhsb.Jb.Network
         }
     }
 
-    public class BankInfo : ResultData
+    public class BankInfo : Data
     {
         /// 银行类型
         [JsonProperty("bie013")]
@@ -932,7 +934,7 @@ namespace Yhsb.Jb.Network
         }
     }
 
-    public class OtherPerson : ResultData
+    public class OtherPerson : Data
     {
         #region PersonInfo
 
@@ -1019,7 +1021,7 @@ namespace Yhsb.Jb.Network
         }
     }
 
-    public class OtherPayment : ResultData
+    public class OtherPayment : Data
     {
         /// 业务类型中文名
         [JsonProperty("aaa121")]
@@ -1055,7 +1057,7 @@ namespace Yhsb.Jb.Network
         }
     }
 
-    public class OtherPaymentDetail : ResultData
+    public class OtherPaymentDetail : Data
     {
         #region PersonInfo
 
@@ -1127,7 +1129,7 @@ namespace Yhsb.Jb.Network
         }
     }
 
-    public class OtherPaymentPersonalDetail : ResultData
+    public class OtherPaymentPersonalDetail : Data
     {
         /// 待遇日期
         [JsonProperty("aae003")]
@@ -1180,7 +1182,7 @@ namespace Yhsb.Jb.Network
         }
     }
 
-    public class Payment : ResultData
+    public class Payment : Data
     {
         /// 支付对象类型: "3" - 个人支付
         [JsonProperty("aaa079")]
@@ -1264,7 +1266,7 @@ namespace Yhsb.Jb.Network
         }
     }
 
-    public class PaymentDetail : ResultData
+    public class PaymentDetail : Data
     {
         /// 身份证号码
         [JsonProperty("aac002")]
@@ -1315,7 +1317,7 @@ namespace Yhsb.Jb.Network
         }
     }
 
-    public class Cbzzfh : ResultData
+    public class Cbzzfh : Data
     {
         /// 身份证号码
         [JsonProperty("aac002")]
@@ -1365,7 +1367,7 @@ namespace Yhsb.Jb.Network
         };
     }
 
-    public class CbzzfhDetail : ResultData
+    public class CbzzfhDetail : Data
     {
         /// 终止原因
         [JsonProperty("aae160")]
@@ -1399,7 +1401,7 @@ namespace Yhsb.Jb.Network
         }
     }
 
-    public class Dyzzfh : ResultData
+    public class Dyzzfh : Data
     {
         /// 身份证号码
         [JsonProperty("aac002")]
@@ -1430,7 +1432,7 @@ namespace Yhsb.Jb.Network
         }
     }
 
-    public class DyzzfhDetail : ResultData
+    public class DyzzfhDetail : Data
     {
         /// 终止原因
         [JsonProperty("aae160")]
@@ -1441,5 +1443,166 @@ namespace Yhsb.Jb.Network
         public string bankType;
 
         public string BankName => BankInfo.GetBankName(bankType);
+    }
+
+    /// 征缴规则查询
+    public class ZjgzQuery : PageParameters
+    {
+        /// 户口性质
+        /// "20" - 农村, "10" - 城市
+        [JsonProperty("aac009")]
+        public string hkxz = "";
+
+        /// 身份类型
+        /// "011" - 普通参保人员, 
+        /// "021" - 残一级, "022" - 残二级,
+        /// "031" - 特困一级, "051" - 贫困人口一级,
+        /// "061" - 低保对象一级, "062" - 低保对象二级,
+        [JsonProperty("aac066")]
+        public string sflx = "";
+
+        /// 缴费档次
+        /// "001" - "014"
+        [JsonProperty("aae174")]
+        public string jfdc = "";
+
+        /// 缴费年度
+        /// "2019"
+        [JsonProperty("aae003")]
+        public string jfnd = "";
+
+        public ZjgzQuery() : base("executeZjgzQuery")
+        {
+        }
+    }
+
+    public class Zjgz : Data
+    {
+        [JsonProperty("aaa044")]
+        public string bz;
+
+        /// 身份类型
+        /// "011" - 普通参保人员, 
+        /// "021" - 残一级, "022" - 残二级,
+        /// "031" - 特困一级, "051" - 贫困人口一级,
+        /// "061" - 低保对象一级, "062" - 低保对象二级,
+        [JsonProperty("aac066")]
+        public string sflx = "";
+
+        /// 缴费档次
+        /// "001" - "014"
+        [JsonProperty("aae174")]
+        public string jfdc = "";
+
+        /// 个人缴费
+        [JsonProperty("aae3411")]
+        public decimal? grjf;
+        
+        /// 政府代缴
+        [JsonProperty("aae34111")]
+        public decimal? zfdj;
+
+        /// 省补贴
+        [JsonProperty("aae3413")]
+        public decimal? shbt;
+
+        /// 市补贴
+        [JsonProperty("aae3414")]
+        public decimal? sjbt;
+
+        /// 县补贴
+        [JsonProperty("aae3415")]
+        public decimal? xjbt;
+
+        /// 开始年月
+        [JsonProperty("aae041")]
+        public int? ksny;
+
+        /// 终止年月
+        [JsonProperty("aae042")]
+        public int? zzny;
+
+        public int? aaz289;
+    }
+
+    /// 征缴规则参数查询
+    public class ZjgzcsQuery : PageParameters
+    {
+        public string aaz289 = "";
+
+        public ZjgzcsQuery(Zjgz zjgz) : base("executeZjgzcsQuery")
+        {
+            aaz289 = $"{zjgz.aaz289}";
+        }
+    }
+
+    public class Czxm : JsonField
+    {
+        public override string Name => Value switch
+        {
+            "1" => "个人缴费",
+            "2" => "中央财政补贴",
+            "3" => "省级财政补贴",
+            "4" => "市级财政补贴",
+            "5" => "县级财政补贴",
+            "6" => "集体补助",
+            "7" => "其他资助",
+            "8" => "镇级财政补贴",
+            "10" => "村级财政补贴",
+            "11" => "政府代缴",
+            "12" => "被征地补助",
+            "13" => "老农保个账",
+            _ => $"未知值: {Value}"
+        };
+    }
+
+    public class Zjgzcs : Data
+    {
+        /// 筹资项目
+        [JsonProperty("aae341")]
+        public Czxm czxm;
+
+        /// 定额标准
+        [JsonProperty("aaa041")]
+        public decimal debz;
+
+        /// 开始年月
+        [JsonProperty("aae041")]
+        public int? ksny;
+
+        /// 终止年月
+        [JsonProperty("aae042")]
+        public int? zzny;
+
+        public int? aaz289;
+
+        public int? aaz026;
+    }
+
+    public class StopZjgzcsAction : Parameters
+    {
+        /// 开始年月
+        [JsonProperty("aae041")]
+        public string ksny;
+
+        /// 终止年月
+        [JsonProperty("aae042")]
+        public string zzny;
+
+        public string aaz026;
+
+        /// 修改终止年月
+        /// "201912"
+        [JsonProperty("aae042s")]
+        public string xgzzny;
+
+        public StopZjgzcsAction(Zjgzcs cs, string xgzzny)
+            : base("executeStopZjgzcs")
+        {
+            ksny = $"{cs.ksny}";
+            zzny = $"{cs.zzny}";
+            aaz026 = $"{cs.aaz026}";
+            this.xgzzny = xgzzny;
+        }
     }
 }
