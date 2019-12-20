@@ -399,6 +399,7 @@ namespace Yhsb.Jb.Network
                     "4" => "终止参保人员",
                     _ => $"未知类型终止缴费人员: {cbState}"
                 },
+                null => "未参保",
                 _ => $"未知类型人员: {jfState}, {cbState}",
             };
     }
@@ -454,7 +455,7 @@ namespace Yhsb.Jb.Network
         public string csName;
 
         /// 居保状态
-        public string JBState => Util.JBState(jfState.Value, cbState.Value);
+        public string JBState => Util.JBState(jfState?.Value, cbState?.Value);
 
         /// 参保身份类型
         public string JBClass => sfCode switch

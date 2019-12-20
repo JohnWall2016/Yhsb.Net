@@ -311,7 +311,7 @@ namespace Yhsb.Jb.Query
                         row.Cell(InfoSaveCol).SetValue(jbzt);
                     }
 
-                    WriteLine($"{idCard} ${jbzt ?? ""}");
+                    WriteLine($"{idCard} {jbzt ?? ""}");
                 }
             });
 
