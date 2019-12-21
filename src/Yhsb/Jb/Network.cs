@@ -65,6 +65,12 @@ namespace Yhsb.Jb.Network
             Request(service.ToJson());
         }
 
+        public string ToServiceString(Parameters parameters)
+        {
+            var service = new Service(parameters, _userID, _password);
+            return service.ToJson();
+        }
+
         public void SendService(string id)
         {
             var service = new Service(new Parameters(id), _userID, _password);
@@ -1476,18 +1482,29 @@ namespace Yhsb.Jb.Network
         }
     }
 
+    public class Sflx : JsonField
+    {
+        public override string Name => Value switch
+        {
+            "011" => "普通参保人员",
+            "021" => "残一级",
+            "022" => "残二级",
+            "031" => "特困一级",
+            "051" => "贫困人口一级",
+            "061" => "低保对象一级",
+            "062" => "低保对象二级",
+            _ => $"未知身份类型: {Value}"
+        };
+    }
+
     public class Zjgz : Data
     {
         [JsonProperty("aaa044")]
         public string bz;
 
         /// 身份类型
-        /// "011" - 普通参保人员, 
-        /// "021" - 残一级, "022" - 残二级,
-        /// "031" - 特困一级, "051" - 贫困人口一级,
-        /// "061" - 低保对象一级, "062" - 低保对象二级,
         [JsonProperty("aac066")]
-        public string sflx = "";
+        public Sflx sflx;
 
         /// 缴费档次
         /// "001" - "014"
@@ -1522,7 +1539,8 @@ namespace Yhsb.Jb.Network
         [JsonProperty("aae042")]
         public int? zzny;
 
-        public int? aaz289;
+        [JsonProperty("aaz289")]
+        public int? gzid;
     }
 
     /// 征缴规则参数查询
@@ -1532,7 +1550,7 @@ namespace Yhsb.Jb.Network
 
         public ZjgzcsQuery(Zjgz zjgz) : base("executeZjgzcsQuery")
         {
-            aaz289 = $"{zjgz.aaz289}";
+            aaz289 = $"{zjgz.gzid}";
         }
     }
 
@@ -1574,12 +1592,14 @@ namespace Yhsb.Jb.Network
         [JsonProperty("aae042")]
         public int? zzny;
 
-        public int? aaz289;
+        [JsonProperty("aaz289")]
+        public int? gzid;
 
-        public int? aaz026;
+        [JsonProperty("aaz026")]
+        public int? csid;
     }
 
-    public class StopZjgzcsAction : Parameters
+    public class StopZjgzcs
     {
         /// 开始年月
         [JsonProperty("aae041")]
@@ -1589,20 +1609,67 @@ namespace Yhsb.Jb.Network
         [JsonProperty("aae042")]
         public string zzny;
 
-        public string aaz026;
+        [JsonProperty("aaz026")]
+        public string csid;
 
         /// 修改终止年月
         /// "201912"
         [JsonProperty("aae042s")]
         public string xgzzny;
+    }
+
+    public class StopZjgzcsAction : Parameters
+    {
+        public StopZjgzcs form_main = new StopZjgzcs();
 
         public StopZjgzcsAction(Zjgzcs cs, string xgzzny)
             : base("executeStopZjgzcs")
         {
-            ksny = $"{cs.ksny}";
-            zzny = $"{cs.zzny}";
-            aaz026 = $"{cs.aaz026}";
-            this.xgzzny = xgzzny;
+            form_main.ksny = $"{cs.ksny}";
+            form_main.zzny = $"{cs.zzny}";
+            form_main.csid = $"{cs.csid}";
+            form_main.xgzzny = xgzzny;
+        }
+    }
+
+    public class NewZjgzcs
+    {
+        /// 筹资项目
+        [JsonProperty("aae341")]
+        public string czxm;
+
+        /// 定额标准
+        [JsonProperty("aaa041")]
+        public string debz;
+
+        /// 补贴类型
+        /// "1" - 正常补贴
+        [JsonProperty("aae380")]
+        public string btlx = "1";
+
+        /// 开始年月
+        /// "2020-01"
+        [JsonProperty("aae041")]
+        public string ksny;
+
+        /// 终止年月
+        /// "2099-12"
+        [JsonProperty("aae042")]
+        public string zzny;
+    }
+
+    public class SaveZjgzcsAction : Parameters
+    {
+        public List<NewZjgzcs> rows = new List<NewZjgzcs>();
+
+        public void Add(NewZjgzcs cs) => rows.Add(cs);
+
+        [JsonProperty("aaz289")]
+        public string gzid;
+
+        public SaveZjgzcsAction(Zjgz gz) : base("executeSaveZjgzcs")
+        {
+            gzid = $"{gz.gzid}";
         }
     }
 }
