@@ -16,7 +16,22 @@ namespace Yhsb.Jb.Settings
             // StopAndAddZjgz("20", "021", "002", "12", "9.9", "8.1", test: false);
 
             // StopAndAddZjgz("20", "011", false);
-            StopAndAddZjgz("20", "021", false);
+            // StopAndAddZjgz("20", "021", false);
+            // StopAndAddZjgz("20", "022", false);
+            // StopAndAddZjgz("20", "031", false);
+            // StopAndAddZjgz("20", "051", false);
+            // StopAndAddZjgz("20", "061", false);
+            // StopAndAddZjgz("20", "062", false);
+            // StopAndAddZjgz("20", "071", false);
+
+            // StopAndAddZjgz("10", "011", false);
+            // StopAndAddZjgz("10", "021", false);
+            // StopAndAddZjgz("10", "022", false);
+            // StopAndAddZjgz("10", "031", false);
+            // StopAndAddZjgz("10", "051", false);
+            // StopAndAddZjgz("10", "061", false);
+            // StopAndAddZjgz("10", "062", false);
+            // StopAndAddZjgz("10", "071", false);
         }
 
         static void StopAndAddZjgz(string hkxz, string sflx, bool test = true)
