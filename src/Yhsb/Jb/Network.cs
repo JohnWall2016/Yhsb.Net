@@ -911,6 +911,8 @@ namespace Yhsb.Jb.Network
         public string aac002 = "", aac003 = "";
 
         /// 代发状态
+        /// 1 - 正常发放
+        /// 2 - 暂停发放
         [JsonProperty("aae116")]
         public string dfState;
 
@@ -938,6 +940,18 @@ namespace Yhsb.Jb.Network
             this.cbState = new CBState { Value = cbState };
             this.dfState = dfState;
         }
+    }
+
+    /// 代发发放状态
+    public class DFState : JsonField
+    {
+        public override string Name => Value switch
+        {
+            "1" => "正常发放",
+            "2" => "暂停发放",
+            "3" => "终止发放",
+            _ => $"未知值: {Value}"
+        };
     }
 
     public class OtherPerson : Data
@@ -975,7 +989,7 @@ namespace Yhsb.Jb.Network
 
         /// 代发状态
         [JsonProperty("aae116")]
-        public string dfState;
+        public DFState dfState;
 
         /// 居保状态
         [JsonProperty("aac008s")]
@@ -987,7 +1001,7 @@ namespace Yhsb.Jb.Network
 
         /// 代发截至成功发放金额
         [JsonProperty("aae019jz")]
-        public decimal totalPayed;
+        public decimal? totalPayed;
 
         public static string Name(string type) =>
             type switch

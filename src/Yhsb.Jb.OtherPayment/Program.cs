@@ -162,11 +162,16 @@ namespace Yhsb.Jb.OtherPayment
 
             Session.Use(session =>
             {
-                session.SendService(new OtherPersonQuery(Type, "1", "1"));
+                session.SendService(new OtherPersonQuery(Type, "1", ""));
                 var result = session.GetResult<OtherPerson>();
                 result.Data.ForEach((otherPerson) =>
                 {
-                    if (otherPerson.grbh == null) return;
+                    if (otherPerson.grbh == null) // 无效数据
+                        return;
+                    if (!otherPerson.dfState.Value.Equals("1") &&  // 不是正常代发
+                        !(otherPerson.dfState.Value.Equals("2") &&  // 是暂停代发且居保不是正常状态
+                        otherPerson.jbState.Value.Equals("1")))
+                        return;
 
                     decimal payAmount = 0;
                     if (otherPerson.standard is decimal standard)
@@ -206,10 +211,12 @@ namespace Yhsb.Jb.OtherPayment
                     row.Cell("E").SetValue(otherPerson.startYearMonth);
                     row.Cell("F").SetValue(otherPerson.standard?.ToString());
                     row.Cell("G").SetValue(otherPerson.type);
-                    row.Cell("H").SetValue(otherPerson.jbState.Name);
-                    row.Cell("I").SetValue(otherPerson.endYearMonth?.ToString());
-                    row.Cell("J").SetValue(otherPerson.totalPayed);
-                    row.Cell("K").SetValue(payAmount);
+                    row.Cell("H").SetValue(otherPerson.dfState.Name);
+                    row.Cell("I").SetValue(otherPerson.jbState.Name);
+                    row.Cell("J").SetValue(otherPerson.endYearMonth?.ToString());
+                    if (otherPerson.totalPayed != null)
+                        row.Cell("K").SetValue((decimal)otherPerson.totalPayed);
+                    row.Cell("L").SetValue(payAmount);
 
                     sum += payAmount;
                 });
