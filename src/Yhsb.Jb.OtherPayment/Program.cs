@@ -227,8 +227,8 @@ namespace Yhsb.Jb.OtherPayment
             trow.Cell("C").SetValue("共计");
             trow.Cell("D").SetValue(currentRow - startRow);
             trow.Cell("F").SetValue("");
-            trow.Cell("J").SetValue("合计");
-            trow.Cell("K").SetValue(sum);
+            trow.Cell("K").SetValue("合计");
+            trow.Cell("L").SetValue(sum);
 
             workbook.Save(Util.StringEx.AppendToFileName(
                 Program.personListXlsx, $"({OtherPerson.Name(Type)}){date}"));
