@@ -100,7 +100,7 @@ namespace Yhsb.Jb.Database.Jzfp2020
     {
         /// 序号
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int NO { get; set; }
+        public int? NO { get; set; } = null;
 
         /// 乡镇街
         public string Xzj { get; set; }

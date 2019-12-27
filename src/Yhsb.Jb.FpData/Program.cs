@@ -23,7 +23,7 @@ namespace Yhsb.Jb.FpData
             using var context = new FpDbContext();
             foreach (var record in records)
             {
-                WriteLine($"{index++} {record.IDCard} ${record.Name} ${record.Type}");
+                WriteLine($"{index++} {record.IDCard} {record.Name} {record.Type}");
                 if (!string.IsNullOrEmpty(record.IDCard))
                 {
                     var fpData = from e in context.FpRawData
@@ -32,8 +32,18 @@ namespace Yhsb.Jb.FpData
                                     e.Date == record.Date
                                  select e;
                     if (fpData.Any())
-                        context.Update(record);
-                    context.Add(record);
+                    {
+                        foreach (var data in fpData)
+                        {
+                            record.NO = data.NO;
+                            context.Entry(data)
+                                .CurrentValues.SetValues(record);
+                        }
+                    }
+                    else
+                    {
+                        context.Add(record);
+                    }
                     context.SaveChanges();
                 }
             }
