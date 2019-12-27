@@ -1,12 +1,11 @@
 using System;
-using Yhsb.Jb.Database;
 using System.Linq;
 
 public class DbTest
 {
-    public static void TestFPTable()
+    public static void TestFPTable2019()
     {
-        using var context = new FpDbContext();
+        using var context = new Yhsb.Jb.Database.Jzfp2019.FpDbContext();
         var data = from fpData in context.FpData2019
                    where fpData.IDCard == "430311194610131520"
                    select fpData;
@@ -23,6 +22,22 @@ public class DbTest
         {
             var info = rdata.First();
             Console.WriteLine($"{info.IDCard} {info.Name} {info.Type}");
+        }
+    }
+
+    public static void TestFPTable2020()
+    {
+        using var context = new Yhsb.Jb.Database.Jzfp2020.FpDbContext();
+        var data = from fpData in context.FpData
+            where fpData.IDCard == "1221323554333"
+            select fpData;
+        if (data.Any())
+        {
+            Console.WriteLine(data.First());
+        }
+        else
+        {
+            Console.WriteLine("no data");
         }
     }
 }

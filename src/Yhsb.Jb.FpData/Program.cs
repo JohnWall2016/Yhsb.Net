@@ -1,14 +1,9 @@
 ﻿using CommandLine;
-using Yhsb.Jb.Network;
-using Yhsb.Jb.Database;
-using Yhsb;
+using Yhsb.Jb.Database.Jzfp2020;
 using Yhsb.Util.Excel;
 using Yhsb.Util.Command;
-using System;
 using System.Linq;
-using System.IO;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 
 using static System.Console;
 
@@ -22,7 +17,7 @@ namespace Yhsb.Jb.FpData
             Command.Parse<Pkrk, Dcsj>(args);
         }
 
-        public static void ImportFpHistoryData(IEnumerable<FpRawData> records)
+        public static void ImportFpRawData(IEnumerable<FpRawData> records)
         {
             var index = 1;
             using var context = new FpDbContext();
@@ -31,10 +26,10 @@ namespace Yhsb.Jb.FpData
                 WriteLine($"{index++} {record.IDCard} ${record.Name} ${record.Type}");
                 if (!string.IsNullOrEmpty(record.IDCard))
                 {
-                    var fpData = from e in context.FpRawData2019
+                    var fpData = from e in context.FpRawData
                                  where e.IDCard == record.IDCard &&
-                                 e.Type == record.Type &&
-                                 e.Date == record.Date
+                                    e.Type == record.Type &&
+                                    e.Date == record.Date
                                  select e;
                     if (fpData.Any())
                         context.Update(record);
@@ -44,17 +39,28 @@ namespace Yhsb.Jb.FpData
             }
         }
 
-        public static void ExportFpData(string tableName, string tmplXlsx, string saveXlsx)
+        public static void ExportFpData(string month, string tmplXlsx, string saveXlsx)
         {
-            using var db = new FpDbContextWithFpData(tableName);
+            using var db = new FpDbContext();
 
-            WriteLine($"开始导出扶贫底册: {tableName}=>{saveXlsx}");
+            WriteLine($"开始导出扶贫底册: {month}扶贫数据=>{saveXlsx}");
 
             var workbook = ExcelExtension.LoadExcel(tmplXlsx);
             var sheet = workbook.GetSheetAt(0);
             int startRow = 2, currentRow = 2;
 
-            var data = from e in db.Entity select e;
+            IQueryable<Database.Jzfp2020.FpData> data = null;
+
+            if (month.ToUpper() == "ALL")
+            {
+                data = from e in db.FpHistoryData select e;
+            }
+            else
+            {
+                data = from e in db.FpMonthData
+                    where e.Month == month select e;
+            }
+
             foreach (var d in data)
             {
                 var index = currentRow - startRow + 1;
@@ -93,7 +99,7 @@ namespace Yhsb.Jb.FpData
 
             workbook.Save(saveXlsx);
 
-            WriteLine($"结束导出扶贫底册: {tableName}=>{saveXlsx}");
+            WriteLine($"结束导出扶贫底册: {month}扶贫数据=>{saveXlsx}");
         }
     }
 
@@ -118,23 +124,60 @@ namespace Yhsb.Jb.FpData
 
         public void Execute()
         {
-            
+            Program.ImportFpRawData(Fetch());
+        }
+
+        IEnumerable<FpRawData> Fetch()
+        {
+            var workbook = ExcelExtension.LoadExcel(Xlsx);
+            var sheet = workbook.GetSheetAt(0);
+
+            for (var index = BeginRow - 1; index < EndRow; index++)
+            {
+                var row = sheet.Row(index);
+                if (row != null)
+                {
+                    var name = row.Cell("H").Value();
+                    var idcard = row.Cell("I").Value();
+                    idcard = idcard.Trim().Substring(0, 18).ToUpper();
+                    var birthDay = idcard.Substring(6, 8);
+                    var xzj = row.Cell("C").Value();
+                    var csq = row.Cell("D").Value();
+
+                    yield return new FpRawData
+                    {
+                        Name = name,
+                        IDCard = idcard,
+                        BirthDay = birthDay,
+                        Xzj = xzj,
+                        Csq = csq,
+                        Type = "贫困人口",
+                        Detail = "是",
+                        Date = Date
+                    };
+                }
+            }
         }
     }
 
     [Verb("dcsj", HelpText = "导出扶贫底册数据")]
     class Dcsj : ICommand
     {
-        [Value(0, HelpText = "表名称，例如：2019年度扶贫历史数据底册, 201905扶贫数据底册",
-            Required = true, MetaName = "tabeName")]
-        public string TableName { get; set; }
+        [Value(0, HelpText = "数据表月份，例如：201912, ALL",
+            Required = true, MetaName = "month")]
+        public string Month { get; set; }
 
         public void Execute()
         {
+            string fileName;
+
+            if (Month.ToUpper() == "ALL")
+                fileName = $@"D:\精准扶贫\2020年度扶贫数据底册{Util.DateTime.FormatedDate()}.xlsx";
+            else
+                fileName = $@"D:\精准扶贫\{Month}扶贫数据底册{Util.DateTime.FormatedDate()}.xlsx";
+
             Program.ExportFpData(
-                TableName, 
-                @"D:\精准扶贫\雨湖区精准扶贫底册模板.xlsx",
-                $@"D:\精准扶贫\{TableName}{Util.DateTime.FormatedDate()}.xlsx");
+                Month, @"D:\精准扶贫\雨湖区精准扶贫底册模板.xlsx", fileName);
         }
     }
 }

@@ -6,7 +6,7 @@ using CommandLine;
 using Yhsb.Util.Command;
 using Yhsb.Util.Excel;
 using Yhsb.Jb.Network;
-using Yhsb.Jb.Database;
+using Yhsb.Jb.Database.Jzfp2019;
 
 using static Yhsb.Util.DateTime;
 using static System.Console;

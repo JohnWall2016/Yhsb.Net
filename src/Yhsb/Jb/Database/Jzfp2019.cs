@@ -8,7 +8,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 using Yhsb.Util.Excel;
 
-namespace Yhsb.Jb.Database
+namespace Yhsb.Jb.Database.Jzfp2019
 {
     public abstract class FpData
     {
@@ -141,7 +141,7 @@ namespace Yhsb.Jb.Database
     {
         protected override void OnConfiguring(
             DbContextOptionsBuilder optionsBuilder) => 
-                optionsBuilder.UseMySql(_internal.Database.DBConnectString);
+                optionsBuilder.UseMySql(_internal.Database.DBJzfp2019);
         
         public DbSet<FpRawData2019> FpRawData2019 { get; set; }
 
