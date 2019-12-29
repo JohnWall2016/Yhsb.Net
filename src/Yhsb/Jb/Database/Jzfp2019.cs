@@ -29,7 +29,7 @@ namespace Yhsb.Jb.Database.Jzfp2019
         public string Name { get; set; }
 
         [Key, Column("身份证号码")]
-        public string IDCard { get; set; }
+        public string Idcard { get; set; }
 
         [Column("出生日期")]
         public string BirthDay { get; set; }
@@ -108,7 +108,7 @@ namespace Yhsb.Jb.Database.Jzfp2019
         public string Name { get; set; }
 
         [Key, Column("身份证号码")]
-        public string IDCard { get; set; }
+        public string Idcard { get; set; }
 
         [Column("出生日期")]
         public string BirthDay { get; set; }
@@ -150,10 +150,10 @@ namespace Yhsb.Jb.Database.Jzfp2019
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<FpRawData2019>()
-                .HasKey(c => new { c.NO, c.IDCard });
+                .HasKey(c => new { c.NO, c.Idcard });
 
             modelBuilder.Entity<FpData2019>()
-                .HasKey(c => new { c.NO, c.IDCard });
+                .HasKey(c => new { c.NO, c.Idcard });
         }
 
         public int LoadExcel(
@@ -226,7 +226,7 @@ namespace Yhsb.Jb.Database.Jzfp2019
     public class FpDbContextWithFpData : FpDbContextWith<CustomFpData>
     {
         public FpDbContextWithFpData(string tableName) 
-            : base(tableName, c => new { c.NO, c.IDCard })
+            : base(tableName, c => new { c.NO, c.Idcard })
         {
         }
     }

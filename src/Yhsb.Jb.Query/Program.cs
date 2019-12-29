@@ -28,7 +28,7 @@ namespace Yhsb.Jb.Query
 
         [Value(0, HelpText = "身份证号码",
             Required = true)]
-        public string IDCard { get; set; }
+        public string Idcard { get; set; }
 
         class JfxxRecord
         {
@@ -152,11 +152,11 @@ namespace Yhsb.Jb.Query
             Result<JbJfxx> jfxx = null;
             Session.Use(session =>
             {
-                session.SendService(new CbxxQuery(IDCard));
+                session.SendService(new CbxxQuery(Idcard));
                 var infos = session.GetResult<Cbxx>();
                 if (infos.IsEmpty || infos[0].Invalid) return;
                 info = infos[0];
-                session.SendService(new JfxxQuery(IDCard));
+                session.SendService(new JfxxQuery(Idcard));
                 var result = session.GetResult<JbJfxx>();
                 if (result.IsEmpty ||
                     (result.Count == 1 && result[0].year == null)) return;

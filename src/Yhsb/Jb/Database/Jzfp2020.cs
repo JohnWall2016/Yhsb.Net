@@ -24,7 +24,7 @@ namespace Yhsb.Jb.Database.Jzfp2020
         public string Name { get; set; }
 
         /// 身份证号码
-        public string IDCard { get; set; }
+        public string Idcard { get; set; }
 
         /// 出生日期
         public string BirthDay { get; set; }
@@ -115,7 +115,7 @@ namespace Yhsb.Jb.Database.Jzfp2020
         public string Name { get; set; }
 
         /// 身份证号码
-        public string IDCard { get; set; }
+        public string Idcard { get; set; }
 
         /// 出生日期
         public string BirthDay { get; set; }

@@ -82,7 +82,7 @@ namespace Yhsb.Jb.Audit
                     foreach (var cbsh in result.Data)
                     {
                         var data = from fpData in context.FpData2019
-                                   where fpData.IDCard == cbsh.idCard
+                                   where fpData.Idcard == cbsh.idCard
                                    select fpData;
                         if (data.Any())
                         {

@@ -59,7 +59,7 @@ namespace Yhsb.Jb.Treatment
                 {
                     var idcard = data.idCard;
                     var fpData = from e in context.FpRawData2019
-                                 where e.IDCard == idcard &&
+                                 where e.Idcard == idcard &&
                                  (e.Type == "贫困人口" ||
                                  e.Type == "特困人员" ||
                                  e.Type == "全额低保人员" ||
@@ -124,7 +124,7 @@ namespace Yhsb.Jb.Treatment
                 {
                     var idcard = data.idCard;
                     var fpData = from e in context.FpRawData2019
-                                 where e.IDCard == idcard &&
+                                 where e.Idcard == idcard &&
                                  (e.Type == "贫困人口" ||
                                  e.Type == "特困人员" ||
                                  e.Type == "全额低保人员" ||
