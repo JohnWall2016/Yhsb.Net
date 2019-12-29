@@ -142,42 +142,59 @@ namespace Yhsb.Jb.Database.Jzfp2020
                     {
                         data.Pkrk = rawData.Detail;
                         data.PkrkDate = rawData.Date;
+                        changed = true;
                     }
                     if (string.IsNullOrEmpty(data.Sypkry))
-                        data.Sypkry = rawData.Type;
+                    {
+                        data.Sypkry = "贫困人口";
+                        changed = true;
+                    }
                     break;
                 case "特困人员":
                     if (string.IsNullOrEmpty(data.Tkry))
                     {
                         data.Tkry = rawData.Detail;
                         data.TkryDate = rawData.Date;
+                        changed = true;
                     }
                     if (string.IsNullOrEmpty(data.Sypkry))
-                        data.Sypkry = rawData.Type;
+                    {
+                        data.Sypkry = "特困人员";
+                        changed = true;
+                    }
                     break;
                 case "全额低保人员":
                     if (string.IsNullOrEmpty(data.Qedb))
                     {
                         data.Qedb = rawData.Detail;
                         data.QedbDate = rawData.Date;
+                        changed = true;
                     }
                     if (string.IsNullOrEmpty(data.Sypkry))
+                    {
                         data.Sypkry = "低保对象";
+                        changed = true;
+                    }
                     break;
                 case "差额低保人员":
                     if (string.IsNullOrEmpty(data.Cedb))
                     {
                         data.Cedb = rawData.Detail;
                         data.CedbDate = rawData.Date;
+                        changed = true;
                     }
                     if (string.IsNullOrEmpty(data.Sypkry))
+                    {
                         data.Sypkry = "低保对象";
+                        changed = true;
+                    }
                     break;
                 case "一二级残疾人员":
                     if (string.IsNullOrEmpty(data.Yejc))
                     {
                         data.Yejc = rawData.Detail;
                         data.YejcDate = rawData.Date;
+                        changed = true;
                     }
                     break;
                 case "三四级残疾人员":
@@ -185,6 +202,7 @@ namespace Yhsb.Jb.Database.Jzfp2020
                     {
                         data.Ssjc = rawData.Detail;
                         data.SsjcDate = rawData.Date;
+                        changed = true;
                     }
                     break;
             }

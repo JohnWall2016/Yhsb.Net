@@ -14,7 +14,7 @@ namespace Yhsb.Jb.FpData
         [App(Name = "扶贫数据导库比对程序")]
         static void Main(string[] args)
         {
-            Command.Parse<Pkrk, Tkry, Csdb, Ncdb, Dcsj, Cjry>(args);
+            Command.Parse<Pkrk, Tkry, Csdb, Ncdb, Cjry, Hbdc, Scdc, Dcsj>(args);
         }
 
         public static void ImportFpRawData(IEnumerable<FpRawData> records)
@@ -417,13 +417,16 @@ namespace Yhsb.Jb.FpData
         public void Execute()
         {
             WriteLine("开始合并扶贫数据至: 扶贫历史数据底册");
-            using var db = new FpDbContext();
+
             var index = 1;
-            foreach (var rawData in Program.FetchFpRawData(Date))
+            using var db = new FpDbContext();
+            IEnumerable<FpRawData> fpRawData = Program.FetchFpRawData(Date);
+            foreach (var rawData in fpRawData)
             {
                 WriteLine($"{index++} {rawData.Idcard} {rawData.Name}");
                 if (rawData.Idcard != null)
                 {
+
                     var fpData = from data in db.FpHistoryData
                                  where data.Idcard == rawData.Idcard
                                  select data;
@@ -443,7 +446,67 @@ namespace Yhsb.Jb.FpData
                     }
                 }
             }
+
             WriteLine("结束合并扶贫数据至: 扶贫历史数据底册");
+        }
+    }
+
+    [Verb("scdc", HelpText = "生成当月扶贫数据底册")]
+    class Scdc : ICommand
+    {
+        [Value(0, HelpText = "数据月份, 例如: 201912",
+            Required = true, MetaName = "date")]
+        public string Date { get; set; }
+
+        [Value(1, HelpText = "是否清除数据表", MetaName = "clear")]
+        public bool Clear { get; set; } = false;
+
+        public void Execute()
+        {
+            using var db = new FpDbContext();
+
+            if (Clear)
+            {
+                WriteLine($"开始清除数据表: {Date}扶贫数据底册");
+                var fpData = from data in db.FpMonthData
+                             where data.Month == Date
+                             select data;
+                db.RemoveRange(fpData);
+                db.SaveChanges();
+                WriteLine($"结束清除数据表: {Date}扶贫数据底册");
+            }
+
+            WriteLine($"开始合并扶贫数据至: {Date}扶贫数据底册");
+
+            var index = 1;
+            IEnumerable<FpRawData> fpRawData = Program.FetchFpRawData(Date, true);
+            foreach (var rawData in fpRawData)
+            {
+                WriteLine($"{index++} {rawData.Idcard} {rawData.Name}");
+                if (rawData.Idcard != null)
+                {
+                    var fpData = from data in db.FpMonthData
+                                 where data.Idcard == rawData.Idcard &&
+                                    data.Month == Date
+                                 select data;
+                    if (fpData.Any())
+                    {
+                        foreach (var data in fpData)
+                        {
+                            if (data.Merge(rawData))
+                                db.Update(data);
+                        }
+                    }
+                    else
+                    {
+                        var data = new FpMonthData() { Month = Date };
+                        if (Database.Jzfp2020.FpData.Merge(data, rawData))
+                            db.Add(data);
+                    }
+                }
+            }
+
+            WriteLine($"结束合并扶贫数据至: {Date}扶贫数据底册");
         }
     }
 
