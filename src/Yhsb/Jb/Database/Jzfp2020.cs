@@ -40,16 +40,16 @@ namespace Yhsb.Jb.Database.Jzfp2020
 
         /// 特困人员日期
         public string TkryDate { get; set; }
-        
+
         /// 全额低保人员
         public string Qedb { get; set; }
-        
+
         /// 全额低保人员日期
         public string QedbDate { get; set; }
-        
+
         /// 差额低保人员
         public string Cedb { get; set; }
-        
+
         /// 差额低保人员日期
         public string CedbDate { get; set; }
 
@@ -64,16 +64,16 @@ namespace Yhsb.Jb.Database.Jzfp2020
 
         /// 三四级残疾人员日期
         public string SsjcDate { get; set; }
-        
+
         /// 属于贫困人员
         public string Sypkry { get; set; }
-        
+
         /// 居保认定身份
         public string Jbrdsf { get; set; }
-        
+
         /// 居保认定身份最初日期
         public string JbrdsfFirstDate { get; set; }
-        
+
         /// 居保认定身份最后日期
         public string JbrdsfLastDate { get; set; }
 
@@ -82,10 +82,119 @@ namespace Yhsb.Jb.Database.Jzfp2020
 
         /// 居保参保情况日期
         public string JbcbqkDate { get; set; }
+
+        public bool Merge(FpRawData rawData) 
+        {
+            if (Idcard != rawData.Idcard) return false;
+            return Merge(this, rawData);
+        }
+
+        public static bool Merge(FpData data, FpRawData rawData)
+        {
+            var changed = false;
+
+            if (string.IsNullOrEmpty(data.Xzj) &&
+                !string.IsNullOrEmpty(rawData.Xzj))
+            {
+                data.Xzj = rawData.Xzj;
+                changed = true;
+            }
+
+            if (string.IsNullOrEmpty(data.Csq) &&
+                !string.IsNullOrEmpty(rawData.Csq))
+            {
+                data.Csq = rawData.Csq;
+                changed = true;
+            }
+
+            if (string.IsNullOrEmpty(data.Address) &&
+                !string.IsNullOrEmpty(rawData.Address))
+            {
+                data.Address = rawData.Address;
+                changed = true;
+            }
+
+            if (string.IsNullOrEmpty(data.Name) &&
+                !string.IsNullOrEmpty(rawData.Name))
+            {
+                data.Name = rawData.Name;
+                changed = true;
+            }
+
+            if (string.IsNullOrEmpty(data.Idcard) &&
+                !string.IsNullOrEmpty(rawData.Idcard))
+            {
+                data.Idcard = rawData.Idcard;
+                changed = true;
+            }
+
+            if (string.IsNullOrEmpty(data.BirthDay) &&
+                !string.IsNullOrEmpty(rawData.BirthDay))
+            {
+                data.BirthDay = rawData.BirthDay;
+                changed = true;
+            }
+
+            switch (rawData.Type)
+            {
+                case "贫困人口":
+                    if (string.IsNullOrEmpty(data.Pkrk))
+                    {
+                        data.Pkrk = rawData.Detail;
+                        data.PkrkDate = rawData.Date;
+                    }
+                    if (string.IsNullOrEmpty(data.Sypkry))
+                        data.Sypkry = rawData.Type;
+                    break;
+                case "特困人员":
+                    if (string.IsNullOrEmpty(data.Tkry))
+                    {
+                        data.Tkry = rawData.Detail;
+                        data.TkryDate = rawData.Date;
+                    }
+                    if (string.IsNullOrEmpty(data.Sypkry))
+                        data.Sypkry = rawData.Type;
+                    break;
+                case "全额低保人员":
+                    if (string.IsNullOrEmpty(data.Qedb))
+                    {
+                        data.Qedb = rawData.Detail;
+                        data.QedbDate = rawData.Date;
+                    }
+                    if (string.IsNullOrEmpty(data.Sypkry))
+                        data.Sypkry = "低保对象";
+                    break;
+                case "差额低保人员":
+                    if (string.IsNullOrEmpty(data.Cedb))
+                    {
+                        data.Cedb = rawData.Detail;
+                        data.CedbDate = rawData.Date;
+                    }
+                    if (string.IsNullOrEmpty(data.Sypkry))
+                        data.Sypkry = "低保对象";
+                    break;
+                case "一二级残疾人员":
+                    if (string.IsNullOrEmpty(data.Yejc))
+                    {
+                        data.Yejc = rawData.Detail;
+                        data.YejcDate = rawData.Date;
+                    }
+                    break;
+                case "三四级残疾人员":
+                    if (string.IsNullOrEmpty(data.Ssjc))
+                    {
+                        data.Ssjc = rawData.Detail;
+                        data.SsjcDate = rawData.Date;
+                    }
+                    break;
+            }
+
+            return changed;
+        }
     }
 
     /// 扶贫历史数据表
-    public class FpHistoryData : FpData {}
+    public class FpHistoryData : FpData { }
 
     /// 扶贫月数据表
     public class FpMonthData : FpData
@@ -138,7 +247,7 @@ namespace Yhsb.Jb.Database.Jzfp2020
         }
 
         protected override void OnConfiguring(
-            DbContextOptionsBuilder optionsBuilder) => 
+            DbContextOptionsBuilder optionsBuilder) =>
                 optionsBuilder.UseMySql(_internal.Database.DBJzfp2020);
 
         public DbSet<FpHistoryData> FpHistoryData { get; set; }

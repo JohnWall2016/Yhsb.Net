@@ -1,6 +1,7 @@
 using System;
 using static System.Console;
 using System.Reflection;
+using System.Collections.Generic;
 
 class CsharpTest
 {
@@ -144,5 +145,31 @@ class CsharpTest
         WriteLine(a == b);
         WriteLine(a == c);
         WriteLine(a == d);
+    }
+
+    class DisposableData : IDisposable
+    {
+        public DisposableData()
+        {
+            WriteLine("creating DisposableData");
+        }
+
+        public void Dispose()
+        {
+            WriteLine("disposing DisposableData");
+        }
+
+        public static IEnumerable<int> Fetch()
+        {
+            using var data = new DisposableData();
+            for (var i = 10; i < 20; i++)
+                yield return i;
+        }
+    }
+
+    public static void TestYield()
+    {
+        foreach (var i in DisposableData.Fetch())
+            WriteLine(i);
     }
 }

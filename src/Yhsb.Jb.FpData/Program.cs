@@ -49,17 +49,23 @@ namespace Yhsb.Jb.FpData
             }
         }
 
-        public static IEnumerable<Database.Jzfp2020.FpData>
+        static readonly string[] pkry = new[]
+            {"贫困人口", "特困人员", "全额低保人员", "差额低保人员"};
+        static readonly string[] cjry = new[]
+            {"一二级残疾人员", "三四级残疾人员"};
+
+        public static IEnumerable<FpRawData>
             FetchFpRawData(string month, bool onlyPkry = false)
         {
             using var db = new FpDbContext();
+            IEnumerable<string> types = pkry;
+            if (!onlyPkry) types = types.Concat(cjry);
             var fpRawData = from data in db.FpRawData
-                where data.Date == month select data;
+                            where data.Date == month &&
+                                types.Contains(data.Type)
+                            select data;
             foreach (var d in fpRawData)
-            {
-                // TODO(wj): 
-            }
-            return null;
+                yield return d;
         }
 
         public static void ExportFpData(string month, string tmplXlsx, string saveXlsx)
@@ -81,7 +87,8 @@ namespace Yhsb.Jb.FpData
             else
             {
                 data = from e in db.FpMonthData
-                    where e.Month == month select e;
+                       where e.Month == month
+                       select e;
             }
 
             foreach (var d in data)
@@ -224,7 +231,7 @@ namespace Yhsb.Jb.FpData
     [Verb("csdb", HelpText = "导入城市低保数据")]
     class Csdb : ImportCommand
     {
-        readonly List<(string name, string idcard)> colNameIdcards = 
+        readonly List<(string name, string idcard)> colNameIdcards =
             new List<(string name, string idcard)>
             {
                 ("G", "H"),
@@ -249,7 +256,7 @@ namespace Yhsb.Jb.FpData
                     var address = row.Cell("D").Value();
 
                     var type = row.Cell("E").Value();
-                    if (type == "全额救助" || type == "全额") 
+                    if (type == "全额救助" || type == "全额")
                         type = "全额低保人员";
                     else
                         type = "差额低保人员";
@@ -258,7 +265,7 @@ namespace Yhsb.Jb.FpData
                     {
                         var name = row.Cell(cols.name).Value();
                         var idcard = row.Cell(cols.idcard).Value();
-                        if (!string.IsNullOrEmpty(name) && 
+                        if (!string.IsNullOrEmpty(name) &&
                             !string.IsNullOrEmpty(idcard))
                         {
                             idcard = idcard.Trim().Substring(0, 18).ToUpper();
@@ -286,7 +293,7 @@ namespace Yhsb.Jb.FpData
     [Verb("ncdb", HelpText = "导入农村低保数据")]
     class Ncdb : ImportCommand
     {
-        readonly List<(string name, string idcard)> colNameIdcards = 
+        readonly List<(string name, string idcard)> colNameIdcards =
             new List<(string name, string idcard)>
             {
                 ("H", "J"),
@@ -313,7 +320,7 @@ namespace Yhsb.Jb.FpData
                     var address = row.Cell("D").Value();
 
                     var type = row.Cell("F").Value();
-                    if (type == "全额救助" || type == "全额") 
+                    if (type == "全额救助" || type == "全额")
                         type = "全额低保人员";
                     else
                         type = "差额低保人员";
@@ -322,7 +329,7 @@ namespace Yhsb.Jb.FpData
                     {
                         var name = row.Cell(cols.name).Value();
                         var idcard = row.Cell(cols.idcard).Value();
-                        if (!string.IsNullOrEmpty(name) && 
+                        if (!string.IsNullOrEmpty(name) &&
                             !string.IsNullOrEmpty(idcard))
                         {
                             idcard = idcard.Trim().Substring(0, 18).ToUpper();
@@ -400,6 +407,46 @@ namespace Yhsb.Jb.FpData
         }
     }
 
+    [Verb("hbdc", HelpText = "合并到扶贫历史数据底册")]
+    class Hbdc : ICommand
+    {
+        [Value(0, HelpText = "数据月份, 例如: 201912",
+            Required = true, MetaName = "date")]
+        public string Date { get; set; }
+
+        public void Execute()
+        {
+            WriteLine("开始合并扶贫数据至: 扶贫历史数据底册");
+            using var db = new FpDbContext();
+            var index = 1;
+            foreach (var rawData in Program.FetchFpRawData(Date))
+            {
+                WriteLine($"{index++} {rawData.Idcard} {rawData.Name}");
+                if (rawData.Idcard != null)
+                {
+                    var fpData = from data in db.FpHistoryData
+                                 where data.Idcard == rawData.Idcard
+                                 select data;
+                    if (fpData.Any())
+                    {
+                        foreach (var data in fpData)
+                        {
+                            if (data.Merge(rawData))
+                                db.Update(data);
+                        }
+                    }
+                    else
+                    {
+                        var data = new FpHistoryData();
+                        if (Database.Jzfp2020.FpData.Merge(data, rawData))
+                            db.Add(data);
+                    }
+                }
+            }
+            WriteLine("结束合并扶贫数据至: 扶贫历史数据底册");
+        }
+    }
+
     [Verb("dcsj", HelpText = "导出扶贫底册数据")]
     class Dcsj : ICommand
     {
@@ -420,4 +467,5 @@ namespace Yhsb.Jb.FpData
                 Month, @"D:\精准扶贫\雨湖区精准扶贫底册模板.xlsx", fileName);
         }
     }
+
 }
