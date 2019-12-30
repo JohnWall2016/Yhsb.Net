@@ -17,7 +17,8 @@ namespace Yhsb.Jb.FpData
         [App(Name = "扶贫数据导库比对程序")]
         static void Main(string[] args)
         {
-            Command.Parse<Pkrk, Tkry, Csdb, Ncdb, Cjry, Hbdc, Scdc, Rdsf, Drjb, Jbzt, Dcsj, Sfbg>(args);
+            Command.Parse<Pkrk, Tkry, Csdb, Ncdb, Cjry, 
+                Hbdc, Scdc, Rdsf, Drjb, Jbzt, Dcsj, Sfbg>(args);
         }
 
         public static void ImportFpRawData(IEnumerable<FpRawData> records)
