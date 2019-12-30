@@ -15,7 +15,7 @@ namespace Yhsb.Jb.FpData
         [App(Name = "扶贫数据导库比对程序")]
         static void Main(string[] args)
         {
-            Command.Parse<Pkrk, Tkry, Csdb, Ncdb, Cjry, Hbdc, Scdc, Rdsf, Drjb, Dcsj>(args);
+            Command.Parse<Pkrk, Tkry, Csdb, Ncdb, Cjry, Hbdc, Scdc, Rdsf, Drjb, Jbzt, Dcsj>(args);
         }
 
         public static void ImportFpRawData(IEnumerable<FpRawData> records)
@@ -526,7 +526,7 @@ namespace Yhsb.Jb.FpData
         {
             using var db = new FpDbContext();
 
-            WriteLine($"开始认定参保人员身份: {MonthOrAll}扶贫底册");
+            WriteLine($"开始认定参保人员身份: {MonthOrAll}扶贫数据底册");
 
             IEnumerable<Database.Jzfp2020.FpData> fpData;
 
@@ -606,7 +606,7 @@ namespace Yhsb.Jb.FpData
                 }
             }
 
-            WriteLine($"结束认定参保人员身份: {MonthOrAll}扶贫底册");
+            WriteLine($"结束认定参保人员身份: {MonthOrAll}扶贫数据底册");
         }
     }
 
@@ -645,6 +645,70 @@ namespace Yhsb.Jb.FpData
                 new List<string> {"D", "A", "B", "C", "E", "F", "H", "J", "K", "N"},
                 printSql: true);
             WriteLine("结束导入居保参保人员明细表");
+        }
+    }
+
+    [Verb("jbzt", HelpText = "更新居保参保状态")]
+    class Jbzt : ICommand
+    {
+        [Value(0, HelpText = "数据表月份，例如：201912, ALL",
+            Required = true, MetaName = "monthOrAll")]
+        public string MonthOrAll { get; set; }
+
+        [Value(1, HelpText = "居保数据月份，例如：201912",
+            Required = true, MetaName = "date")]
+        public string Date { get; set; }
+
+        static readonly List<(int cbzt, int jfzt, string jbzt)> jbztMap =
+            new List<(int cbzt, int jfzt, string jbzt)>
+            {
+                (1, 3, "正常待遇"),
+                (2, 3, "暂停待遇"),
+                (4, 3, "终止参保"),
+                (1, 1, "正常缴费"),
+                (2, 2, "暂停缴费"),
+            };
+
+        public void Execute()
+        {
+            using var db = new FpDbContext();
+            
+            WriteLine($"开始更新居保状态: {MonthOrAll}扶贫数据底册");
+
+            var jbTable = db.GetTableName<Jbrymx>();
+            if (MonthOrAll.ToUpper() == "ALL")
+            {
+                var fpTable = db.GetTableName<FpHistoryData>();
+                foreach (var (cbzt, jfzt, jbzt) in jbztMap)
+                {
+                    var sql = 
+                    $@"update {fpTable}, {jbTable}" +
+                    $@"   set {fpTable}.Jbcbqk='{jbzt}'" +
+                    $@"       {fpTable}.JbcbqkDate='{Date}'" +
+                    $@" where {fpTable}.Idcard={jbTable}.Idcard" +
+                    $@"   and {jbTable}.Cbzt='{cbzt}'" +
+                    $@"   and {jbTable}.Jfzt='{jfzt}'";
+                    db.ExecuteSql(sql);
+                }
+            }
+            else
+            {
+                var fpTable = db.GetTableName<FpMonthData>();
+                foreach (var (cbzt, jfzt, jbzt) in jbztMap)
+                {
+                    var sql = 
+                    $@"update {fpTable}, {jbTable}" +
+                    $@"   set {fpTable}.Jbcbqk='{jbzt}'" +
+                    $@"       {fpTable}.JbcbqkDate='{Date}'" +
+                    $@" where {fpTable}.Month='{MonthOrAll}'" +
+                    $@"   and {fpTable}.Idcard={jbTable}.Idcard" +
+                    $@"   and {jbTable}.Cbzt='{cbzt}'" +
+                    $@"   and {jbTable}.Jfzt='{jfzt}'";
+                    db.ExecuteSql(sql);
+                }
+            }
+
+            WriteLine($"结束更新居保状态: {MonthOrAll}扶贫数据底册");
         }
     }
 
