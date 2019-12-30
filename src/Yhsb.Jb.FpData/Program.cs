@@ -17,7 +17,7 @@ namespace Yhsb.Jb.FpData
         [App(Name = "扶贫数据导库比对程序")]
         static void Main(string[] args)
         {
-            Command.Parse<Pkrk, Tkry, Csdb, Ncdb, Cjry, 
+            Command.Parse<Pkrk, Tkry, Csdb, Ncdb, Cjry,
                 Hbdc, Scdc, Rdsf, Drjb, Jbzt, Dcsj, Sfbg>(args);
         }
 
@@ -72,7 +72,8 @@ namespace Yhsb.Jb.FpData
                 yield return d;
         }
 
-        public static void ExportFpData(string monthOrAll, string tmplXlsx, string saveXlsx)
+        public static void ExportFpData(
+            string monthOrAll, string tmplXlsx, string saveXlsx)
         {
             using var db = new FpDbContext();
 
@@ -582,7 +583,8 @@ namespace Yhsb.Jb.FpData
                 {
                     if (!string.IsNullOrEmpty(d.Jbrdsf))
                     {
-                        WriteLine($"{i++} {d.Idcard} {d.Name} {jbrdsf} <= {d.Jbrdsf}");
+                        WriteLine(
+                            $"{i++} {d.Idcard} {d.Name} {jbrdsf} <= {d.Jbrdsf}");
                         d.Jbrdsf = jbrdsf;
                         d.JbrdsfLastDate = Date;
                         updated = true;
@@ -645,7 +647,8 @@ namespace Yhsb.Jb.FpData
 
             WriteLine("开始导入居保参保人员明细表");
             db.LoadExcel<Jbrymx>(Xlsx, BeginRow, EndRow,
-                new List<string> { "D", "A", "B", "C", "E", "F", "H", "J", "K", "N" },
+                new List<string>
+                { "D", "A", "B", "C", "E", "F", "H", "J", "K", "N" },
                 printSql: true);
             WriteLine("结束导入居保参保人员明细表");
         }
@@ -727,9 +730,11 @@ namespace Yhsb.Jb.FpData
             string fileName;
 
             if (MonthOrAll.ToUpper() == "ALL")
-                fileName = $@"D:\精准扶贫\2020年度扶贫数据底册{Util.DateTime.FormatedDate()}.xlsx";
+                fileName = 
+                    $@"D:\精准扶贫\2020年度扶贫数据底册{Util.DateTime.FormatedDate()}.xlsx";
             else
-                fileName = $@"D:\精准扶贫\{MonthOrAll}扶贫数据底册{Util.DateTime.FormatedDate()}.xlsx";
+                fileName = 
+                    $@"D:\精准扶贫\{MonthOrAll}扶贫数据底册{Util.DateTime.FormatedDate()}.xlsx";
 
             Program.ExportFpData(
                 MonthOrAll, @"D:\精准扶贫\雨湖区精准扶贫底册模板.xlsx", fileName);
@@ -784,7 +789,7 @@ namespace Yhsb.Jb.FpData
                 if (data.Any())
                 {
                     WriteLine($"开始导出 {type} 批量信息变更表");
-                    
+
                     int i = 0, files = 0;
                     IWorkbook workbook = null;
                     ISheet sheet = null;
@@ -795,7 +800,8 @@ namespace Yhsb.Jb.FpData
                         {
                             if (workbook != null)
                             {
-                                workbook.Save(Path.Join(Dir, $"{type}批量信息变更表{++files}.xlsx"));
+                                workbook.Save(
+                                    Path.Join(Dir, $"{type}批量信息变更表{++files}.xlsx"));
                                 workbook = null;
                             }
                             if (workbook == null)
