@@ -62,13 +62,18 @@ namespace Yhsb.Jb.Database
             var tmpFileName = Path.GetTempFileName();
             File.AppendAllText(tmpFileName, builder.ToString());
 
-            tmpFileName = new Uri(tmpFileName).AbsolutePath;
+            var cvsFileName = new Uri(tmpFileName).AbsolutePath;
             var tableName = context.GetTableName<T>();
-            var sql = $@"load data infile '{tmpFileName}' into table `{tableName}` " +
+            var sql = $@"load data infile '{cvsFileName}' into table `{tableName}` " +
                 @"CHARACTER SET utf8 FIELDS TERMINATED BY ',' OPTIONALLY " +
                 @"ENCLOSED BY '\'' LINES TERMINATED BY '\n';";
             
-            return context.ExecuteSql(sql, printSql);
+            var result = context.ExecuteSql(sql, printSql);
+
+            if (File.Exists(tmpFileName))
+                File.Delete(tmpFileName);
+
+            return result;
         }
 
         public static int DeleteAll<T>(
