@@ -688,12 +688,12 @@ namespace Yhsb.Jb.FpData
                 foreach (var (cbzt, jfzt, jbzt) in jbztMap)
                 {
                     var sql =
-                    $@"update {fpTable}, {jbTable}" +
-                    $@"   set {fpTable}.Jbcbqk='{jbzt}'" +
-                    $@"       {fpTable}.JbcbqkDate='{Date}'" +
-                    $@" where {fpTable}.Idcard={jbTable}.Idcard" +
-                    $@"   and {jbTable}.Cbzt='{cbzt}'" +
-                    $@"   and {jbTable}.Jfzt='{jfzt}'";
+                    $"update {fpTable}, {jbTable}" +
+                    $"   set {fpTable}.Jbcbqk='{jbzt}'" +
+                    $"       {fpTable}.JbcbqkDate='{Date}'" +
+                    $" where {fpTable}.Idcard={jbTable}.Idcard" +
+                    $"   and {jbTable}.Cbzt='{cbzt}'" +
+                    $"   and {jbTable}.Jfzt='{jfzt}'";
                     db.ExecuteSql(sql);
                 }
             }
@@ -703,13 +703,13 @@ namespace Yhsb.Jb.FpData
                 foreach (var (cbzt, jfzt, jbzt) in jbztMap)
                 {
                     var sql =
-                    $@"update {fpTable}, {jbTable}" +
-                    $@"   set {fpTable}.Jbcbqk='{jbzt}'" +
-                    $@"       {fpTable}.JbcbqkDate='{Date}'" +
-                    $@" where {fpTable}.Month='{MonthOrAll}'" +
-                    $@"   and {fpTable}.Idcard={jbTable}.Idcard" +
-                    $@"   and {jbTable}.Cbzt='{cbzt}'" +
-                    $@"   and {jbTable}.Jfzt='{jfzt}'";
+                    $"update {fpTable}, {jbTable}" +
+                    $"   set {fpTable}.Jbcbqk='{jbzt}'" +
+                    $"       {fpTable}.JbcbqkDate='{Date}'" +
+                    $" where {fpTable}.Month='{MonthOrAll}'" +
+                    $"   and {fpTable}.Idcard={jbTable}.Idcard" +
+                    $"   and {jbTable}.Cbzt='{cbzt}'" +
+                    $"   and {jbTable}.Jfzt='{jfzt}'";
                     db.ExecuteSql(sql);
                 }
             }
