@@ -14,7 +14,7 @@ namespace Yhsb.Jb.FpData
         [App(Name = "扶贫数据导库比对程序")]
         static void Main(string[] args)
         {
-            Command.Parse<Pkrk, Tkry, Csdb, Ncdb, Cjry, Hbdc, Scdc, Dcsj>(args);
+            Command.Parse<Pkrk, Tkry, Csdb, Ncdb, Cjry, Hbdc, Scdc, Rdsf, Dcsj>(args);
         }
 
         public static void ImportFpRawData(IEnumerable<FpRawData> records)
@@ -68,11 +68,11 @@ namespace Yhsb.Jb.FpData
                 yield return d;
         }
 
-        public static void ExportFpData(string month, string tmplXlsx, string saveXlsx)
+        public static void ExportFpData(string monthOrAll, string tmplXlsx, string saveXlsx)
         {
             using var db = new FpDbContext();
 
-            WriteLine($"开始导出扶贫底册: {month}扶贫数据=>{saveXlsx}");
+            WriteLine($"开始导出扶贫底册: {monthOrAll}扶贫数据=>{saveXlsx}");
 
             var workbook = ExcelExtension.LoadExcel(tmplXlsx);
             var sheet = workbook.GetSheetAt(0);
@@ -80,14 +80,14 @@ namespace Yhsb.Jb.FpData
 
             IQueryable<Database.Jzfp2020.FpData> data = null;
 
-            if (month.ToUpper() == "ALL")
+            if (monthOrAll.ToUpper() == "ALL")
             {
                 data = from e in db.FpHistoryData select e;
             }
             else
             {
                 data = from e in db.FpMonthData
-                       where e.Month == month
+                       where e.Month == monthOrAll
                        select e;
             }
 
@@ -129,7 +129,7 @@ namespace Yhsb.Jb.FpData
 
             workbook.Save(saveXlsx);
 
-            WriteLine($"结束导出扶贫底册: {month}扶贫数据=>{saveXlsx}");
+            WriteLine($"结束导出扶贫底册: {monthOrAll}扶贫数据=>{saveXlsx}");
         }
     }
 
@@ -510,25 +510,123 @@ namespace Yhsb.Jb.FpData
         }
     }
 
-    [Verb("dcsj", HelpText = "导出扶贫底册数据")]
-    class Dcsj : ICommand
+    [Verb("rdsf", HelpText = "认定居保身份")]
+    class Rdsf : ICommand
     {
         [Value(0, HelpText = "数据表月份，例如：201912, ALL",
-            Required = true, MetaName = "month")]
-        public string Month { get; set; }
+            Required = true, MetaName = "monthOrAll")]
+        public string MonthOrAll { get; set; }
+
+        [Value(1, HelpText = "数据月份，例如：201912",
+            Required = true, MetaName = "date")]
+        public string Date { get; set; }
+
+        public void Execute()
+        {
+            using var db = new FpDbContext();
+
+            WriteLine($"开始认定参保人员身份: {MonthOrAll}扶贫底册");
+
+            IEnumerable<Database.Jzfp2020.FpData> fpData;
+
+            if (MonthOrAll.ToUpper() == "ALL")
+                fpData = from d in db.FpHistoryData
+                         select d;
+            else
+                fpData = from d in db.FpMonthData
+                         where d.Month == MonthOrAll
+                         select d;
+
+            var i = 1;
+            foreach (var d in fpData)
+            {
+                string jbrdsf = null;
+                string sypkry = null;
+
+                if (!string.IsNullOrEmpty(d.Pkrk))
+                {
+                    jbrdsf = "贫困人口一级";
+                    sypkry = "贫困人口";
+                }
+                else if (!string.IsNullOrEmpty(d.Tkry))
+                {
+                    jbrdsf = "特困一级";
+                    sypkry = "特困人员";
+                }
+                else if (!string.IsNullOrEmpty(d.Qedb))
+                {
+                    jbrdsf = "低保对象一级";
+                    sypkry = "低保对象";
+                }
+                else if (!string.IsNullOrEmpty(d.Yejc))
+                {
+                    jbrdsf = "残一级";
+                }
+                else if (!string.IsNullOrEmpty(d.Cedb))
+                {
+                    jbrdsf = "低保对象二级";
+                    sypkry = "低保对象";
+                }
+                else if (!string.IsNullOrEmpty(d.Ssjc))
+                {
+                    jbrdsf = "残二级";
+                }
+                
+                var updated = false;
+
+                if (jbrdsf != null && jbrdsf != d.Jbrdsf)
+                {
+                    if (!string.IsNullOrEmpty(d.Jbrdsf))
+                    {
+                        WriteLine($"{i++} {d.Idcard} {d.Name} {jbrdsf} <= {d.Jbrdsf}");
+                        d.Jbrdsf = jbrdsf;
+                        d.JbrdsfLastDate = Date;
+                        updated = true;
+                    }
+                    else
+                    {
+                        WriteLine($"{i++} {d.Idcard} {d.Name} {jbrdsf}");
+                        d.Jbrdsf = jbrdsf;
+                        d.JbrdsfFirstDate = Date;
+                        updated = true;
+                    }
+                }
+
+                if (sypkry != null && sypkry != d.Sypkry)
+                {
+                    d.Sypkry = sypkry;
+                    updated = true;
+                }
+
+                if (updated)
+                {
+                    db.Update(d);
+                    db.SaveChanges();
+                }
+            }
+
+            WriteLine($"结束认定参保人员身份: {MonthOrAll}扶贫底册");
+        }
+    }
+
+    [Verb("dcsj", HelpText = "导出扶贫底册数据")]
+    class Dcsj : ICommand
+    {   
+        [Value(0, HelpText = "数据表月份，例如：201912, ALL",
+            Required = true, MetaName = "monthOrAll")]
+        public string MonthOrAll { get; set; }
 
         public void Execute()
         {
             string fileName;
 
-            if (Month.ToUpper() == "ALL")
+            if (MonthOrAll.ToUpper() == "ALL")
                 fileName = $@"D:\精准扶贫\2020年度扶贫数据底册{Util.DateTime.FormatedDate()}.xlsx";
             else
-                fileName = $@"D:\精准扶贫\{Month}扶贫数据底册{Util.DateTime.FormatedDate()}.xlsx";
+                fileName = $@"D:\精准扶贫\{MonthOrAll}扶贫数据底册{Util.DateTime.FormatedDate()}.xlsx";
 
             Program.ExportFpData(
-                Month, @"D:\精准扶贫\雨湖区精准扶贫底册模板.xlsx", fileName);
+                MonthOrAll, @"D:\精准扶贫\雨湖区精准扶贫底册模板.xlsx", fileName);
         }
     }
-
 }
