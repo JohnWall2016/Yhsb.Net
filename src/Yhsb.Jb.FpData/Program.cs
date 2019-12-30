@@ -5,6 +5,8 @@ using Yhsb.Util.Excel;
 using Yhsb.Util.Command;
 using System.Linq;
 using System.Collections.Generic;
+using System.IO;
+using NPOI.SS.UserModel;
 
 using static System.Console;
 
@@ -15,7 +17,7 @@ namespace Yhsb.Jb.FpData
         [App(Name = "扶贫数据导库比对程序")]
         static void Main(string[] args)
         {
-            Command.Parse<Pkrk, Tkry, Csdb, Ncdb, Cjry, Hbdc, Scdc, Rdsf, Drjb, Jbzt, Dcsj>(args);
+            Command.Parse<Pkrk, Tkry, Csdb, Ncdb, Cjry, Hbdc, Scdc, Rdsf, Drjb, Jbzt, Dcsj, Sfbg>(args);
         }
 
         public static void ImportFpRawData(IEnumerable<FpRawData> records)
@@ -572,7 +574,7 @@ namespace Yhsb.Jb.FpData
                 {
                     jbrdsf = "残二级";
                 }
-                
+
                 var updated = false;
 
                 if (jbrdsf != null && jbrdsf != d.Jbrdsf)
@@ -642,7 +644,7 @@ namespace Yhsb.Jb.FpData
 
             WriteLine("开始导入居保参保人员明细表");
             db.LoadExcel<Jbrymx>(Xlsx, BeginRow, EndRow,
-                new List<string> {"D", "A", "B", "C", "E", "F", "H", "J", "K", "N"},
+                new List<string> { "D", "A", "B", "C", "E", "F", "H", "J", "K", "N" },
                 printSql: true);
             WriteLine("结束导入居保参保人员明细表");
         }
@@ -672,7 +674,7 @@ namespace Yhsb.Jb.FpData
         public void Execute()
         {
             using var db = new FpDbContext();
-            
+
             WriteLine($"开始更新居保状态: {MonthOrAll}扶贫数据底册");
 
             var jbTable = db.GetTableName<Jbrymx>();
@@ -681,7 +683,7 @@ namespace Yhsb.Jb.FpData
                 var fpTable = db.GetTableName<FpHistoryData>();
                 foreach (var (cbzt, jfzt, jbzt) in jbztMap)
                 {
-                    var sql = 
+                    var sql =
                     $@"update {fpTable}, {jbTable}" +
                     $@"   set {fpTable}.Jbcbqk='{jbzt}'" +
                     $@"       {fpTable}.JbcbqkDate='{Date}'" +
@@ -696,7 +698,7 @@ namespace Yhsb.Jb.FpData
                 var fpTable = db.GetTableName<FpMonthData>();
                 foreach (var (cbzt, jfzt, jbzt) in jbztMap)
                 {
-                    var sql = 
+                    var sql =
                     $@"update {fpTable}, {jbTable}" +
                     $@"   set {fpTable}.Jbcbqk='{jbzt}'" +
                     $@"       {fpTable}.JbcbqkDate='{Date}'" +
@@ -714,7 +716,7 @@ namespace Yhsb.Jb.FpData
 
     [Verb("dcsj", HelpText = "导出扶贫底册数据")]
     class Dcsj : ICommand
-    {   
+    {
         [Value(0, HelpText = "数据表月份，例如：201912, ALL",
             Required = true, MetaName = "monthOrAll")]
         public string MonthOrAll { get; set; }
@@ -730,6 +732,91 @@ namespace Yhsb.Jb.FpData
 
             Program.ExportFpData(
                 MonthOrAll, @"D:\精准扶贫\雨湖区精准扶贫底册模板.xlsx", fileName);
+        }
+    }
+
+    [Verb("sfbg", HelpText = "导出居保参保身份变更信息表")]
+    class Sfbg : ICommand
+    {
+        [Value(0, HelpText = "导出目录",
+            Required = true, MetaName = "dir")]
+        public string Dir { get; set; }
+
+        static readonly List<(string type, string code)> jbsfMap =
+            new List<(string type, string code)>
+            {
+                ("贫困人口一级", "051"),
+                ("特困一级", "031"),
+                ("低保对象一级", "061"),
+                ("低保对象二级", "062"),
+                ("残一级", "021"),
+                ("残二级", "022"),
+            };
+
+        public void Execute()
+        {
+            var tmplXlsx = "D:\\精准扶贫\\批量信息变更模板.xlsx";
+            var rowsPerXlsx = 500;
+
+            if (!Directory.Exists(Dir))
+                Directory.CreateDirectory(Dir);
+            else
+            {
+                WriteLine($"目录已存在: {Dir}");
+                return;
+            }
+
+            using var db = new FpDbContext();
+
+            WriteLine("从 扶贫历史数据底册 和 居保参保人员明细表 导出信息变更表");
+
+            foreach (var (type, code) in jbsfMap)
+            {
+                var data = from fp in db.FpHistoryData
+                           from jb in db.Jbrymx
+                           where fp.Idcard == jb.Idcard &&
+                               fp.Jbrdsf == type &&
+                               jb.Cbsf != code &&
+                               jb.Cbzt == "1" &&
+                               jb.Jfzt == "1"
+                           select new { jb.Name, jb.Idcard, code };
+                if (data.Any())
+                {
+                    WriteLine($"开始导出 {type} 批量信息变更表");
+                    
+                    int i = 0, files = 0;
+                    IWorkbook workbook = null;
+                    ISheet sheet = null;
+                    int startRow = 2, currentRow = 2;
+                    foreach (var d in data)
+                    {
+                        if (i++ % rowsPerXlsx == 0)
+                        {
+                            if (workbook != null)
+                            {
+                                workbook.Save(Path.Join(Dir, $"{type}批量信息变更表{++files}.xlsx"));
+                                workbook = null;
+                            }
+                            if (workbook == null)
+                            {
+                                workbook = ExcelExtension.LoadExcel(tmplXlsx);
+                                sheet = workbook.GetSheetAt(0);
+                                currentRow = 2;
+                            }
+                        }
+                        var row = sheet.GetOrCopyRow(currentRow++, startRow, false);
+                        row.Cell("A").SetValue(d.Idcard);
+                        row.Cell("C").SetValue(d.Name);
+                        row.Cell("H").SetValue(d.code);
+                    }
+                    if (workbook != null)
+                    {
+                        workbook.Save(Path.Join(Dir, $"{type}批量信息变更表{++files}.xlsx"));
+                    }
+
+                    WriteLine($"结束导出 {type} 批量信息变更表: {i} 条");
+                }
+            }
         }
     }
 }
