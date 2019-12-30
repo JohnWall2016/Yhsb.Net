@@ -1,5 +1,8 @@
 using System;
 using System.Linq;
+using System.Collections.Generic;
+using Yhsb.Jb.Database;
+using Yhsb.Jb.Database.Jzfp2020;
 
 public class DbTest
 {
@@ -39,5 +42,21 @@ public class DbTest
         {
             Console.WriteLine("no data");
         }
+    }
+
+    public static void TestDatabaseEx()
+    {
+        using var db = new FpDbContext();
+        Console.WriteLine(db.GetTableName<FpHistoryData>());
+        Console.WriteLine(db.GetTableName<FpMonthData>());
+        Console.WriteLine(db.GetTableName<Jbrymx>());
+
+        db.DeleteAll<Jbrymx>();
+        /*
+        db.LoadExcel<Jbrymx>(
+            @"D:\精准扶贫\2019\参保人员明细表\居保参保人员明细表20191203A.xlsx",
+            2, 101, 
+            new List<string> {"D", "A", "B", "C", "E", "F", "H", "J", "K", "N"});
+        */
     }
 }

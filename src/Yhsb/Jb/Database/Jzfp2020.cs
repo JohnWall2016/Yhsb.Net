@@ -257,6 +257,41 @@ namespace Yhsb.Jb.Database.Jzfp2020
         public string Date { get; set; }
     }
 
+    /// 居保参保人员明细表
+    public class Jbrymx
+    {
+        /// 身份证号码
+        [Key]
+        public string Idcard { get; set; }
+
+        /// 行政区划
+        public string Xzqh { get; set; }
+
+        /// 户籍性质
+        public string Hjxz { get; set; }
+
+        /// 姓名
+        public string Name { get; set; }
+
+        /// 性别
+        public string Sex { get; set; }
+
+        /// 出生日期
+        public string BirthDay { get; set; }
+
+        /// 参保身份
+        public string Cbsf { get; set; }
+
+        /// 参保状态
+        public string Cbzt { get; set; }
+
+        /// 缴费状态
+        public string Jfzt { get; set; }
+
+        /// 参保时间
+        public string Cbsj { get; set; }
+    }
+
     public class FpDbContext : DbContext
     {
         public FpDbContext() : base()
@@ -271,5 +306,6 @@ namespace Yhsb.Jb.Database.Jzfp2020
         public DbSet<FpHistoryData> FpHistoryData { get; set; }
         public DbSet<FpMonthData> FpMonthData { get; set; }
         public DbSet<FpRawData> FpRawData { get; set; }
+        public DbSet<Jbrymx> Jbrymx { get; set; }
     }
 }

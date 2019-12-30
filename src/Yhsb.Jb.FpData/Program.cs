@@ -1,4 +1,5 @@
 ﻿using CommandLine;
+using Yhsb.Jb.Database;
 using Yhsb.Jb.Database.Jzfp2020;
 using Yhsb.Util.Excel;
 using Yhsb.Util.Command;
@@ -14,7 +15,7 @@ namespace Yhsb.Jb.FpData
         [App(Name = "扶贫数据导库比对程序")]
         static void Main(string[] args)
         {
-            Command.Parse<Pkrk, Tkry, Csdb, Ncdb, Cjry, Hbdc, Scdc, Rdsf, Dcsj>(args);
+            Command.Parse<Pkrk, Tkry, Csdb, Ncdb, Cjry, Hbdc, Scdc, Rdsf, Drjb, Dcsj>(args);
         }
 
         public static void ImportFpRawData(IEnumerable<FpRawData> records)
@@ -606,6 +607,44 @@ namespace Yhsb.Jb.FpData
             }
 
             WriteLine($"结束认定参保人员身份: {MonthOrAll}扶贫底册");
+        }
+    }
+
+    [Verb("drjb", HelpText = "导入居保参保人员明细表")]
+    class Drjb : ICommand
+    {
+        [Value(0, HelpText = "xlsx文件",
+            Required = true, MetaName = "xslx")]
+        public string Xlsx { get; set; }
+
+        [Value(1, HelpText = "数据开始行, 从1开始",
+            Required = true, MetaName = "beginRow")]
+        public int BeginRow { get; set; }
+
+        [Value(2, HelpText = "数据结束行(包含), 从1开始",
+            Required = true, MetaName = "endRow")]
+        public int EndRow { get; set; }
+
+        [Value(3, HelpText = "是否清除数据表", MetaName = "clear")]
+        public bool Clear { get; set; } = false;
+
+        public void Execute()
+        {
+            using var db = new FpDbContext();
+            // WriteLine($"{Xlsx} {BeginRow} {EndRow} {Clear}");
+
+            if (Clear)
+            {
+                WriteLine("开始清除数据表: 居保参保人员明细表");
+                db.DeleteAll<Jbrymx>(printSql: true);
+                WriteLine("结束清除数据表: 居保参保人员明细表");
+            }
+
+            WriteLine("开始导入居保参保人员明细表");
+            db.LoadExcel<Jbrymx>(Xlsx, BeginRow, EndRow,
+                new List<string> {"D", "A", "B", "C", "E", "F", "H", "J", "K", "N"},
+                printSql: true);
+            WriteLine("结束导入居保参保人员明细表");
         }
     }
 
