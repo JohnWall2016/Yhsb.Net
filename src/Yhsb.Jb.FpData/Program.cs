@@ -7,6 +7,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.IO;
 using NPOI.SS.UserModel;
+using Microsoft.EntityFrameworkCore;
 
 using static System.Console;
 
@@ -59,7 +60,7 @@ namespace Yhsb.Jb.FpData
             {"一二级残疾人员", "三四级残疾人员"};
 
         public static IEnumerable<FpRawData>
-            FetchFpRawData(string month, bool onlyPkry = false)
+            FetchFpRawData(string month, int skip, bool onlyPkry = false)
         {
             using var db = new FpDbContext();
             IEnumerable<string> types = pkry;
@@ -68,7 +69,7 @@ namespace Yhsb.Jb.FpData
                             where data.Date == month &&
                                 types.Contains(data.Type)
                             select data;
-            foreach (var d in fpRawData)
+            foreach (var d in fpRawData.Skip(skip))
                 yield return d;
         }
 
@@ -174,9 +175,15 @@ namespace Yhsb.Jb.FpData
                 var row = sheet.Row(index);
                 if (row != null)
                 {
-                    var name = row.Cell("H").Value();
-                    var idcard = row.Cell("I").Value();
-                    idcard = idcard.Trim().Substring(0, 18).ToUpper();
+                    var name = row.Cell("G").Value();
+
+                    var idcard = row.Cell("H").Value();
+                    idcard = idcard.Trim();
+                    if (idcard.Length < 18)
+                        continue;
+                    if (idcard.Length > 18)
+                        idcard = idcard.Substring(0, 18).ToUpper();
+
                     var birthDay = idcard.Substring(6, 8);
                     var xzj = row.Cell("C").Value();
                     var csq = row.Cell("D").Value();
@@ -210,12 +217,18 @@ namespace Yhsb.Jb.FpData
                 var row = sheet.Row(index);
                 if (row != null)
                 {
-                    var name = row.Cell("G").Value();
-                    var idcard = row.Cell("H").Value();
-                    idcard = idcard.Trim().Substring(0, 18).ToUpper();
+                    var name = row.Cell("C").Value();
+
+                    var idcard = row.Cell("D").Value();
+                    idcard = idcard.Trim();
+                    if (idcard.Length < 18)
+                        continue;
+                    if (idcard.Length > 18)
+                        idcard = idcard.Substring(0, 18).ToUpper();
+
                     var birthDay = idcard.Substring(6, 8);
-                    var xzj = row.Cell("C").Value();
-                    var csq = row.Cell("D").Value();
+                    var xzj = row.Cell("A").Value();
+                    var csq = row.Cell("B").Value();
 
                     yield return new FpRawData
                     {
@@ -239,75 +252,11 @@ namespace Yhsb.Jb.FpData
         readonly List<(string name, string idcard)> colNameIdcards =
             new List<(string name, string idcard)>
             {
-                ("G", "H"),
-                ("I", "J"),
-                ("K", "L"),
-                ("M", "N"),
-                ("O", "P"),
-            };
-
-        protected override IEnumerable<FpRawData> Fetch()
-        {
-            var workbook = ExcelExtension.LoadExcel(Xlsx);
-            var sheet = workbook.GetSheetAt(0);
-
-            for (var index = BeginRow - 1; index < EndRow; index++)
-            {
-                var row = sheet.Row(index);
-                if (row != null)
-                {
-                    var xzj = row.Cell("A").Value();
-                    var csq = row.Cell("B").Value();
-                    var address = row.Cell("D").Value();
-
-                    var type = row.Cell("E").Value();
-                    if (type == "全额救助" || type == "全额")
-                        type = "全额低保人员";
-                    else
-                        type = "差额低保人员";
-
-                    foreach (var cols in colNameIdcards)
-                    {
-                        var name = row.Cell(cols.name).Value();
-                        var idcard = row.Cell(cols.idcard).Value();
-                        if (!string.IsNullOrEmpty(name) &&
-                            !string.IsNullOrEmpty(idcard))
-                        {
-                            idcard = idcard.Trim().Substring(0, 18).ToUpper();
-                            var birthDay = idcard.Substring(6, 8);
-
-                            yield return new FpRawData
-                            {
-                                Name = name,
-                                Idcard = idcard,
-                                BirthDay = birthDay,
-                                Xzj = xzj,
-                                Csq = csq,
-                                Address = address,
-                                Type = type,
-                                Detail = "城市",
-                                Date = Date
-                            };
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    [Verb("ncdb", HelpText = "导入农村低保数据")]
-    class Ncdb : ImportCommand
-    {
-        readonly List<(string name, string idcard)> colNameIdcards =
-            new List<(string name, string idcard)>
-            {
-                ("H", "J"),
-                ("K", "L"),
-                ("M", "N"),
-                ("O", "P"),
-                ("Q", "R"),
-                ("S", "T"),
-                ("U", "V"),
+                ("H", "I"),
+                ("J", "K"),
+                ("L", "M"),
+                ("N", "O"),
+                ("P", "Q"),
             };
 
         protected override IEnumerable<FpRawData> Fetch()
@@ -337,7 +286,80 @@ namespace Yhsb.Jb.FpData
                         if (!string.IsNullOrEmpty(name) &&
                             !string.IsNullOrEmpty(idcard))
                         {
-                            idcard = idcard.Trim().Substring(0, 18).ToUpper();
+                            idcard = idcard.Trim();
+                            if (idcard.Length < 18)
+                                continue;
+                            if (idcard.Length > 18)
+                                idcard = idcard.Substring(0, 18).ToUpper();
+
+                            var birthDay = idcard.Substring(6, 8);
+
+                            yield return new FpRawData
+                            {
+                                Name = name,
+                                Idcard = idcard,
+                                BirthDay = birthDay,
+                                Xzj = xzj,
+                                Csq = csq,
+                                Address = address,
+                                Type = type,
+                                Detail = "城市",
+                                Date = Date
+                            };
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    [Verb("ncdb", HelpText = "导入农村低保数据")]
+    class Ncdb : ImportCommand
+    {
+        readonly List<(string name, string idcard)> colNameIdcards =
+            new List<(string name, string idcard)>
+            {
+                ("G", "I"),
+                ("J", "K"),
+                ("L", "M"),
+                ("N", "O"),
+                ("P", "Q"),
+                ("R", "S"),
+            };
+
+        protected override IEnumerable<FpRawData> Fetch()
+        {
+            var workbook = ExcelExtension.LoadExcel(Xlsx);
+            var sheet = workbook.GetSheetAt(0);
+
+            for (var index = BeginRow - 1; index < EndRow; index++)
+            {
+                var row = sheet.Row(index);
+                if (row != null)
+                {
+                    var xzj = row.Cell("A").Value();
+                    var csq = row.Cell("B").Value();
+                    var address = row.Cell("D").Value();
+
+                    var type = row.Cell("E").Value();
+                    if (type == "全额救助" || type == "全额")
+                        type = "全额低保人员";
+                    else
+                        type = "差额低保人员";
+
+                    foreach (var cols in colNameIdcards)
+                    {
+                        var name = row.Cell(cols.name).Value();
+                        var idcard = row.Cell(cols.idcard).Value();
+                        if (!string.IsNullOrEmpty(name) &&
+                            !string.IsNullOrEmpty(idcard))
+                        {
+                            idcard = idcard.Trim();
+                            if (idcard.Length < 18)
+                                continue;
+                            if (idcard.Length > 18)
+                                idcard = idcard.Substring(0, 18).ToUpper();
+
                             var birthDay = idcard.Substring(6, 8);
 
                             yield return new FpRawData
@@ -373,13 +395,19 @@ namespace Yhsb.Jb.FpData
                 if (row != null)
                 {
                     var name = row.Cell("A").Value();
+
                     var idcard = row.Cell("B").Value();
-                    idcard = idcard.Trim().Substring(0, 18).ToUpper();
+                    idcard = idcard.Trim();
+                    if (idcard.Length < 18)
+                        continue;
+                    if (idcard.Length > 18)
+                        idcard = idcard.Substring(0, 18).ToUpper();
+
                     var birthDay = idcard.Substring(6, 8);
-                    var xzj = row.Cell("H").Value();
-                    var csq = row.Cell("I").Value();
-                    var address = row.Cell("G").Value();
-                    var level = row.Cell("L").Value();
+                    var xzj = row.Cell("F").Value();
+                    var csq = row.Cell("G").Value();
+                    var address = row.Cell("H").Value();
+                    var level = row.Cell("K").Value();
                     string type;
                     switch (level)
                     {
@@ -419,35 +447,43 @@ namespace Yhsb.Jb.FpData
             Required = true, MetaName = "date")]
         public string Date { get; set; }
 
+        [Value(1, HelpText = "跳过记录数", MetaName = "skip")]
+        public int Skip { get; set; } = 0;
+
         public void Execute()
         {
             WriteLine("开始合并扶贫数据至: 扶贫历史数据底册");
 
             var index = 1;
             using var db = new FpDbContext();
-            IEnumerable<FpRawData> fpRawData = Program.FetchFpRawData(Date);
+            IEnumerable<FpRawData> fpRawData = Program.FetchFpRawData(Date, Skip);
             foreach (var rawData in fpRawData)
             {
-                WriteLine($"{index++} {rawData.Idcard} {rawData.Name}");
+                WriteLine($"{index++} {rawData.NO} {rawData.Idcard} {rawData.Name}");
                 if (rawData.Idcard != null)
                 {
-
                     var fpData = from data in db.FpHistoryData
                                  where data.Idcard == rawData.Idcard
                                  select data;
                     if (fpData.Any())
                     {
+                        var updated = false;
                         foreach (var data in fpData)
                         {
                             if (data.Merge(rawData))
-                                db.Update(data);
+                                updated = true;
                         }
+                        if (updated)
+                            db.SaveChanges();
                     }
                     else
                     {
                         var data = new FpHistoryData();
                         if (Database.Jzfp2020.FpData.Merge(data, rawData))
+                        {
                             db.Add(data);
+                            db.SaveChanges();
+                        }
                     }
                 }
             }
@@ -466,6 +502,9 @@ namespace Yhsb.Jb.FpData
         [Value(1, HelpText = "是否清除数据表", MetaName = "clear")]
         public bool Clear { get; set; } = false;
 
+        [Value(2, HelpText = "跳过记录数", MetaName = "skip")]
+        public int Skip { get; set; } = 0;
+
         public void Execute()
         {
             using var db = new FpDbContext();
@@ -473,21 +512,17 @@ namespace Yhsb.Jb.FpData
             if (Clear)
             {
                 WriteLine($"开始清除数据表: {Date}扶贫数据底册");
-                var fpData = from data in db.FpMonthData
-                             where data.Month == Date
-                             select data;
-                db.RemoveRange(fpData);
-                db.SaveChanges();
+                db.Delete<FpMonthData>(where: $"Month='{Date}'", printSql: true);
                 WriteLine($"结束清除数据表: {Date}扶贫数据底册");
             }
 
             WriteLine($"开始合并扶贫数据至: {Date}扶贫数据底册");
 
             var index = 1;
-            IEnumerable<FpRawData> fpRawData = Program.FetchFpRawData(Date, true);
+            IEnumerable<FpRawData> fpRawData = Program.FetchFpRawData(Date, Skip, true);
             foreach (var rawData in fpRawData)
             {
-                WriteLine($"{index++} {rawData.Idcard} {rawData.Name}");
+                WriteLine($"{index++} {rawData.NO} {rawData.Idcard} {rawData.Name}");
                 if (rawData.Idcard != null)
                 {
                     var fpData = from data in db.FpMonthData
@@ -496,17 +531,23 @@ namespace Yhsb.Jb.FpData
                                  select data;
                     if (fpData.Any())
                     {
+                        var updated = false;
                         foreach (var data in fpData)
                         {
                             if (data.Merge(rawData))
-                                db.Update(data);
+                                updated = true;
                         }
+                        if (updated)
+                            db.SaveChanges();
                     }
                     else
                     {
                         var data = new FpMonthData() { Month = Date };
                         if (Database.Jzfp2020.FpData.Merge(data, rawData))
+                        {
                             db.Add(data);
+                            db.SaveChanges();
+                        }
                     }
                 }
             }
@@ -577,8 +618,6 @@ namespace Yhsb.Jb.FpData
                     jbrdsf = "残二级";
                 }
 
-                var updated = false;
-
                 if (jbrdsf != null && jbrdsf != d.Jbrdsf)
                 {
                     if (!string.IsNullOrEmpty(d.Jbrdsf))
@@ -587,29 +626,21 @@ namespace Yhsb.Jb.FpData
                             $"{i++} {d.Idcard} {d.Name} {jbrdsf} <= {d.Jbrdsf}");
                         d.Jbrdsf = jbrdsf;
                         d.JbrdsfLastDate = Date;
-                        updated = true;
                     }
                     else
                     {
                         WriteLine($"{i++} {d.Idcard} {d.Name} {jbrdsf}");
                         d.Jbrdsf = jbrdsf;
                         d.JbrdsfFirstDate = Date;
-                        updated = true;
                     }
                 }
 
                 if (sypkry != null && sypkry != d.Sypkry)
                 {
                     d.Sypkry = sypkry;
-                    updated = true;
-                }
-
-                if (updated)
-                {
-                    db.Update(d);
-                    db.SaveChanges();
                 }
             }
+            db.SaveChanges();
 
             WriteLine($"结束认定参保人员身份: {MonthOrAll}扶贫数据底册");
         }
@@ -648,7 +679,7 @@ namespace Yhsb.Jb.FpData
             WriteLine("开始导入居保参保人员明细表");
             db.LoadExcel<Jbrymx>(Xlsx, BeginRow, EndRow,
                 new List<string>
-                { "D", "A", "B", "C", "E", "F", "H", "J", "K", "N" },
+                { "E", "A", "B", "C", "F", "G", "I", "K", "L", "O" },
                 printSql: true);
             WriteLine("结束导入居保参保人员明细表");
         }
@@ -661,7 +692,7 @@ namespace Yhsb.Jb.FpData
             Required = true, MetaName = "monthOrAll")]
         public string MonthOrAll { get; set; }
 
-        [Value(1, HelpText = "居保数据月份，例如：201912",
+        [Value(1, HelpText = "居保数据日期，例如：20191231",
             Required = true, MetaName = "date")]
         public string Date { get; set; }
 
@@ -688,13 +719,13 @@ namespace Yhsb.Jb.FpData
                 foreach (var (cbzt, jfzt, jbzt) in jbztMap)
                 {
                     var sql =
-                    $"update {fpTable}, {jbTable}" +
-                    $"   set {fpTable}.Jbcbqk='{jbzt}'" +
-                    $"       {fpTable}.JbcbqkDate='{Date}'" +
-                    $" where {fpTable}.Idcard={jbTable}.Idcard" +
-                    $"   and {jbTable}.Cbzt='{cbzt}'" +
-                    $"   and {jbTable}.Jfzt='{jfzt}'";
-                    db.ExecuteSql(sql);
+                    $"update {fpTable}, {jbTable}\n" +
+                    $"   set {fpTable}.Jbcbqk='{jbzt}',\n" +
+                    $"       {fpTable}.JbcbqkDate='{Date}'\n" +
+                    $" where {fpTable}.Idcard={jbTable}.Idcard\n" +
+                    $"   and {jbTable}.Cbzt='{cbzt}'\n" +
+                    $"   and {jbTable}.Jfzt='{jfzt}'\n";
+                    db.ExecuteSql(sql, printSql: true);
                 }
             }
             else
@@ -703,14 +734,14 @@ namespace Yhsb.Jb.FpData
                 foreach (var (cbzt, jfzt, jbzt) in jbztMap)
                 {
                     var sql =
-                    $"update {fpTable}, {jbTable}" +
-                    $"   set {fpTable}.Jbcbqk='{jbzt}'" +
-                    $"       {fpTable}.JbcbqkDate='{Date}'" +
-                    $" where {fpTable}.Month='{MonthOrAll}'" +
-                    $"   and {fpTable}.Idcard={jbTable}.Idcard" +
-                    $"   and {jbTable}.Cbzt='{cbzt}'" +
-                    $"   and {jbTable}.Jfzt='{jfzt}'";
-                    db.ExecuteSql(sql);
+                    $"update {fpTable}, {jbTable}\n" +
+                    $"   set {fpTable}.Jbcbqk='{jbzt}',\n" +
+                    $"       {fpTable}.JbcbqkDate='{Date}'\n" +
+                    $" where {fpTable}.Month='{MonthOrAll}'\n" +
+                    $"   and {fpTable}.Idcard={jbTable}.Idcard\n" +
+                    $"   and {jbTable}.Cbzt='{cbzt}'\n" +
+                    $"   and {jbTable}.Jfzt='{jfzt}'\n";
+                    db.ExecuteSql(sql, printSql: true);
                 }
             }
 
@@ -748,6 +779,10 @@ namespace Yhsb.Jb.FpData
             Required = true, MetaName = "dir")]
         public string Dir { get; set; }
 
+        [Value(1, HelpText = "导出清除信息变更表",
+            MetaName = "clear")]
+        public bool Clear { get; set; } = false;
+
         static readonly List<(string type, string code)> jbsfMap =
             new List<(string type, string code)>
             {
@@ -761,7 +796,7 @@ namespace Yhsb.Jb.FpData
 
         public void Execute()
         {
-            var tmplXlsx = "D:\\精准扶贫\\批量信息变更模板.xlsx";
+            var tmplXlsx = "D:\\精准扶贫\\批量信息变更模板.xls";
             var rowsPerXlsx = 500;
 
             if (!Directory.Exists(Dir))
@@ -785,7 +820,7 @@ namespace Yhsb.Jb.FpData
                                jb.Cbsf != code &&
                                jb.Cbzt == "1" &&
                                jb.Jfzt == "1"
-                           select new { jb.Name, jb.Idcard, code };
+                           select new { jb.Name, jb.Idcard, Code = code };
                 if (data.Any())
                 {
                     WriteLine($"开始导出 {type} 批量信息变更表");
@@ -793,7 +828,7 @@ namespace Yhsb.Jb.FpData
                     int i = 0, files = 0;
                     IWorkbook workbook = null;
                     ISheet sheet = null;
-                    int startRow = 2, currentRow = 2;
+                    int startRow = 1, currentRow = 1;
                     foreach (var d in data)
                     {
                         if (i++ % rowsPerXlsx == 0)
@@ -801,28 +836,89 @@ namespace Yhsb.Jb.FpData
                             if (workbook != null)
                             {
                                 workbook.Save(
-                                    Path.Join(Dir, $"{type}批量信息变更表{++files}.xlsx"));
+                                    Path.Join(Dir, $"{type}批量信息变更表{++files}.xls"));
                                 workbook = null;
                             }
                             if (workbook == null)
                             {
                                 workbook = ExcelExtension.LoadExcel(tmplXlsx);
                                 sheet = workbook.GetSheetAt(0);
-                                currentRow = 2;
+                                currentRow = 1;
                             }
                         }
                         var row = sheet.GetOrCopyRow(currentRow++, startRow, false);
-                        row.Cell("A").SetValue(d.Idcard);
-                        row.Cell("C").SetValue(d.Name);
-                        row.Cell("H").SetValue(d.code);
+                        row.Cell("B").SetValue(d.Idcard);
+                        row.Cell("E").SetValue(d.Name);
+                        row.Cell("J").SetValue(d.Code);
                     }
                     if (workbook != null)
                     {
-                        workbook.Save(Path.Join(Dir, $"{type}批量信息变更表{++files}.xlsx"));
+                        workbook.Save(Path.Join(Dir, $"{type}批量信息变更表{++files}.xls"));
                     }
 
                     WriteLine($"结束导出 {type} 批量信息变更表: {i} 条");
                 }
+            }
+
+            if (Clear)
+            {
+                WriteLine("开始导出 普通参保 批量信息变更表");
+
+                int i = 0, files = 0;
+                IWorkbook workbook = null;
+                ISheet sheet = null;
+                int startRow = 1, currentRow = 1;
+/*
+                var clrData = from jb in db.Jbrymx
+                              join fp in db.FpHistoryData on jb.Idcard equals fp.Idcard into JbFpData
+                              from fp in JbFpData.DefaultIfEmpty()
+                              //where jbfp.Jbrdsf == null &&
+                              //  jb.Cbzt == "1" && jb.Jfzt == "1"
+                              //  string.IsNullOrEmpty(fp.Jbrdsf)
+                              //from jbfp in JbfpTable
+                              select new { fp.Name, fp.Idcard, Code = "011" };
+                //clrData.FromSql("")
+*/
+                var clearData = from jb in db.Jbrymx
+                                where jb.Cbsf != "011" && jb.Cbzt == "1" && jb.Jfzt == "1"
+                                select new { jb.Name, jb.Idcard };
+
+                using var db2 = new FpDbContext();
+                foreach (var d in clearData)
+                {
+                    var inData = from fp in db2.FpHistoryData
+                                 where fp.Idcard == d.Idcard
+                                 select fp;
+                    if (!inData.Any())
+                    {
+                        WriteLine($"{i + 1} {d.Idcard} {d.Name}");
+
+                        if (i++ % rowsPerXlsx == 0)
+                        {
+                            if (workbook != null)
+                            {
+                                workbook.Save(
+                                    Path.Join(Dir, $"普通参保批量信息变更表{++files}.xls"));
+                                workbook = null;
+                            }
+                            if (workbook == null)
+                            {
+                                workbook = ExcelExtension.LoadExcel(tmplXlsx);
+                                sheet = workbook.GetSheetAt(0);
+                                currentRow = 1;
+                            }
+                        }
+                        var row = sheet.GetOrCopyRow(currentRow++, startRow, false);
+                        row.Cell("B").SetValue(d.Idcard);
+                        row.Cell("E").SetValue(d.Name);
+                        row.Cell("J").SetValue("011");
+                    }
+                }
+                if (workbook != null)
+                    workbook.Save(
+                        Path.Join(Dir, $"普通参保批量信息变更表{++files}.xls"));
+
+                WriteLine($"结束导出 普通参保 批量信息变更表: {i} 条");
             }
         }
     }

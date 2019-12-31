@@ -83,5 +83,18 @@ namespace Yhsb.Jb.Database
             var sql = $"delete from {context.GetTableName<T>()};";
             return context.ExecuteSql(sql, printSql);
         }
+
+        public static int Delete<T>(
+            this DbContext context, string where = null, bool printSql = false)
+            where T : class
+        {
+            if (!string.IsNullOrWhiteSpace(where))
+                where = $" where {where}";
+            else
+                where = "";
+
+            var sql = $"delete from {context.GetTableName<T>()}{where};";
+            return context.ExecuteSql(sql, printSql);
+        }
     }
 }
