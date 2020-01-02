@@ -6,7 +6,9 @@ using Yhsb.Util.Command;
 using System.Linq;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using NPOI.SS.UserModel;
+using Microsoft.EntityFrameworkCore;
 
 using static System.Console;
 
@@ -497,12 +499,12 @@ namespace Yhsb.Jb.FpData
         [Value(0, HelpText = "数据月份, 例如: 201912",
             Required = true, MetaName = "date")]
         public string Date { get; set; }
-
-        [Value(1, HelpText = "是否清除数据表", MetaName = "clear")]
-        public bool Clear { get; set; } = false;
-
-        [Value(2, HelpText = "跳过记录数", MetaName = "skip")]
+        
+        [Value(1, HelpText = "跳过记录数",  MetaName = "skip")]
         public int Skip { get; set; } = 0;
+
+        [Value(2, HelpText = "是否清除数据表", MetaName = "clear")]
+        public bool Clear { get; set; } = false;
 
         public void Execute()
         {
