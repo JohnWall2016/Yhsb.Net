@@ -1,15 +1,12 @@
 using System;
 using System.Collections.Generic;
 using static System.Console;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.IO;
-using System.Linq;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Yhsb.Util.Excel;
 
-namespace Yhsb.Jb.Database
+namespace Yhsb.Database
 {
     public static class DatabaseEx
     {

@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using Yhsb.Jb.Database;
+using Yhsb.Database;
 using Yhsb.Jb.Database.Jzfp2020;
 
 public class DbTest

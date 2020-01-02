@@ -1,5 +1,5 @@
 ﻿using CommandLine;
-using Yhsb.Jb.Database;
+using Yhsb.Database;
 using Yhsb.Jb.Database.Jzfp2020;
 using Yhsb.Util.Excel;
 using Yhsb.Util.Command;
@@ -7,7 +7,6 @@ using System.Linq;
 using System.Collections.Generic;
 using System.IO;
 using NPOI.SS.UserModel;
-using Microsoft.EntityFrameworkCore;
 
 using static System.Console;
 
