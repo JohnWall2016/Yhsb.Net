@@ -6,7 +6,7 @@ using CommandLine;
 using Yhsb.Util.Command;
 using Yhsb.Util.Excel;
 using Yhsb.Jb.Network;
-using Yhsb.Jb.Database.Jzfp2019;
+using Yhsb.Jb.Database.Jzfp2020;
 
 using static Yhsb.Util.DateTime;
 using static System.Console;
@@ -81,7 +81,7 @@ namespace Yhsb.Jb.Audit
                     using var context = new FpDbContext();
                     foreach (var cbsh in result.Data)
                     {
-                        var data = from fpData in context.FpData2019
+                        var data = from fpData in context.FpHistoryData
                                    where fpData.Idcard == cbsh.idCard
                                    select fpData;
                         if (data.Any())
@@ -91,9 +91,9 @@ namespace Yhsb.Jb.Audit
                                 $"{cbsh.idCard} {cbsh.name} {cbsh.birthDay} {info.Jbrdsf} " +
                                 $"{(info.Name != cbsh.name ? info.Name : "")}");
                             var row = sheet.GetOrCopyRow(index++, copyIndex, false);
-                            row.Cell("A").SetValue(cbsh.idCard);
-                            row.Cell("C").SetValue(cbsh.name);
-                            row.Cell("H").SetValue(_jbClassMap[info.Jbrdsf]);
+                            row.Cell("B").SetValue(cbsh.idCard);
+                            row.Cell("E").SetValue(cbsh.name);
+                            row.Cell("J").SetValue(_jbClassMap[info.Jbrdsf]);
                             export = true;
                         }
                         else

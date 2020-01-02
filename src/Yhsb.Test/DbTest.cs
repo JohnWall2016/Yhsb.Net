@@ -32,11 +32,12 @@ public class DbTest
     {
         using var context = new Yhsb.Jb.Database.Jzfp2020.FpDbContext();
         var data = from fpData in context.FpHistoryData
-            where fpData.Idcard == "1221323554333"
+            where fpData.Idcard == "430311197209271512"
             select fpData;
         if (data.Any())
         {
-            Console.WriteLine(data.First());
+            var d = data.First();
+            Console.WriteLine($"{d.NO} {d.Idcard} {d.Name} {d.Jbrdsf}");
         }
         else
         {
