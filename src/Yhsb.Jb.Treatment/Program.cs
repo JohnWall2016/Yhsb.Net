@@ -1,6 +1,6 @@
 ﻿using CommandLine;
 using Yhsb.Jb.Network;
-using Yhsb.Jb.Database.Jzfp2019;
+using Yhsb.Jb.Database.Jzfp2020;
 using Yhsb.Util;
 using Yhsb.Util.Excel;
 using Yhsb.Util.Command;
@@ -58,7 +58,7 @@ namespace Yhsb.Jb.Treatment
                 foreach (var data in result.Data)
                 {
                     var idcard = data.idCard;
-                    var fpData = from e in context.FpRawData2019
+                    var fpData = from e in context.FpRawData
                                  where e.Idcard == idcard &&
                                  (e.Type == "贫困人口" ||
                                  e.Type == "特困人员" ||
@@ -67,11 +67,12 @@ namespace Yhsb.Jb.Treatment
                                  select e;
                     if (fpData.Any())
                     {
-                        WriteLine($"{currentRow - startRow + 1} {data.idCard} {data.name}");
+                        var record = fpData.First();
+                        WriteLine(
+                            $"{currentRow - startRow + 1} {data.idCard} {data.name} {record.Type}");
 
                         var qjns = data.Yjnx - data.Sjnx;
                         if (qjns < 0) qjns = 0;
-                        var record = fpData.First();
 
                         var row = sheet.GetOrCopyRow(currentRow++, startRow);
                         row.Cell("A").SetValue(currentRow - startRow);
@@ -123,7 +124,7 @@ namespace Yhsb.Jb.Treatment
                 foreach (var data in result.Data)
                 {
                     var idcard = data.idCard;
-                    var fpData = from e in context.FpRawData2019
+                    var fpData = from e in context.FpRawData
                                  where e.Idcard == idcard &&
                                  (e.Type == "贫困人口" ||
                                  e.Type == "特困人员" ||
