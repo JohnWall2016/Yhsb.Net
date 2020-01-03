@@ -191,6 +191,7 @@ namespace Yhsb.Jb.Treatment
         public void Execute()
         {
             var (year, month, _) = Util.DateTime.SplitDate(Date);
+            if (month[0] == '0') month = month.Substring(1);
 
             var inXlsx = $@"{Program.rootDir}\信息核对报告表{Date}.xlsx";
             var outputDir = $@"{Program.rootDir}\{year}年{month}月待遇核定数据";
