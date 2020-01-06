@@ -924,7 +924,7 @@ namespace Yhsb.Jb.Network
 
         public OtherPersonQuery(
             string type, string cbState, string dfState,
-            int page = 1, int pageSize = 500,
+            int page = 1, int pageSize = 1000,
             Dictionary<string, string>[] sorting = null)
             : base("executeDfrymdQuery", page: page, pageSize: pageSize,
                 sorting: sorting ?? new[]

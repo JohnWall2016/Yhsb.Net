@@ -148,6 +148,9 @@ namespace Yhsb.Jb.OtherPayment
             Required = true, MetaName = "date")]
         public string Date { get; set; }
 
+        [Option("all", HelpText = "导出所有居保正常代发人员")]
+        public bool All { get; set; } = false;
+
         public void Execute()
         {
             var workbook = ExcelExtension.LoadExcel(Program.personListXlsx);
@@ -168,11 +171,13 @@ namespace Yhsb.Jb.OtherPayment
                 {
                     if (otherPerson.grbh == null) // 无效数据
                         return;
+                    if (!All && !otherPerson.dfState.Value.Equals("1"))
+                        return;
                     if (!otherPerson.dfState.Value.Equals("1") &&  // 不是正常代发
                         !(otherPerson.dfState.Value.Equals("2") &&  // 是暂停代发且居保不是正常状态
                         otherPerson.jbState.Value.Equals("1")))
                         return;
-
+                    
                     decimal payAmount = 0;
                     if (otherPerson.standard is decimal standard)
                     {
@@ -198,7 +203,8 @@ namespace Yhsb.Jb.OtherPayment
                              ((endYear - startYear) * 12 + endMonth - startMonth) * standard;
                         }
                     }
-                    else if (Type == "801" && otherPerson.totalPayed == 5000)
+                    else if (Type == "801" && otherPerson.standard == null
+                         && otherPerson.totalPayed == 5000)
                     {
                         return;
                     }
@@ -230,8 +236,12 @@ namespace Yhsb.Jb.OtherPayment
             trow.Cell("K").SetValue("合计");
             trow.Cell("L").SetValue(sum);
 
-            workbook.Save(Util.StringEx.AppendToFileName(
-                Program.personListXlsx, $"({OtherPerson.Name(Type)}){date}"));
+            if (!All)
+                workbook.Save(Util.StringEx.AppendToFileName(
+                    Program.personListXlsx, $"({OtherPerson.Name(Type)}){date}"));
+            else
+                workbook.Save(Util.StringEx.AppendToFileName(
+                    Program.personListXlsx, $"({OtherPerson.Name(Type)}ALL){date}"));
         }
     }
 }
