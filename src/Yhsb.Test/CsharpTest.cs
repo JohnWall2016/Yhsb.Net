@@ -172,4 +172,15 @@ class CsharpTest
         foreach (var i in DisposableData.Fetch())
             WriteLine(i);
     }
+
+    public static void TestAnonymousClass()
+    {
+        var p1 = new { Name = "John", Age = 4 };
+        var p2 = new { Name = "Rose", Age = 4 };
+
+        WriteLine(p1);
+        WriteLine(p2);
+        WriteLine(p1.GetType());
+        WriteLine(p2.GetType());
+    }
 }
