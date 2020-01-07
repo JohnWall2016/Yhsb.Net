@@ -3,7 +3,7 @@ using static System.Console;
 using System.Reflection;
 using System.Collections.Generic;
 
-class CsharpTest
+public static class CsharpTest
 {
     public static void TestString()
     {
@@ -182,5 +182,25 @@ class CsharpTest
         WriteLine(p2);
         WriteLine(p1.GetType());
         WriteLine(p2.GetType());
+    }
+
+    public class Test
+    {
+        public virtual string Name => "Test";
+    }
+
+    public class Test2 : Test
+    {
+        public override string Name => "Test2";
+    }
+
+    public static void Hello(this Test test) => WriteLine(test.Name);
+
+    public static void TestExtension()
+    {
+        var test = new Test();
+        test.Hello();
+        var test2 = new Test2();
+        test2.Hello();
     }
 }

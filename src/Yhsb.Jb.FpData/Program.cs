@@ -74,6 +74,19 @@ namespace Yhsb.Jb.FpData
                 yield return d;
         }
 
+        public static IEnumerable<IGrouping<string, FpRawData>>
+            FetchFpRawDataGroup(string month, int skip, bool onlyPkry = false)
+        {
+            using var db = new FpDbContext();
+            IEnumerable<string> types = pkry;
+            if (!onlyPkry) types = types.Concat(cjry);
+            foreach (var d in db.FpRawData.Where(
+                data => data.Date == month && types.Contains(data.Type))
+                .AsEnumerable()
+                .GroupBy(data => data.Idcard).Skip(skip))
+                yield return d;
+        }
+
         public static void ExportFpData(
             string monthOrAll, string tmplXlsx, string saveXlsx)
         {
@@ -451,7 +464,7 @@ namespace Yhsb.Jb.FpData
         [Value(1, HelpText = "跳过记录数", MetaName = "skip")]
         public int Skip { get; set; } = 0;
 
-        public void Execute()
+        public void ExecuteOld()
         {
             WriteLine("开始合并扶贫数据至: 扶贫历史数据底册");
 
@@ -491,6 +504,41 @@ namespace Yhsb.Jb.FpData
 
             WriteLine("结束合并扶贫数据至: 扶贫历史数据底册");
         }
+
+        public void Execute()
+        {
+            WriteLine("开始合并扶贫数据至: 扶贫历史数据底册");
+
+            var index = 1;
+            var fpRawDataGroup = Program.FetchFpRawDataGroup(Date, Skip);
+            using var db = new FpDbContext();
+            foreach (var groups in fpRawDataGroup)
+            {
+                WriteLine($"{index++} {groups.Key}");
+                var fpData = from data in db.FpHistoryData
+                             where data.Idcard == groups.Key
+                             select data;
+
+                if (fpData.Any())
+                {
+                    foreach (var data in fpData)
+                    {
+                        foreach (var rawData in groups)
+                            data.Merge(rawData);
+                    }
+                }
+                else
+                {
+                    var historyData = new FpHistoryData();
+                    foreach (var rawData in groups)
+                        Database.Jzfp2020.FpData.Merge(historyData, rawData);
+                    db.Add(historyData);
+                }
+                db.SaveChanges();
+            }
+
+            WriteLine("结束合并扶贫数据至: 扶贫历史数据底册");
+        }
     }
 
     [Verb("scdc", HelpText = "生成当月扶贫数据底册")]
@@ -499,14 +547,14 @@ namespace Yhsb.Jb.FpData
         [Value(0, HelpText = "数据月份, 例如: 201912",
             Required = true, MetaName = "date")]
         public string Date { get; set; }
-        
-        [Value(1, HelpText = "跳过记录数",  MetaName = "skip")]
+
+        [Value(1, HelpText = "跳过记录数", MetaName = "skip")]
         public int Skip { get; set; } = 0;
 
         [Value(2, HelpText = "是否清除数据表", MetaName = "clear")]
         public bool Clear { get; set; } = false;
 
-        public void Execute()
+        public void ExecuteOld()
         {
             using var db = new FpDbContext();
 
@@ -552,6 +600,50 @@ namespace Yhsb.Jb.FpData
                     }
                 }
             }
+
+            WriteLine($"结束合并扶贫数据至: {Date}扶贫数据底册");
+        }
+
+        public void Execute()
+        {
+            using var db = new FpDbContext();
+
+            if (Clear)
+            {
+                WriteLine($"开始清除数据表: {Date}扶贫数据底册");
+                db.Delete<FpMonthData>(where: $"Month='{Date}'", printSql: true);
+                WriteLine($"结束清除数据表: {Date}扶贫数据底册");
+            }
+
+            WriteLine($"开始合并扶贫数据至: {Date}扶贫数据底册");
+
+            var index = 1;
+            var fpRawDataGroup = Program.FetchFpRawDataGroup(Date, Skip, true);
+            foreach (var groups in fpRawDataGroup)
+            {
+                WriteLine($"{index++} {groups.Key}");
+                var fpData = from data in db.FpMonthData
+                             where data.Idcard == groups.Key &&
+                                data.Month == Date
+                             select data;
+
+                if (fpData.Any())
+                {
+                    foreach (var data in fpData)
+                    {
+                        foreach (var rawData in groups)
+                            data.Merge(rawData);
+                    }
+                }
+                else
+                {
+                    var data = new FpMonthData() { Month = Date };
+                    foreach (var rawData in groups)
+                        Database.Jzfp2020.FpData.Merge(data, rawData);
+                    db.Add(data);
+                }
+            }
+            db.SaveChanges();
 
             WriteLine($"结束合并扶贫数据至: {Date}扶贫数据底册");
         }
@@ -762,10 +854,10 @@ namespace Yhsb.Jb.FpData
             string fileName;
 
             if (MonthOrAll.ToUpper() == "ALL")
-                fileName = 
+                fileName =
                     $@"D:\精准扶贫\2020年度扶贫数据底册{Util.DateTime.FormatedDate()}.xlsx";
             else
-                fileName = 
+                fileName =
                     $@"D:\精准扶贫\{MonthOrAll}扶贫数据底册{Util.DateTime.FormatedDate()}.xlsx";
 
             Program.ExportFpData(
@@ -869,17 +961,17 @@ namespace Yhsb.Jb.FpData
                 IWorkbook workbook = null;
                 ISheet sheet = null;
                 int startRow = 1, currentRow = 1;
-/*
-                var clrData = from jb in db.Jbrymx
-                              join fp in db.FpHistoryData on jb.Idcard equals fp.Idcard into JbFpData
-                              from fp in JbFpData.DefaultIfEmpty()
-                              //where jbfp.Jbrdsf == null &&
-                              //  jb.Cbzt == "1" && jb.Jfzt == "1"
-                              //  string.IsNullOrEmpty(fp.Jbrdsf)
-                              //from jbfp in JbfpTable
-                              select new { fp.Name, fp.Idcard, Code = "011" };
-                //clrData.FromSql("")
-*/
+                /*
+                                var clrData = from jb in db.Jbrymx
+                                              join fp in db.FpHistoryData on jb.Idcard equals fp.Idcard into JbFpData
+                                              from fp in JbFpData.DefaultIfEmpty()
+                                              //where jbfp.Jbrdsf == null &&
+                                              //  jb.Cbzt == "1" && jb.Jfzt == "1"
+                                              //  string.IsNullOrEmpty(fp.Jbrdsf)
+                                              //from jbfp in JbfpTable
+                                              select new { fp.Name, fp.Idcard, Code = "011" };
+                                //clrData.FromSql("")
+                */
                 var clearData = from jb in db.Jbrymx
                                 where jb.Cbsf != "011" && jb.Cbzt == "1" && jb.Jfzt == "1"
                                 select new { jb.Name, jb.Idcard };
