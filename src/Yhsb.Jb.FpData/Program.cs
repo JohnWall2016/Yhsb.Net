@@ -466,47 +466,6 @@ namespace Yhsb.Jb.FpData
         [Value(1, HelpText = "跳过记录数", MetaName = "skip")]
         public int Skip { get; set; } = 0;
 
-        public void ExecuteOld()
-        {
-            WriteLine("开始合并扶贫数据至: 扶贫历史数据底册");
-
-            var index = 1;
-            using var db = new FpDbContext();
-            IEnumerable<FpRawData> fpRawData = Program.FetchFpRawData(Date, Skip);
-            foreach (var rawData in fpRawData)
-            {
-                WriteLine($"{index++} {rawData.NO} {rawData.Idcard} {rawData.Name}");
-                if (rawData.Idcard != null)
-                {
-                    var fpData = from data in db.FpHistoryData
-                                 where data.Idcard == rawData.Idcard
-                                 select data;
-                    if (fpData.Any())
-                    {
-                        var updated = false;
-                        foreach (var data in fpData)
-                        {
-                            if (data.Merge(rawData))
-                                updated = true;
-                        }
-                        if (updated)
-                            db.SaveChanges();
-                    }
-                    else
-                    {
-                        var data = new FpHistoryData();
-                        if (Database.Jzfp2020.FpData.Merge(data, rawData))
-                        {
-                            db.Add(data);
-                            db.SaveChanges();
-                        }
-                    }
-                }
-            }
-
-            WriteLine("结束合并扶贫数据至: 扶贫历史数据底册");
-        }
-
         public void Execute()
         {
             WriteLine("开始合并扶贫数据至: 扶贫历史数据底册");
@@ -536,8 +495,8 @@ namespace Yhsb.Jb.FpData
                         Database.Jzfp2020.FpData.Merge(historyData, rawData);
                     db.Add(historyData);
                 }
-                db.SaveChanges();
             }
+            db.SaveChanges();
 
             WriteLine("结束合并扶贫数据至: 扶贫历史数据底册");
         }
@@ -555,56 +514,6 @@ namespace Yhsb.Jb.FpData
 
         [Option("clear", HelpText = "是否清除数据表")]
         public bool Clear { get; set; } = false;
-
-        public void ExecuteOld()
-        {
-            using var db = new FpDbContext();
-
-            if (Clear)
-            {
-                WriteLine($"开始清除数据表: {Date}扶贫数据底册");
-                db.Delete<FpMonthData>(where: $"Month='{Date}'", printSql: true);
-                WriteLine($"结束清除数据表: {Date}扶贫数据底册");
-            }
-
-            WriteLine($"开始合并扶贫数据至: {Date}扶贫数据底册");
-
-            var index = 1;
-            IEnumerable<FpRawData> fpRawData = Program.FetchFpRawData(Date, Skip, true);
-            foreach (var rawData in fpRawData)
-            {
-                WriteLine($"{index++} {rawData.NO} {rawData.Idcard} {rawData.Name}");
-                if (rawData.Idcard != null)
-                {
-                    var fpData = from data in db.FpMonthData
-                                 where data.Idcard == rawData.Idcard &&
-                                    data.Month == Date
-                                 select data;
-                    if (fpData.Any())
-                    {
-                        var updated = false;
-                        foreach (var data in fpData)
-                        {
-                            if (data.Merge(rawData))
-                                updated = true;
-                        }
-                        if (updated)
-                            db.SaveChanges();
-                    }
-                    else
-                    {
-                        var data = new FpMonthData() { Month = Date };
-                        if (Database.Jzfp2020.FpData.Merge(data, rawData))
-                        {
-                            db.Add(data);
-                            db.SaveChanges();
-                        }
-                    }
-                }
-            }
-
-            WriteLine($"结束合并扶贫数据至: {Date}扶贫数据底册");
-        }
 
         public void Execute()
         {
@@ -756,7 +665,7 @@ namespace Yhsb.Jb.FpData
             Required = true, MetaName = "endRow")]
         public int EndRow { get; set; }
 
-        [Value(3, HelpText = "是否清除数据表", MetaName = "clear")]
+        [Option("clear", HelpText = "是否清除数据表")]
         public bool Clear { get; set; } = false;
 
         public void Execute()
