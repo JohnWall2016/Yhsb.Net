@@ -6,7 +6,6 @@ using Yhsb.Util.Command;
 using System.Linq;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
 using NPOI.SS.UserModel;
 using Microsoft.EntityFrameworkCore;
 
@@ -783,8 +782,7 @@ namespace Yhsb.Jb.FpData
             Required = true, MetaName = "dir")]
         public string Dir { get; set; }
 
-        [Value(1, HelpText = "导出清除信息变更表",
-            MetaName = "clear")]
+        [Option("clear", HelpText = "导出清除信息变更表")]
         public bool Clear { get; set; } = false;
 
         static readonly List<(string type, string code)> jbsfMap =
