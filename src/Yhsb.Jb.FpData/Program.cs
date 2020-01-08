@@ -102,13 +102,15 @@ namespace Yhsb.Jb.FpData
 
             if (monthOrAll.ToUpper() == "ALL")
             {
-                data = from e in db.FpHistoryData select e;
+                data = db.FpHistoryData.FromSqlRaw(
+                    "SELECT * FROM fphistorydata ORDER BY CONVERT( xzj USING gbk ), " +
+                    "CONVERT( csq USING gbk ), CONVERT( name USING gbk )");
             }
             else
             {
-                data = from e in db.FpMonthData
-                       where e.Month == monthOrAll
-                       select e;
+                data = db.FpMonthData.FromSqlRaw(
+                    "SELECT * FROM fpmonthdata WHERE month={0} ORDER BY CONVERT( xzj USING gbk ), " +
+                    "CONVERT( csq USING gbk ), CONVERT( name USING gbk )", monthOrAll);
             }
 
             foreach (var d in data)
@@ -551,7 +553,7 @@ namespace Yhsb.Jb.FpData
         [Value(1, HelpText = "跳过记录数", MetaName = "skip")]
         public int Skip { get; set; } = 0;
 
-        [Value(2, HelpText = "是否清除数据表", MetaName = "clear")]
+        [Option("clear", HelpText = "是否清除数据表")]
         public bool Clear { get; set; } = false;
 
         public void ExecuteOld()
