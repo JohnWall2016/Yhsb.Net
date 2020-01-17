@@ -262,12 +262,12 @@ namespace Yhsb.Jb.Network
     public class JfxxQuery : PageParameters
     {
         [JsonProperty("aac002")]
-        public string idCard = "";
+        public string idcard = "";
 
-        public JfxxQuery(string idCard)
+        public JfxxQuery(string idcard)
             : base("executeSncbqkcxjfxxQ", page: 1, pageSize: 500)
         {
-            this.idCard = idCard;
+            this.idcard = idcard;
         }
     }
 
@@ -351,11 +351,11 @@ namespace Yhsb.Jb.Network
     public class CbxxQuery : Parameters
     {
         [JsonProperty("aac002")]
-        public string idCard = "";
+        public string idcard = "";
 
-        public CbxxQuery(string idCard) : base("executeSncbxxConQ")
+        public CbxxQuery(string idcard) : base("executeSncbxxConQ")
         {
-            this.idCard = idCard;
+            this.idcard = idcard;
         }
     }
 
@@ -420,7 +420,7 @@ namespace Yhsb.Jb.Network
 
         /// 身份证号码
         [JsonProperty("aac002")]
-        public string idCard;
+        public string idcard;
 
         [JsonProperty("aac003")]
         public string name;
@@ -478,7 +478,7 @@ namespace Yhsb.Jb.Network
             _ => $"未知身份类型: {sfCode}"
         };
 
-        public bool Valid => idCard != null;
+        public bool Valid => idcard != null;
 
         public bool Invalid => !Valid;
     }
@@ -519,7 +519,7 @@ namespace Yhsb.Jb.Network
     {
         /// 身份证号码
         [JsonProperty("aac002")]
-        public string idCard;
+        public string idcard;
 
         [JsonProperty("aac003")]
         public string name;
@@ -678,7 +678,7 @@ namespace Yhsb.Jb.Network
         public string aac009 = "", aac003 = "";
 
         [JsonProperty("aac002")]
-        public string idCard = "";
+        public string idcard = "";
 
         public DyfhQuery(
             string idcard = "", string shzt = "0",
@@ -695,7 +695,7 @@ namespace Yhsb.Jb.Network
                     }
                 })
         {
-            this.idCard = idcard;
+            this.idcard = idcard;
             this.shzt = shzt;
             this.qsshsj = qsshsj;
             this.jzshsj = jzshsj;
@@ -726,7 +726,7 @@ namespace Yhsb.Jb.Network
 
         /// 身份证号码
         [JsonProperty("aac002")]
-        public string idCard;
+        public string idcard;
 
         [JsonProperty("aac003")]
         public string name;
@@ -860,12 +860,12 @@ namespace Yhsb.Jb.Network
     public class BankInfoQuery : Parameters
     {
         [JsonProperty("aac002")]
-        public string idCard = "";
+        public string idcard = "";
 
-        public BankInfoQuery(string idCard) 
+        public BankInfoQuery(string idcard) 
             : base("executeSncbgrBankinfoConQ")
         {
-            this.idCard = idCard;
+            this.idcard = idcard;
         }
     }
 
@@ -964,7 +964,7 @@ namespace Yhsb.Jb.Network
 
         /// 身份证号码
         [JsonProperty("aac002")]
-        public string idCard;
+        public string idcard;
 
         [JsonProperty("aac003")]
         public string name;
@@ -1087,7 +1087,7 @@ namespace Yhsb.Jb.Network
 
         /// 身份证号码
         [JsonProperty("aac002")]
-        public string idCard;
+        public string idcard;
 
         [JsonProperty("aac003")]
         public string name;
@@ -1244,7 +1244,7 @@ namespace Yhsb.Jb.Network
 
         /// 身份证号码
         [JsonProperty("aac002")]
-        public string idCard = "";
+        public string idcard = "";
 
         [JsonProperty("aac003")]
         public string name = "";
@@ -1290,7 +1290,7 @@ namespace Yhsb.Jb.Network
     {
         /// 身份证号码
         [JsonProperty("aac002")]
-        public string idCard;
+        public string idcard;
 
         [JsonProperty("aac003")]
         public string name;
@@ -1326,14 +1326,14 @@ namespace Yhsb.Jb.Network
 
         /// 身份证号码
         [JsonProperty("aac002")]
-        public string idCard = "";
+        public string idcard = "";
 
         public string aac003 = "", aac009 = "", aae0160 = "";
 
-        public CbzzfhQuery(string idCard)
+        public CbzzfhQuery(string idcard)
             : base("cbzzfhPerInfoList")
         {
-            this.idCard = idCard;
+            this.idcard = idcard;
         }
     }
 
@@ -1341,7 +1341,7 @@ namespace Yhsb.Jb.Network
     {
         /// 身份证号码
         [JsonProperty("aac002")]
-        public string idCard;
+        public string idcard;
 
         [JsonProperty("aac003")]
         public string name;
@@ -1408,16 +1408,16 @@ namespace Yhsb.Jb.Network
 
         /// 身份证号码
         [JsonProperty("aac002")]
-        public string idCard = "";
+        public string idcard = "";
 
         public string aac003 = "", aac009 = "", aae0160 = "";
 
         public string aic301 = "";
 
-        public DyzzfhQuery(string idCard)
+        public DyzzfhQuery(string idcard)
             : base("dyzzfhPerInfoList")
         {
-            this.idCard = idCard;
+            this.idcard = idcard;
         }
     }
 
@@ -1425,7 +1425,7 @@ namespace Yhsb.Jb.Network
     {
         /// 身份证号码
         [JsonProperty("aac002")]
-        public string idCard;
+        public string idcard;
 
         [JsonProperty("aac003")]
         public string name;

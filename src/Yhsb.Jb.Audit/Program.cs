@@ -82,23 +82,23 @@ namespace Yhsb.Jb.Audit
                     foreach (var cbsh in result.Data)
                     {
                         var data = from fpData in context.FpHistoryData
-                                   where fpData.Idcard == cbsh.idCard
+                                   where fpData.Idcard == cbsh.idcard
                                    select fpData;
                         if (data.Any())
                         {
                             var info = data.First();
                             WriteLine(
-                                $"{cbsh.idCard} {cbsh.name} {cbsh.birthDay} {info.Jbrdsf} " +
+                                $"{cbsh.idcard} {cbsh.name} {cbsh.birthDay} {info.Jbrdsf} " +
                                 $"{(info.Name != cbsh.name ? info.Name : "")}");
                             var row = sheet.GetOrCopyRow(index++, copyIndex, false);
-                            row.Cell("B").SetValue(cbsh.idCard);
+                            row.Cell("B").SetValue(cbsh.idcard);
                             row.Cell("E").SetValue(cbsh.name);
                             row.Cell("J").SetValue(_jbClassMap[info.Jbrdsf]);
                             export = true;
                         }
                         else
                         {
-                            WriteLine($"{cbsh.idCard} {cbsh.name} {cbsh.birthDay}");
+                            WriteLine($"{cbsh.idcard} {cbsh.name} {cbsh.birthDay}");
                         }
                     }
                     if (export)

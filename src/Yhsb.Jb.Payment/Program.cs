@@ -60,7 +60,7 @@ namespace Yhsb.Jb.Payment
                         var payment = detailResult[0];
 
                         string reason = null, bankName = null;
-                        session.SendService(new DyzzfhQuery(payment.idCard));
+                        session.SendService(new DyzzfhQuery(payment.idcard));
                         var dyzzResult = session.GetResult<Dyzzfh>();
                         if (!dyzzResult.IsEmpty)
                         {
@@ -75,7 +75,7 @@ namespace Yhsb.Jb.Payment
                         }
                         else
                         {
-                            session.SendService(new CbzzfhQuery(payment.idCard));
+                            session.SendService(new CbzzfhQuery(payment.idcard));
                             var cbzzResult = session.GetResult<Cbzzfh>();
                             if (!cbzzResult.IsEmpty)
                             {
@@ -93,7 +93,7 @@ namespace Yhsb.Jb.Payment
                         var row = sheet.GetOrCopyRow(currentRow++, startRow);
                         row.Cell("A").SetValue(currentRow - startRow);
                         row.Cell("B").SetValue(payment.name);
-                        row.Cell("C").SetValue(payment.idCard);
+                        row.Cell("C").SetValue(payment.idcard);
 
                         var type = payment.TypeCH;
                         if (reason != null)

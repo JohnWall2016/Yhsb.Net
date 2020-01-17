@@ -123,7 +123,7 @@ namespace Yhsb.Jb.Treatment
                 using var context = new FpDbContext();
                 foreach (var data in result.Data)
                 {
-                    var idcard = data.idCard;
+                    var idcard = data.idcard;
                     var fpData = from e in context.FpRawData
                                  where e.Idcard == idcard &&
                                  (e.Type == "贫困人口" ||
@@ -150,12 +150,12 @@ namespace Yhsb.Jb.Treatment
             {
                 var index = currentRow - startRow + 1;
 
-                WriteLine($"{index} {data.idCard} {data.name} {data.bz} {data.fpType}");
+                WriteLine($"{index} {data.idcard} {data.name} {data.bz} {data.fpType}");
 
                 var row = sheet.GetOrCopyRow(currentRow++, startRow);
                 row.Cell("A").SetValue(index);
                 row.Cell("B").SetValue(data.name);
-                row.Cell("C").SetValue(data.idCard);
+                row.Cell("C").SetValue(data.idcard);
                 row.Cell("D").SetValue(data.xzqh);
                 row.Cell("E").SetValue(data.payAmount);
                 row.Cell("F").SetValue(data.payMonth);

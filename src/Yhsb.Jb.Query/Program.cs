@@ -115,7 +115,7 @@ namespace Yhsb.Jb.Query
         {
             WriteLine("个人信息:");
             WriteLine(
-                $"{info.name} {info.idCard} {info.JBState} " +
+                $"{info.name} {info.idcard} {info.JBState} " +
                 $"{info.JBClass} {info.agency} {info.czName} " +
                 $"{info.dealDate}\n"
             );
@@ -202,7 +202,7 @@ namespace Yhsb.Jb.Query
                 var workbook = ExcelExtension.LoadExcel(xlsx);
                 var sheet = workbook.GetSheetAt(0);
                 sheet.Cell("A5").SetValue(info.name);
-                sheet.Cell("C5").SetValue(info.idCard);
+                sheet.Cell("C5").SetValue(info.idcard);
                 sheet.Cell("E5").SetValue(info.agency);
                 sheet.Cell("G5").SetValue(info.czName);
                 sheet.Cell("K5").SetValue(info.dealDate);
@@ -252,9 +252,9 @@ namespace Yhsb.Jb.Query
                 for (var i = 0; i <= sheet.LastRowNum; i++)
                 {
                     var row = sheet.GetRow(i);
-                    var idCard = row.Cell("A").Value();
+                    var idcard = row.Cell("A").Value();
                     var title = row.Cell("D").Value();
-                    session.SendService(new CbxxQuery(idCard));
+                    session.SendService(new CbxxQuery(idcard));
                     var result = session.GetResult<Cbxx>();
                     if (!result.IsEmpty)
                     {
@@ -300,10 +300,10 @@ namespace Yhsb.Jb.Query
                 for (var i = BeginRow - 1; i < EndRow; i++)
                 {
                     var row = sheet.GetRow(i);
-                    var idCard = row.Cell(IdCardCol).Value().ToUpper();
+                    var idcard = row.Cell(IdCardCol).Value().ToUpper();
 
                     var jbzt = "";
-                    session.SendService(new CbxxQuery(idCard));
+                    session.SendService(new CbxxQuery(idcard));
                     var result = session.GetResult<Cbxx>();
                     if (!result.IsEmpty)
                     {
@@ -311,7 +311,7 @@ namespace Yhsb.Jb.Query
                         row.Cell(InfoSaveCol).SetValue(jbzt);
                     }
 
-                    WriteLine($"{idCard} {jbzt ?? ""}");
+                    WriteLine($"{idcard} {jbzt ?? ""}");
                 }
             });
 

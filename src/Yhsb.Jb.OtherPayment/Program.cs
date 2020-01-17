@@ -39,7 +39,7 @@ namespace Yhsb.Jb.OtherPayment
 
         class Item
         {
-            public string region, name, idCard, type;
+            public string region, name, idcard, type;
             public int? yearMonth, startDate, endDate;
             public decimal amount;
         }
@@ -84,7 +84,7 @@ namespace Yhsb.Jb.OtherPayment
                                 {
                                     region = paymentDetail.region,
                                     name = paymentDetail.name,
-                                    idCard = paymentDetail.idCard,
+                                    idcard = paymentDetail.idcard,
                                     type = typeCH,
                                     yearMonth = paymentDetail.yearMonth,
                                     startDate = startDate,
@@ -115,7 +115,7 @@ namespace Yhsb.Jb.OtherPayment
                 row.Cell("A").SetValue(currentRow - startRow);
                 row.Cell("B").SetValue(item.region);
                 row.Cell("C").SetValue(item.name);
-                row.Cell("D").SetValue(item.idCard);
+                row.Cell("D").SetValue(item.idcard);
                 row.Cell("E").SetValue(item.type);
                 row.Cell("F").SetValue(item.yearMonth?.ToString());
                 row.Cell("G").SetValue(item.startDate?.ToString());
@@ -213,7 +213,7 @@ namespace Yhsb.Jb.OtherPayment
                     row.Cell("A").SetValue(currentRow - startRow);
                     row.Cell("B").SetValue(otherPerson.region);
                     row.Cell("C").SetValue(otherPerson.name);
-                    row.Cell("D").SetValue(otherPerson.idCard);
+                    row.Cell("D").SetValue(otherPerson.idcard);
                     row.Cell("E").SetValue(otherPerson.startYearMonth);
                     row.Cell("F").SetValue(otherPerson.standard?.ToString());
                     row.Cell("G").SetValue(otherPerson.type);
