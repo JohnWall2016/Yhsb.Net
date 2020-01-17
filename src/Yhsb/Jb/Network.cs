@@ -602,7 +602,7 @@ namespace Yhsb.Jb.Network
         public string name;
 
         [JsonProperty("sfz")]
-        public string idCard;
+        public string idcard;
 
         [JsonProperty("csrq")]
         public int birthDay;

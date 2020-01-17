@@ -57,7 +57,7 @@ namespace Yhsb.Jb.Treatment
                 using var context = new FpDbContext();
                 foreach (var data in result.Data)
                 {
-                    var idcard = data.idCard;
+                    var idcard = data.idcard;
                     var fpData = from e in context.FpRawData
                                  where e.Idcard == idcard &&
                                  (e.Type == "贫困人口" ||
@@ -69,7 +69,7 @@ namespace Yhsb.Jb.Treatment
                     {
                         var record = fpData.First();
                         WriteLine(
-                            $"{currentRow - startRow + 1} {data.idCard} {data.name} {record.Type}");
+                            $"{currentRow - startRow + 1} {data.idcard} {data.name} {record.Type}");
 
                         var qjns = data.Yjnx - data.Sjnx;
                         if (qjns < 0) qjns = 0;
@@ -78,7 +78,7 @@ namespace Yhsb.Jb.Treatment
                         row.Cell("A").SetValue(currentRow - startRow);
                         row.Cell("B").SetValue(data.xzqh);
                         row.Cell("C").SetValue(data.name);
-                        row.Cell("D").SetValue(data.idCard);
+                        row.Cell("D").SetValue(data.idcard);
                         row.Cell("E").SetValue(data.birthDay);
                         row.Cell("F").SetValue(data.sex.ToString());
                         row.Cell("G").SetValue(data.hJClass.ToString());
