@@ -81,7 +81,7 @@ namespace Yhsb.Jb.Treatment
                         row.Cell("D").SetValue(data.idcard);
                         row.Cell("E").SetValue(data.birthDay);
                         row.Cell("F").SetValue(data.sex.ToString());
-                        row.Cell("G").SetValue(data.hJClass.ToString());
+                        row.Cell("G").SetValue(data.hjClass.ToString());
                         row.Cell("H").SetValue(record.Name);
                         row.Cell("I").SetValue(record.Type);
                         row.Cell("J").SetValue(data.JBState);

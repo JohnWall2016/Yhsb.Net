@@ -637,7 +637,7 @@ namespace Yhsb.Jb.Network
         public Sex sex;
 
         [JsonProperty("aac009")]
-        public HJClass hJClass;
+        public HJClass hjClass;
 
         /// 应缴年限
         public int Yjnx
