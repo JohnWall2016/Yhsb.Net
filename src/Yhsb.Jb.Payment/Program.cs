@@ -25,9 +25,9 @@ namespace Yhsb.Jb.Payment
             Required = true, MetaName = "date")]
         public string Date { get; set; }
 
-        [Value(1, HelpText = "业务状态: 0-待支付(默认), 1-已支付",
+        [Value(1, HelpText = "业务状态: 0-待支付, 1-已支付, 默认为：所有",
             MetaName = "state")]
-        public string State { get; set; } = "0";
+        public string State { get; set; } = "";
 
         public void Execute()
         {
@@ -48,6 +48,7 @@ namespace Yhsb.Jb.Payment
 
                 session.SendService(new PaymentQuery(Date, State));
                 var result = session.GetResult<Network.Payment>();
+                result.Data.Sort((x, y) => x.NO - y.NO);
 
                 foreach (var data in result.Data)
                 {
