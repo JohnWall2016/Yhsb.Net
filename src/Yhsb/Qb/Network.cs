@@ -18,7 +18,8 @@ namespace Yhsb.Qb.Network
         string _sessionID;
 
         public Session(
-            string host, int port, string userID, string password) : base(host, port, "GBK")
+            string host, int port, string userID, string password)
+            : base(host, port, "GBK")
         {
             _userID = userID;
             _password = password;
@@ -55,7 +56,7 @@ namespace Yhsb.Qb.Network
         }
 
         public void SendInEnvelope<T>(string funid, T body)
-            where T : InData
+            where T : InData<T>
         {
             var inEnv = new InEnvelope<Funid, T>(
                 new Funid(funid, _userID, _password), body);
@@ -63,7 +64,7 @@ namespace Yhsb.Qb.Network
         }
 
         public string ToInEnvelopeString<T>(string funid, T body)
-            where T : InData
+            where T : InData<T>
         {
             var inEnv = new InEnvelope<Funid, T>(
                 new Funid(funid, _userID, _password), body);
@@ -80,85 +81,9 @@ namespace Yhsb.Qb.Network
         }
     }
 
-    public class ResultSet<T> : List<T>
-        where T : OutData<T>, new()
+    public sealed class FieldAttribute : Attribute
     {
-    }
-
-    public abstract class InData
-    {
-        static readonly XNamespace nsIn = "http://www.molss.gov.cn/";
-
-        readonly string _type;
-
-        public XElement ToElement()
-        {
-            var element = new XElement(nsIn + _type,
-                new XAttribute(XNamespace.Xmlns + "int", nsIn));
-            foreach (var minfo in GetType().GetFields())
-            {
-                if (minfo.FieldType == typeof(string))
-                {
-                    var value = minfo.GetValue(this);
-                    if (value != null)
-                    {
-                        element.Add(new XElement("para",
-                            new XAttribute(minfo.Name, value)));
-                    }
-                }
-            }
-            return element;
-        }
-
-        public InData(string type)
-        {
-            _type = type;
-        }
-    }
-
-    public class InSystem : InData
-    {
-        public InSystem() : base("system") { }
-    }
-
-    public class InBussiness : InData
-    {
-        public InBussiness() : base("bussiness") { }
-    }
-
-    public class InEnvelope<Header, Body>
-        where Header : InData
-        where Body : InData
-    {
-        static readonly XNamespace nsSoap =
-            "http://schemas.xmlsoap.org/soap/envelope/";
-
-        public Header _header;
-        public Body _body;
-
-        public InEnvelope(Header header, Body body)
-        {
-            _header = header;
-            _body = body;
-        }
-
-        public override string ToString()
-        {
-            return new XDeclaration("1.0", "GBK", null).ToString() +
-                new XDocument(
-                    new XElement(nsSoap + "Envelope",
-                        new XAttribute(XNamespace.Xmlns + "soap", nsSoap),
-                        new XAttribute(nsSoap + "encodingStyle",
-                            "http://schemas.xmlsoap.org/soap/encoding/"),
-                        new XElement(nsSoap + "Header", _header.ToElement()),
-                        new XElement(nsSoap + "Body", _body.ToElement())))
-                        .ToString(SaveOptions.DisableFormatting);
-        }
-    }
-
-    public sealed class FieldProperty : Attribute
-    {
-        public FieldProperty(string name = "")
+        public FieldAttribute(string name = "")
         {
             Name = name;
         }
@@ -168,11 +93,11 @@ namespace Yhsb.Qb.Network
         public bool Ignore { get; set; } = false;
     }
 
-    public class FieldsData<T>
+    public class FieldData<T>
     {
         static Dictionary<string, FieldInfo> _fieldsMap = null;
 
-        static FieldsData()
+        static FieldData()
         {
             if (_fieldsMap == null) LoadFieldsMap();
         }
@@ -184,7 +109,7 @@ namespace Yhsb.Qb.Network
             Type type = typeof(T);
             foreach (var field in type.GetFields())
             {
-                var attr = field.GetCustomAttribute<FieldProperty>();
+                var attr = field.GetCustomAttribute<FieldAttribute>();
                 if (attr != null)
                 {
                     if (!attr.Ignore)
@@ -208,17 +133,105 @@ namespace Yhsb.Qb.Network
                 return null;
             }
         }
+
+        public Dictionary<string, FieldInfo> FieldMap
+            => _fieldsMap ?? new Dictionary<string, FieldInfo>();
     }
 
-    public interface IXElementSerializor
+    public interface IToXElement
+    {
+        XElement ToXElement();
+    }
+
+    public abstract class InData<T> : FieldData<T>, IToXElement
+    {
+        static readonly XNamespace nsIn = "http://www.molss.gov.cn/";
+
+        readonly string _type;
+
+        public XElement ToXElement()
+        {
+            var element = new XElement(nsIn + _type,
+                new XAttribute(XNamespace.Xmlns + "int", nsIn));
+            foreach (var (name, finfo) in FieldMap)
+            {
+                if (finfo.FieldType == typeof(string))
+                {
+                    var value = finfo.GetValue(this);
+                    if (value != null)
+                    {
+                        element.Add(new XElement("para",
+                            new XAttribute(name, value)));
+                    }
+                }
+            }
+            return element;
+        }
+
+        public InData(string type)
+        {
+            _type = type;
+        }
+    }
+
+    public class InSystem<T> : InData<T>
+    {
+        public InSystem() : base("system") { }
+    }
+
+    public class InBussiness<T> : InData<T>
+    {
+        public InBussiness() : base("bussiness") { }
+    }
+
+    public class InEnvelope<Header, Body>
+        where Header : InData<Header>
+        where Body : InData<Body>
+    {
+        static readonly XNamespace nsSoap =
+            "http://schemas.xmlsoap.org/soap/envelope/";
+
+        public Header _header;
+        public Body _body;
+
+        public InEnvelope(Header header, Body body)
+        {
+            _header = header;
+            _body = body;
+        }
+
+        public override string ToString()
+        {
+            return new XDeclaration("1.0", "GBK", null).ToString() +
+                new XDocument(
+                    new XElement(nsSoap + "Envelope",
+                        new XAttribute(XNamespace.Xmlns + "soap", nsSoap),
+                        new XAttribute(nsSoap + "encodingStyle",
+                            "http://schemas.xmlsoap.org/soap/encoding/"),
+                        new XElement(nsSoap + "Header", _header.ToXElement()),
+                        new XElement(nsSoap + "Body", _body.ToXElement())))
+                        .ToString(SaveOptions.DisableFormatting);
+        }
+    }
+
+    public interface IFromXElement
     {
         void FromXElement(XElement element);
     }
 
-    public abstract class OutData<T> : FieldsData<T>, IXElementSerializor
+    public abstract class OutData<T> : FieldData<T>, IFromXElement
     {
         public void FromXElement(XElement element)
         {
+            if (element.Name == "row")
+            {
+                foreach (var a in element.Attributes())
+                {
+                    var f = GetField(a.Name.LocalName);
+                    f?.SetValue(this, a.Value);
+                }
+            }
+
             foreach (var elem in element.Elements())
             {
                 if (elem.Name == "result")
@@ -246,7 +259,7 @@ namespace Yhsb.Qb.Network
                                 foreach (var e in elem.Elements())
                                 {
                                     var obj = subType.GetConstructor(new Type[0])
-                                        .Invoke(null) as IXElementSerializor;
+                                        .Invoke(null) as IFromXElement;
                                     obj.FromXElement(e);
                                     rsType.GetMethod("Add").Invoke(resultSet, new[] { obj });
                                 }
@@ -255,16 +268,13 @@ namespace Yhsb.Qb.Network
                         }
                     }
                 }
-                else if (elem.Name == "row")
-                {
-                    foreach (var a in elem.Attributes())
-                    {
-                        var f = GetField(a.Name.LocalName);
-                        f?.SetValue(this, a.Value);
-                    }
-                }
             }
         }
+    }
+
+    public class ResultSet<T> : List<T>
+        where T : OutData<T>, new()
+    {
     }
 
     public class OutHeader : OutData<OutHeader>
@@ -273,17 +283,22 @@ namespace Yhsb.Qb.Network
         public string message;
     }
 
-    public class OutBusiness : OutData<OutBusiness>
+    public class OutBusiness<T> : OutData<T>
     {
         public string result;
-        public string row_count;
-        public string querysql;
+
+        [Field("row_count")]
+        public string rowCount;
+
+        [Field("querysql")]
+        public string querySql;
     }
 
-    public class QueryList<T> : OutBusiness
+    public class QueryList<T> : OutBusiness<QueryList<T>>
         where T : OutData<T>, new()
     {
-        public ResultSet<T> querylist;
+        [Field("querylist")]
+        public ResultSet<T> queryList;
     }
 
     public class OutEnvelope<OutBody>
@@ -308,21 +323,30 @@ namespace Yhsb.Qb.Network
             Body = new OutBody();
             Body.FromXElement(@out);
         }
-    }
 
-    public class LoginInfo : InSystem
-    {
-        public string usr;
-        public string pwd;
-
-        public LoginInfo(string user, string password)
+        public void Deconstruct(out OutHeader header, out OutBody body)
         {
-            usr = user;
-            pwd = password;
+            header = Header;
+            body = Body;
         }
     }
 
-    public class Funid : LoginInfo
+    public class LoginInfo<T> : InSystem<T>
+    {
+        [Field("usr")]
+        public string user;
+
+        [Field("pwd")]
+        public string password;
+
+        public LoginInfo(string user, string password)
+        {
+            this.user = user;
+            this.password = password;
+        }
+    }
+
+    public class Funid : LoginInfo<Funid>
     {
         public string funid;
 
@@ -333,28 +357,46 @@ namespace Yhsb.Qb.Network
         }
     }
 
-    public class SncbryQuery : InBussiness
+    public class SncbryQuery : InBussiness<SncbryQuery>
     {
-        public string startrow = "1";
-        public string row_count = "-1";
-        public string pagesize = "500";
-        public string clientsql;
-        public string functionid = "F27.06";
+        [Field("startrow")]
+        public string startRow = "1";
+
+        [Field("row_count")]
+        public string rowCount = "-1";
+
+        [Field("pagesize")]
+        public string pageSize = "500";
+
+        [Field("clientsql")]
+        public string clientSql;
+
+        [Field("functionid")]
+        public string functionID = "F27.06";
 
         public SncbryQuery(string idcard)
         {
-            clientsql = $"( aac002 = &apos;{idcard}&apos;)";
+            clientSql = $"( aac002 = &apos;{idcard}&apos;)";
         }
     }
 
-    public class Sncbry
+    public class Sncbry : OutData<Sncbry>
     {
-        public string aac003;
-        public string rown;
+        [Field("rown")]
+        public string rowNO;
+
+        [Field("aac002")]
+        public string idcard;
+
+        [Field("aac003")]
+        public string name;
+
         public string aac008;
-        public string aab300;
+
+        [Field("aab300")]
+        public string agency;
+
         public string sac007;
         public string aac031;
-        public string aac002;
     }
 }
