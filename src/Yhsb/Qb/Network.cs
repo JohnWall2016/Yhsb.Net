@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
+using System;
+using System.Reflection;
 
 using static System.Console;
 
@@ -69,7 +71,7 @@ namespace Yhsb.Qb.Network
         }
 
         public OutEnvelope<T> GetOutEnvelope<T>()
-            where T : OutData, new()
+            where T : OutData<T>, new()
         {
             var result = ReadBody();
             var doc = XDocument.Load(new StringReader(result));
@@ -79,7 +81,7 @@ namespace Yhsb.Qb.Network
     }
 
     public class ResultSet<T> : List<T>
-        where T : new()
+        where T : OutData<T>, new()
     {
     }
 
@@ -116,19 +118,19 @@ namespace Yhsb.Qb.Network
 
     public class InSystem : InData
     {
-        public InSystem() : base("system") {}
+        public InSystem() : base("system") { }
     }
 
     public class InBussiness : InData
     {
-        public InBussiness() : base("bussiness") {}
+        public InBussiness() : base("bussiness") { }
     }
 
-    public class InEnvelope<Header, Body> 
+    public class InEnvelope<Header, Body>
         where Header : InData
         where Body : InData
     {
-        static readonly XNamespace nsSoap = 
+        static readonly XNamespace nsSoap =
             "http://schemas.xmlsoap.org/soap/envelope/";
 
         public Header _header;
@@ -146,7 +148,7 @@ namespace Yhsb.Qb.Network
                 new XDocument(
                     new XElement(nsSoap + "Envelope",
                         new XAttribute(XNamespace.Xmlns + "soap", nsSoap),
-                        new XAttribute(nsSoap + "encodingStyle", 
+                        new XAttribute(nsSoap + "encodingStyle",
                             "http://schemas.xmlsoap.org/soap/encoding/"),
                         new XElement(nsSoap + "Header", _header.ToElement()),
                         new XElement(nsSoap + "Body", _body.ToElement())))
@@ -154,64 +156,124 @@ namespace Yhsb.Qb.Network
         }
     }
 
-    public abstract class OutData
+    public sealed class FieldProperty : Attribute
+    {
+        public FieldProperty(string name = "")
+        {
+            Name = name;
+        }
+
+        public string Name { get; set; }
+
+        public bool Ignore { get; set; } = false;
+    }
+
+    public class FieldsData<T>
+    {
+        static Dictionary<string, FieldInfo> _fieldsMap = null;
+
+        static FieldsData()
+        {
+            if (_fieldsMap == null) LoadFieldsMap();
+        }
+
+        static void LoadFieldsMap()
+        {
+            _fieldsMap = new Dictionary<string, FieldInfo>();
+
+            Type type = typeof(T);
+            foreach (var field in type.GetFields())
+            {
+                var attr = field.GetCustomAttribute<FieldProperty>();
+                if (attr != null)
+                {
+                    if (!attr.Ignore)
+                        _fieldsMap[attr.Name] = field;
+                }
+                else
+                {
+                    _fieldsMap[field.Name] = field;
+                }
+            }
+        }
+
+        protected static FieldInfo GetField(string name)
+        {
+            if (_fieldsMap.TryGetValue(name, out var field))
+            {
+                return field;
+            }
+            else
+            {
+                return null;
+            }
+        }
+    }
+
+    public interface IXElementSerializor
+    {
+        void FromXElement(XElement element);
+    }
+
+    public abstract class OutData<T> : FieldsData<T>, IXElementSerializor
     {
         public void FromXElement(XElement element)
         {
-            var type = GetType();
-            foreach(var elem in element.Elements())
+            foreach (var elem in element.Elements())
             {
                 if (elem.Name == "result")
                 {
                     var attr = elem.Attributes().FirstOrDefault();
-                    var field = type.GetField(attr.Name.LocalName);
+                    var field = GetField(attr.Name.LocalName);
                     field?.SetValue(this, attr.Value);
                 }
                 else if (elem.Name == "resultset")
                 {
-                    var attr = elem.Attributes().FirstOrDefault();
-                    if (attr.Name.LocalName == "name")
-                    {
-                        var field = type.GetField(attr.Value);
-                        if (field != null)
-                        {
-                            var rsType = field.FieldType;
-                            if (rsType.IsGenericType)
-                            {
-                                if (rsType.GetGenericTypeDefinition() == typeof(ResultSet<>))
-                                {
-                                    var resultSet = rsType.GetConstructor(
-                                        new System.Type[0]).Invoke(null);
+                    var attr = elem.Attributes().FirstOrDefault(a => a.Name.LocalName == "name");
 
-                                    var subType = rsType.GetGenericArguments()[0];
-                                    foreach (var e in elem.Elements())
-                                    {
-                                        var obj = subType.GetConstructor(
-                                            new System.Type[0]).Invoke(null);
-                                        foreach (var a in e.Attributes())
-                                        {
-                                            var f = subType.GetField(a.Name.LocalName);
-                                            f?.SetValue(obj, a.Value);
-                                        }
-                                        rsType.GetMethod("Add").Invoke(resultSet, new []{obj});
-                                    }
-                                    field.SetValue(this, resultSet);
+                    var field = GetField(attr.Value);
+                    if (field != null)
+                    {
+                        var rsType = field.FieldType;
+                        if (rsType.IsGenericType)
+                        {
+                            if (rsType.GetGenericTypeDefinition() == typeof(ResultSet<>))
+                            {
+                                var resultSet = rsType.GetConstructor(
+                                    new System.Type[0]).Invoke(null);
+
+                                var subType = rsType.GetGenericArguments()[0];
+                                foreach (var e in elem.Elements())
+                                {
+                                    var obj = subType.GetConstructor(
+                                        new System.Type[0]).Invoke(null) as IXElementSerializor;
+                                    obj.FromXElement(e);
+                                    rsType.GetMethod("Add").Invoke(resultSet, new[] { obj });
                                 }
+                                field.SetValue(this, resultSet);
                             }
                         }
+                    }
+                }
+                else if (elem.Name == "row")
+                {
+                    foreach (var a in elem.Attributes())
+                    {
+                        var f = GetField(a.Name.LocalName);
+                        f?.SetValue(this, a.Value);
                     }
                 }
             }
         }
     }
 
-    public class OutHeader : OutData
+    public class OutHeader : OutData<OutHeader>
     {
         public string sessionID;
         public string message;
     }
 
-    public class OutBusiness : OutData
+    public class OutBusiness : OutData<OutBusiness>
     {
         public string result;
         public string row_count;
@@ -219,13 +281,13 @@ namespace Yhsb.Qb.Network
     }
 
     public class QueryList<T> : OutBusiness
-        where T : new()
+        where T : OutData<T>, new()
     {
         public ResultSet<T> querylist;
     }
 
     public class OutEnvelope<OutBody>
-        where OutBody : OutData, new()
+        where OutBody : OutData<OutBody>, new()
     {
         public OutHeader Header { get; }
         public OutBody Body { get; }
@@ -270,7 +332,7 @@ namespace Yhsb.Qb.Network
             this.funid = funid;
         }
     }
-    
+
     public class SncbryQuery : InBussiness
     {
         public string startrow = "1";
@@ -295,5 +357,4 @@ namespace Yhsb.Qb.Network
         public string aac031;
         public string aac002;
     }
-    
 }
