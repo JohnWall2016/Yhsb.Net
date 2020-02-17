@@ -229,7 +229,8 @@ namespace Yhsb.Qb.Network
                 }
                 else if (elem.Name == "resultset")
                 {
-                    var attr = elem.Attributes().FirstOrDefault(a => a.Name.LocalName == "name");
+                    var attr = elem.Attributes().FirstOrDefault(
+                        a => a.Name.LocalName == "name");
 
                     var field = GetField(attr.Value);
                     if (field != null)
@@ -239,14 +240,13 @@ namespace Yhsb.Qb.Network
                         {
                             if (rsType.GetGenericTypeDefinition() == typeof(ResultSet<>))
                             {
-                                var resultSet = rsType.GetConstructor(
-                                    new System.Type[0]).Invoke(null);
+                                var resultSet = rsType.GetConstructor(new Type[0]).Invoke(null);
 
                                 var subType = rsType.GetGenericArguments()[0];
                                 foreach (var e in elem.Elements())
                                 {
-                                    var obj = subType.GetConstructor(
-                                        new System.Type[0]).Invoke(null) as IXElementSerializor;
+                                    var obj = subType.GetConstructor(new Type[0])
+                                        .Invoke(null) as IXElementSerializor;
                                     obj.FromXElement(e);
                                     rsType.GetMethod("Add").Invoke(resultSet, new[] { obj });
                                 }
