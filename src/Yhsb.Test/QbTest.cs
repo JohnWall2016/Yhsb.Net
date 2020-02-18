@@ -1,4 +1,5 @@
 using Yhsb.Qb.Network;
+using System.Linq;
 
 using static System.Console;
 
@@ -20,6 +21,11 @@ public class QbTest
 
             WriteLine(body.XmlData);
             WriteLine(body);
+
+            if (body.queryList.Any())
+            {
+                WriteLine(body.queryList[0]);
+            }
         });
     }
 }

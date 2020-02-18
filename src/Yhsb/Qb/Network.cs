@@ -156,6 +156,7 @@ namespace Yhsb.Qb.Network
         public bool Ignore { get; set; } = false;
     }
 
+
     public class FieldData<T>
     {
         static Dictionary<string, FieldInfo> _fieldsMap = null;
@@ -355,6 +356,36 @@ namespace Yhsb.Qb.Network
         void FromXElement(XElement element);
     }
 
+    public class CustomField
+    {
+        public string Value { get; set; } = default;
+        
+        public virtual string Name => $"{Value}";
+
+        public override string ToString() => Name;
+    }
+
+    public static class FieldInfoExtension
+    {
+        public static void SetCustomValue(this FieldInfo info, object obj, string value)
+        {
+            if (info.FieldType.IsSubclassOf(typeof(CustomField)))
+            {
+                var constructor = info.FieldType.GetConstructor(new Type[0]);
+                if (constructor != null)
+                {
+                    var field = constructor.Invoke(null) as CustomField;
+                    field.Value = value;
+                    info.SetValue(obj, field);
+                }
+            }
+            else if (info.FieldType.IsAssignableFrom(typeof(string)))
+            {
+                info.SetValue(obj, value);
+            }
+        }
+    }
+
     public class OutData<T> : FieldData<T>, IFromXElement
     {
         public string XmlData { get; private set; }
@@ -368,7 +399,7 @@ namespace Yhsb.Qb.Network
                 foreach (var a in element.Attributes())
                 {
                     var f = GetField(a.Name.LocalName);
-                    f?.SetValue(this, a.Value);
+                    f?.SetCustomValue(this, a.Value);
                 }
             }
 
@@ -378,7 +409,7 @@ namespace Yhsb.Qb.Network
                 {
                     var attr = elem.Attributes().FirstOrDefault();
                     var field = GetField(attr.Name.LocalName);
-                    field?.SetValue(this, attr.Value);
+                    field?.SetCustomValue(this, attr.Value);
                 }
                 else if (elem.Name == "resultset")
                 {
@@ -444,7 +475,7 @@ namespace Yhsb.Qb.Network
         where T : OutData<T>, new()
     {
         [Field("querylist")]
-        public ResultSet<T> queryList;
+        public ResultSet<T> queryList = new ResultSet<T>();
     }
 
     public class OutEnvelope<OutBody>
@@ -523,6 +554,41 @@ namespace Yhsb.Qb.Network
         }
     }
 
+    /// 社会保险状态
+    public class SBState : CustomField
+    {
+        public override string Name => Value switch
+        {
+            "1" => "在职",
+            "2" => "退休",
+            "4" => "终止",
+            _ => $"未知值: {Value}"
+        };
+    }
+
+    /// 参保状态
+    public class CBState : CustomField
+    {
+        public override string Name => Value switch
+        {
+            "1" => "参保缴费",
+            "2" => "暂停缴费",
+            "3" => "终止缴费",
+            _ => $"未知值: {Value}"
+        };
+    }
+
+    /// 缴费人员类别
+    public class JFClass : CustomField
+    {
+        public override string Name => Value switch
+        {
+            "102" => "个体缴费",
+            "101" => "单位在业人员",
+            _ => $"未知值: {Value}"
+        };
+    }
+
     public class Sncbry : OutData<Sncbry>
     {
         [Field("rown")]
@@ -534,12 +600,16 @@ namespace Yhsb.Qb.Network
         [Field("aac003")]
         public string name;
 
-        public string aac008;
+        [Field("aac008")]
+        public SBState sbState;
 
         [Field("aab300")]
         public string agency;
 
-        public string sac007;
-        public string aac031;
+        [Field("sac007")]
+        public JFClass jfClass;
+
+        [Field("aac031")]
+        public CBState cbState;
     }
 }
