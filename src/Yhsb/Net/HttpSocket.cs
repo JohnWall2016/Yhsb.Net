@@ -13,16 +13,18 @@ namespace Yhsb.Net
         readonly int _port;
         TcpClient _client;
         NetworkStream _stream;
-        readonly Encoding _encoding;
-
         public string Url => $"{_host}:{_port}";
+
+        public Encoding Encoding { get; }
 
         public HttpSocket(
             string host, int port, string encoding = "utf-8")
         {
             _host = host;
             _port = port;
-            _encoding = Encoding.GetEncoding(encoding);
+
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            Encoding = Encoding.GetEncoding(encoding);
 
             _client = new TcpClient(host, port);
             _stream = _client.GetStream();
@@ -44,7 +46,7 @@ namespace Yhsb.Net
 
         public void Write(byte[] buffer) => _stream.Write(buffer);
 
-        public void Write(String s) => _stream.Write(_encoding.GetBytes(s));
+        public void Write(String s) => _stream.Write(Encoding.GetBytes(s));
 
         public (byte[] buffer, int length) Read(int size)
         {
@@ -87,7 +89,7 @@ namespace Yhsb.Net
                     stream.WriteByte((byte)c);
                 }
             }
-            return _encoding.GetString(
+            return Encoding.GetString(
                 stream.GetBuffer(), 0, (int)stream.Length);
         }
 
@@ -148,7 +150,7 @@ namespace Yhsb.Net
             {
                 throw new Exception("Unsupported transfer mode");
             }
-            return _encoding.GetString(stream.GetBuffer(), 0, (int)stream.Length);
+            return Encoding.GetString(stream.GetBuffer(), 0, (int)stream.Length);
         }
 
         public string GetHttp(string path, string encoding = "utf-8")

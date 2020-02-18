@@ -11,11 +11,10 @@ public class XmlTest
         var element = new SncbryQuery("430302195806251012").ToXElement();
         WriteLine(element);
 
-        WriteLine(new Funid("F00.01.03", "hqm", "YLZ_A2A5F63315129CB2998A0E0FCE31BA51").ToXElement());
+        WriteLine(new InEnvelope<SncbryQuery>(
+          new SncbryQuery("430302195806251012"), "hqm", "YLZ_A2A5F63315129CB2998A0E0FCE31BA51"));
 
-        WriteLine(new InEnvelope<Funid, SncbryQuery>(
-            new Funid("F00.01.03", "hqm", "YLZ_A2A5F63315129CB2998A0E0FCE31BA51"),
-            new SncbryQuery("430302195806251012")));
+        WriteLine(new InEnvelope<Login>(new Login(), "hqm", "YLZ_A2A5F63315129CB2998A0E0FCE31BA51"));
 
         var doc = XDocument.Load(new StringReader(xmlResult));
         var (header, body) = new OutEnvelope<QueryList<Sncbry>>(doc);

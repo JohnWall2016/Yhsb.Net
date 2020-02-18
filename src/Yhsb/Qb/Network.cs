@@ -1,9 +1,13 @@
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Xml.Linq;
 using System;
+using System.IO;
+using System.Xml;
+using System.Linq;
+using System.Text;
+using System.Xml.Linq;
 using System.Reflection;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using System.Xml.Serialization;
 
 using static System.Console;
 
@@ -15,7 +19,7 @@ namespace Yhsb.Qb.Network
     {
         readonly string _userID;
         readonly string _password;
-        string _sessionID;
+        readonly Dictionary<string, string> _cookies;
 
         public Session(
             string host, int port, string userID, string password)
@@ -23,6 +27,7 @@ namespace Yhsb.Qb.Network
         {
             _userID = userID;
             _password = password;
+            _cookies = new Dictionary<string, string>();
         }
 
         HttpRequest CreateRequest()
@@ -34,10 +39,10 @@ namespace Yhsb.Qb.Network
                 .AddHeader("Host", Url)
                 .AddHeader("Connection", "Keep-Alive")
                 .AddHeader("Cache-Control", "no-cache");
-            if (_sessionID != null)
+            if (_cookies.Any())
             {
                 request.AddHeader(
-                    "Cookie", $"JSESSIONID={_sessionID}");
+                    "Cookie", string.Join("; ", _cookies.Select(e => $"{e.Key}={e.Value}")));
             }
             return request;
         }
@@ -49,25 +54,25 @@ namespace Yhsb.Qb.Network
             return request;
         }
 
-        void Request(string content)
+        public void Request(string content)
         {
             var request = BuildRequest(content);
+
+            // WriteLine($"Request: {Encoding.GetString(request.ToArray())}");
+
             Write(request.ToArray());
         }
 
-        public void SendInEnvelope<T>(string funid, T body)
-            where T : InData<T>
+        public void SendInEnvelope<T>(T body)
+            where T : InBody<T>
         {
-            var inEnv = new InEnvelope<Funid, T>(
-                new Funid(funid, _userID, _password), body);
-            Request(inEnv.ToString());
+            Request(ToInEnvelopeString(body));
         }
 
-        public string ToInEnvelopeString<T>(string funid, T body)
-            where T : InData<T>
+        public string ToInEnvelopeString<T>(T body)
+            where T : InBody<T>
         {
-            var inEnv = new InEnvelope<Funid, T>(
-                new Funid(funid, _userID, _password), body);
+            var inEnv = new InEnvelope<T>(body, _userID, _password);
             return inEnv.ToString();
         }
 
@@ -75,9 +80,67 @@ namespace Yhsb.Qb.Network
             where T : OutData<T>, new()
         {
             var result = ReadBody();
-            var doc = XDocument.Load(new StringReader(result));
+
+            // WriteLine($"GetOutEnvelope: {result}");
+
+            return FromOutEnvelope<T>(result);
+        }
+
+        public OutEnvelope<T> FromOutEnvelope<T>(string xml)
+            where T : OutData<T>, new()
+        {
+            var doc = XDocument.Load(new StringReader(xml));
             var outEnv = new OutEnvelope<T>(doc);
             return outEnv;
+        }
+
+        public OutEnvelope<LoginInfo> Login()
+        {
+            SendInEnvelope(new Login());
+            var header = ReadHeader();
+            if (header.TryGetValue("set-cookie", out var cookies))
+            {
+                cookies.ForEach(cookie =>
+                {
+                    var match = Regex.Match(cookie, @"([^=]+?)=(.+?);");
+                    if (match.Success)
+                    {
+                        _cookies[match.Groups[1].Value] = match.Groups[2].Value;
+                    }
+                });
+            }
+            return FromOutEnvelope<LoginInfo>(ReadBody(header));
+        }
+
+        public void Logout()
+        {
+
+        }
+
+        public static void Use(
+            Action<Session> action, string user = "ssb")
+        {
+            using var session = new Session(
+                _internal.Session.Host,
+                _internal.Session.Port,
+                _internal.Session.Users[user].ID,
+                _internal.Session.Users[user].Pwd);
+            session.Login();
+            action(session);
+            session.Logout();
+        }
+
+        public static void Use(
+            Action<Session, LoginInfo> action, string user = "ssb")
+        {
+            using var session = new Session(
+                _internal.Session.Host,
+                _internal.Session.Port,
+                _internal.Session.Users[user].ID,
+                _internal.Session.Users[user].Pwd);
+            var info = session.Login();
+            action(session, info.Body);
+            session.Logout();
         }
     }
 
@@ -136,6 +199,13 @@ namespace Yhsb.Qb.Network
 
         public Dictionary<string, FieldInfo> FieldMap
             => _fieldsMap ?? new Dictionary<string, FieldInfo>();
+
+        public override string ToString()
+        {
+            var fields = string.Join(
+                ", ", FieldMap.Select((m) => $"{m.Value.Name}: {m.Value.GetValue(this)}"));
+            return $"({this.GetType()}: {{ {fields} }})";
+        }
     }
 
     public interface IToXElement
@@ -149,10 +219,10 @@ namespace Yhsb.Qb.Network
 
         readonly string _type;
 
-        public XElement ToXElement()
+        public virtual XElement ToXElement()
         {
             var element = new XElement(nsIn + _type,
-                new XAttribute(XNamespace.Xmlns + "int", nsIn));
+                new XAttribute(XNamespace.Xmlns + "in", nsIn));
             foreach (var (name, finfo) in FieldMap)
             {
                 if (finfo.FieldType == typeof(string))
@@ -181,28 +251,78 @@ namespace Yhsb.Qb.Network
 
     public class InBussiness<T> : InData<T>
     {
-        public InBussiness() : base("bussiness") { }
+        public InBussiness() : base("business") { }
     }
 
-    public class InEnvelope<Header, Body>
-        where Header : InData<Header>
-        where Body : InData<Body>
+    public class InHeader : InSystem<InHeader>
+    {
+        [Field("usr")]
+        public string user;
+
+        [Field("pwd")]
+        public string password;
+
+        public string funid;
+
+        public InHeader(string funid, string user, string password)
+        {
+            this.user = user;
+            this.password = password;
+            this.funid = funid;
+        }
+    }
+
+    public class InBody<T> : InBussiness<T>
+    {
+        public string FunID { get; set; } = "";
+
+        public InBody(string funID)
+        {
+            FunID = funID;
+        }
+    }
+
+    public class InFunction<T> : InBody<T>
+    {
+        [Field("functionid")]
+        public string functionID = "";
+
+        public InFunction(string funID, string functionID) : base(funID)
+        {
+            this.functionID = functionID;
+        }
+    }
+
+    class XmlRawTextWriter : XmlTextWriter
+    {
+        public XmlRawTextWriter(TextWriter writer)
+            : base(writer)
+        {
+        }
+
+        public override void WriteString(string text)
+        {
+            base.WriteRaw(text);
+        }
+    }
+
+    public class InEnvelope<Body> where Body : InBody<Body>
     {
         static readonly XNamespace nsSoap =
             "http://schemas.xmlsoap.org/soap/envelope/";
 
-        public Header _header;
+        public InHeader _header;
         public Body _body;
 
-        public InEnvelope(Header header, Body body)
+        public InEnvelope(Body body, string user, string password)
         {
-            _header = header;
+            _header = new InHeader(body.FunID, user, password);
             _body = body;
         }
 
         public override string ToString()
         {
-            return new XDeclaration("1.0", "GBK", null).ToString() +
+            /*return new XDeclaration("1.0", "GBK", null).ToString() +
                 new XDocument(
                     new XElement(nsSoap + "Envelope",
                         new XAttribute(XNamespace.Xmlns + "soap", nsSoap),
@@ -210,7 +330,23 @@ namespace Yhsb.Qb.Network
                             "http://schemas.xmlsoap.org/soap/encoding/"),
                         new XElement(nsSoap + "Header", _header.ToXElement()),
                         new XElement(nsSoap + "Body", _body.ToXElement())))
-                        .ToString(SaveOptions.DisableFormatting);
+                        .ToString(SaveOptions.DisableFormatting);*/
+
+            var w = new StringWriter();
+            w.Write(new XDeclaration("1.0", "GBK", null));
+
+            using XmlWriter xw = new XmlRawTextWriter(w);
+            IXmlSerializable ser = new XElement(nsSoap + "Envelope",
+                    new XAttribute(XNamespace.Xmlns + "soap", nsSoap),
+                    new XAttribute(nsSoap + "encodingStyle",
+                    "http://schemas.xmlsoap.org/soap/encoding/"),
+                    new XElement(nsSoap + "Header", _header.ToXElement()),
+                    new XElement(nsSoap + "Body", _body.ToXElement())
+                );
+            ser.WriteXml(xw);
+
+            var result = w.ToString();
+            return result;
         }
     }
 
@@ -219,10 +355,14 @@ namespace Yhsb.Qb.Network
         void FromXElement(XElement element);
     }
 
-    public abstract class OutData<T> : FieldData<T>, IFromXElement
+    public class OutData<T> : FieldData<T>, IFromXElement
     {
+        public string XmlData { get; private set; }
+
         public void FromXElement(XElement element)
         {
+            XmlData = element.ToString();
+
             if (element.Name == "row")
             {
                 foreach (var a in element.Attributes())
@@ -275,12 +415,18 @@ namespace Yhsb.Qb.Network
     public class ResultSet<T> : List<T>
         where T : OutData<T>, new()
     {
+        public override string ToString()
+        {
+            return $"[{string.Join(", ", this)}]";
+        }
     }
 
     public class OutHeader : OutData<OutHeader>
     {
         public string sessionID;
         public string message;
+        public string username;
+        public string producttype;
     }
 
     public class OutBusiness<T> : OutData<T>
@@ -331,33 +477,33 @@ namespace Yhsb.Qb.Network
         }
     }
 
-    public class LoginInfo<T> : InSystem<T>
+    public class Login : InBody<Login>
     {
+        public Login() : base(
+            "F00.00.00.00|192.168.1.110|PC-20170427DGON|00-05-0F-08-1A-34")
+        {
+        }
+    }
+
+    public class LoginInfo : OutData<LoginInfo>
+    {
+        [Field("operator_name")]
+        public string name;
+
         [Field("usr")]
         public string user;
 
-        [Field("pwd")]
-        public string password;
+        [Field("login_name")]
+        public string loginName;
 
-        public LoginInfo(string user, string password)
-        {
-            this.user = user;
-            this.password = password;
-        }
+        [Field("sab090")]
+        public string agencyName;
+
+        [Field("grbhqz")]
+        public string agencyCode;
     }
 
-    public class Funid : LoginInfo<Funid>
-    {
-        public string funid;
-
-        public Funid(string funid, string user, string password)
-            : base(user, password)
-        {
-            this.funid = funid;
-        }
-    }
-
-    public class SncbryQuery : InBussiness<SncbryQuery>
+    public class SncbryQuery : InFunction<SncbryQuery>
     {
         [Field("startrow")]
         public string startRow = "1";
@@ -371,10 +517,7 @@ namespace Yhsb.Qb.Network
         [Field("clientsql")]
         public string clientSql;
 
-        [Field("functionid")]
-        public string functionID = "F27.06";
-
-        public SncbryQuery(string idcard)
+        public SncbryQuery(string idcard) : base("F00.01.03", "F27.06")
         {
             clientSql = $"( aac002 = &apos;{idcard}&apos;)";
         }

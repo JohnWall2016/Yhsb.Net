@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Web;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
@@ -14,13 +15,14 @@ namespace Yhsb.Jb.Network
     {
         readonly string _userID;
         readonly string _password;
-        string _sessionID, _cxCookie;
+        Dictionary<string, string> _cookies;
 
         public Session(
             string host, int port, string userID, string password) : base(host, port)
         {
             _userID = userID;
             _password = password;
+            _cookies = new Dictionary<string, string>();
         }
 
         HttpRequest CreateRequest()
@@ -38,10 +40,10 @@ namespace Yhsb.Jb.Network
                 .AddHeader("Referer", $"http://{Url}/hncjb/pages/html/index.html")
                 .AddHeader("Accept-Encoding", "gzip, deflate")
                 .AddHeader("Accept-Language", "zh-CN,zh;q=0.8");
-            if (_sessionID != null)
+            if (_cookies.Any())
             {
                 request.AddHeader(
-                    "Cookie", $"jsessionid_ylzcbp={_sessionID}; cxcookie={_cxCookie}");
+                    "Cookie",  string.Join("; ", _cookies.Select(e => $"{e.Key}={e.Value}")));
             }
             return request;
         }
@@ -89,22 +91,17 @@ namespace Yhsb.Jb.Network
         {
             SendService("loadCurrentUser");
             var header = ReadHeader();
-            var cookies = header["set-cookie"];
-            cookies?.ForEach(cookie =>
+            if (header.TryGetValue("set-cookie", out var cookies))
             {
-                var match = Regex.Match(cookie, @"jsessionid_ylzcbp=(.+?);");
-                if (match.Success)
+                cookies.ForEach(cookie =>
                 {
-                    _sessionID = match.Groups[1].Value;
-                    return;
-                }
-                match = Regex.Match(cookie, @"cxcookie=(.+?);");
-                if (match.Success)
-                {
-                    _cxCookie = match.Groups[1].Value;
-                    return;
-                }
-            });
+                    var match = Regex.Match(cookie, @"([^=]+?)=(.+?);");
+                    if (match.Success)
+                    {
+                        _cookies[match.Groups[1].Value] = match.Groups[2].Value;
+                    }
+                });
+            }
             ReadBody(header);
 
             SendService(new Syslogin(_userID, _password));
