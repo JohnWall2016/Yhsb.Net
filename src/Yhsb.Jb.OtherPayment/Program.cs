@@ -157,7 +157,7 @@ namespace Yhsb.Jb.OtherPayment
             var sheet = workbook.GetSheetAt(0);
 
             int startRow = 3, currentRow = 3;
-            decimal sum = 0;
+            decimal sum = 0, payedSum = 0;
 
             var date = DateTime.Now.ToString("yyyyMMdd");
             var dateCH = DateTime.Now.ToString("yyyy年M月d日");
@@ -221,7 +221,11 @@ namespace Yhsb.Jb.OtherPayment
                     row.Cell("I").SetValue(otherPerson.jbState.Name);
                     row.Cell("J").SetValue(otherPerson.endYearMonth?.ToString());
                     if (otherPerson.totalPayed != null)
-                        row.Cell("K").SetValue((decimal)otherPerson.totalPayed);
+                    {
+                        var payed = (decimal)otherPerson.totalPayed;
+                        row.Cell("K").SetValue(payed);
+                        payedSum += payed;
+                    }
                     row.Cell("L").SetValue(payAmount);
 
                     sum += payAmount;
@@ -233,7 +237,8 @@ namespace Yhsb.Jb.OtherPayment
             trow.Cell("C").SetValue("共计");
             trow.Cell("D").SetValue(currentRow - startRow);
             trow.Cell("F").SetValue("");
-            trow.Cell("K").SetValue("合计");
+            trow.Cell("J").SetValue("合计");
+            trow.Cell("K").SetValue(payedSum);
             trow.Cell("L").SetValue(sum);
 
             if (!All)
