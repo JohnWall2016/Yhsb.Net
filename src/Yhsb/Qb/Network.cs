@@ -283,18 +283,7 @@ namespace Yhsb.Qb.Network
         }
     }
 
-    public class InFunction<T> : InBody<T>
-    {
-        [Field("functionid")]
-        public string functionID = "";
-
-        public InFunction(string funID, string functionID) : base(funID)
-        {
-            this.functionID = functionID;
-        }
-    }
-    
-    public class RowQuery<T> : InFunction<T>
+    public class ClientSqlQuery<T> : InBody<T>
     {
         [Field("startrow")]
         public string startRow = "1";
@@ -308,23 +297,17 @@ namespace Yhsb.Qb.Network
         [Field("clientsql")]
         public string clientSql;
 
-        public RowQuery(string funID, string functionID)
-            : base(funID, functionID)
-        {}
-    }
+        [Field("functionid")]
+        public string functionID = "";
 
-    public class InAddFid<T> : InBody<T>
-    {
-        [Field("fid")]
-        public string fID = "";
-
-        public InAddFid(string funID, string fID) : base(funID)
+        public ClientSqlQuery(string funID, string functionID)
+            : base(funID)
         {
-            this.fID = fID;
+            this.functionID = functionID;
         }
     }
 
-    public class Query<T> : InAddFid<T>
+    public class AddSqlQuery<T> : InBody<T>
     {
         [Field("pagesize")]
         public string pageSize = "0";
@@ -334,9 +317,14 @@ namespace Yhsb.Qb.Network
 
         public string begin = "0";
 
-        public Query(string funID, string functionID)
-            : base(funID, functionID)
-        {}
+        [Field("fid")]
+        public string fID = "";
+
+        public AddSqlQuery(string funID, string fID)
+            : base(funID)
+        {
+            this.fID = fID;
+        }
     }
 
     class XmlRawTextWriter : XmlTextWriter
@@ -404,7 +392,7 @@ namespace Yhsb.Qb.Network
     public class CustomField
     {
         public string Value { get; set; } = default;
-        
+
         public virtual string Name => $"{Value}";
 
         public override string ToString() => Name;
@@ -579,7 +567,7 @@ namespace Yhsb.Qb.Network
         public string agencyCode;
     }
 
-    public class SncbryQuery : RowQuery<SncbryQuery>
+    public class SncbryQuery : ClientSqlQuery<SncbryQuery>
     {
         public SncbryQuery(string idcard) : base("F00.01.03", "F27.06")
         {
@@ -654,13 +642,14 @@ namespace Yhsb.Qb.Network
         public string dwbh;
     }
 
-    public class RyxxQuery : RowQuery<RyxxQuery>
+    public class RyxxQuery : ClientSqlQuery<RyxxQuery>
     {
         /// 社保机构编码
         [Field("aab034")]
         public string agencyCode;
 
-        public RyxxQuery(string idcard, string agencyCode) : base("F00.01.03", "F27.02")
+        public RyxxQuery(string idcard, string agencyCode)
+            : base("F00.01.03", "F27.02")
         {
             clientSql = $"( AC01.AAC002 = &apos;{idcard}&apos;)";
             this.agencyCode = agencyCode;
@@ -737,20 +726,21 @@ namespace Yhsb.Qb.Network
         public string agencyCode;
     }
 
-    public class CbxxQuery : Query<CbxxQuery>
+    public class CbxxQuery : AddSqlQuery<CbxxQuery>
     {
         /// 社保机构编码
         [Field("aab034")]
         public string agencyCode;
 
-        public CbxxQuery(string pid, string agencyCode) : base("F27.00.01", "F27.02.01")
+        public CbxxQuery(string pid, string agencyCode)
+            : base("F27.00.01", "F27.02.01")
         {
             addSql = $"ac01.aac001 = &apos;{pid}&apos;";
             this.agencyCode = agencyCode;
         }
     }
 
-    public class QueryResult<T>  : OutData<T>
+    public class QueryResult<T> : OutData<T>
         where T : OutData<T>, new()
     {
         public string result;
