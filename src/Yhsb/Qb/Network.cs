@@ -293,6 +293,51 @@ namespace Yhsb.Qb.Network
             this.functionID = functionID;
         }
     }
+    
+    public class RowQuery<T> : InFunction<T>
+    {
+        [Field("startrow")]
+        public string startRow = "1";
+
+        [Field("row_count")]
+        public string rowCount = "-1";
+
+        [Field("pagesize")]
+        public string pageSize = "500";
+
+        [Field("clientsql")]
+        public string clientSql;
+
+        public RowQuery(string funID, string functionID)
+            : base(funID, functionID)
+        {}
+    }
+
+    public class InAddFid<T> : InBody<T>
+    {
+        [Field("fid")]
+        public string fID = "";
+
+        public InAddFid(string funID, string fID) : base(funID)
+        {
+            this.fID = fID;
+        }
+    }
+
+    public class Query<T> : InAddFid<T>
+    {
+        [Field("pagesize")]
+        public string pageSize = "0";
+
+        [Field("addsql")]
+        public string addSql;
+
+        public string begin = "0";
+
+        public Query(string funID, string functionID)
+            : base(funID, functionID)
+        {}
+    }
 
     class XmlRawTextWriter : XmlTextWriter
     {
@@ -534,20 +579,8 @@ namespace Yhsb.Qb.Network
         public string agencyCode;
     }
 
-    public class SncbryQuery : InFunction<SncbryQuery>
+    public class SncbryQuery : RowQuery<SncbryQuery>
     {
-        [Field("startrow")]
-        public string startRow = "1";
-
-        [Field("row_count")]
-        public string rowCount = "-1";
-
-        [Field("pagesize")]
-        public string pageSize = "500";
-
-        [Field("clientsql")]
-        public string clientSql;
-
         public SncbryQuery(string idcard) : base("F00.01.03", "F27.06")
         {
             clientSql = $"( aac002 = &apos;{idcard}&apos;)";
@@ -611,5 +644,136 @@ namespace Yhsb.Qb.Network
 
         [Field("aac031")]
         public CBState cbState;
+
+        /// 个人编号
+        [Field("sac100")]
+        public string grbh;
+
+        /// 单位编号
+        [Field("sab100")]
+        public string dwbh;
+    }
+
+    public class RyxxQuery : RowQuery<RyxxQuery>
+    {
+        /// 社保机构编码
+        [Field("aab034")]
+        public string agencyCode;
+
+        public RyxxQuery(string idcard, string agencyCode) : base("F00.01.03", "F27.02")
+        {
+            clientSql = $"( AC01.AAC002 = &apos;{idcard}&apos;)";
+            this.agencyCode = agencyCode;
+        }
+    }
+
+    /// 人员信息
+    public class Ryxx : OutData<Ryxx>
+    {
+        [Field("rown")]
+        public string rowNO;
+
+        /// 单位编号
+        [Field("sab100")]
+        public string dwbh;
+
+        /// 单位名称
+        [Field("aab004")]
+        public string dwmc;
+
+        /// 确认状态
+        [Field("sae270")]
+        public string qrzt;
+
+        /// 个人编号
+        [Field("sac100")]
+        public string grbh;
+
+        /// 个人识别号
+        [Field("aac001")]
+        public string pid;
+
+        /// 公民身份号码
+        [Field("aac002")]
+        public string idcard;
+
+        /// 姓名
+        [Field("aac003")]
+        public string name;
+
+        /// 出生年月
+        [Field("aac006")]
+        public string birthDay;
+
+        /// 参加工作日期
+        [Field("aac007")]
+        public string cjgzrq;
+
+        /// 建账时间
+        [Field("sic041")]
+        public string jzsj;
+
+        /// 审核状态
+        [Field("sae114")]
+        public string shzt;
+
+        /// 审核人
+        [Field("sae101")]
+        public string shr;
+
+        /// 审核时间
+        [Field("sae102")]
+        public string shsj;
+
+        /// 审批状态
+        [Field("sae113")]
+        public string spzt;
+
+        [Field("sac004")]
+        public string phone;
+
+        /// 社保机构编码
+        [Field("aab034")]
+        public string agencyCode;
+    }
+
+    public class CbxxQuery : Query<CbxxQuery>
+    {
+        /// 社保机构编码
+        [Field("aab034")]
+        public string agencyCode;
+
+        public CbxxQuery(string pid, string agencyCode) : base("F27.00.01", "F27.02.01")
+        {
+            addSql = $"ac01.aac001 = &apos;{pid}&apos;";
+            this.agencyCode = agencyCode;
+        }
+    }
+
+    public class QueryResult<T>  : OutData<T>
+        where T : OutData<T>, new()
+    {
+        public string result;
+
+        [Field("cxjg")]
+        public ResultSet<T> queryList = new ResultSet<T>();
+    }
+
+    /// 参保信息
+    public class Cbxx : OutData<Cbxx>
+    {
+        /// 个人识别号
+        [Field("aac001")]
+        public string pid;
+
+        /// 公民身份号码
+        [Field("aac002")]
+        public string idcard;
+
+        /// 姓名
+        [Field("aac003")]
+        public string name;
+
+        public string aae140;
     }
 }
