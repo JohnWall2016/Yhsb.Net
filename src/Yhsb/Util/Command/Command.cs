@@ -73,7 +73,7 @@ namespace Yhsb.Util.Command
             where T1 : ICommand where T2 : ICommand where T3 : ICommand
             where T4 : ICommand
         {
-            return Parser.Default.ParseArguments<T1, T2>(args)
+            return Parser.Default.ParseArguments<T1, T2, T3, T4>(args)
                 .WithParsed(exec =>
                 {
                     try 

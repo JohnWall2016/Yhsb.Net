@@ -16,7 +16,7 @@ namespace Yhsb.Jb.Query
         [App(Name = "信息查询程序")]
         static void Main(string[] args)
         {
-            Command.Parse<Jfxx, UpInfo, Doc>(args);
+            Command.Parse<Jfxx, UpInfo, Doc, UpJfxx>(args);
         }
     }
 
@@ -317,6 +317,56 @@ namespace Yhsb.Jb.Query
 
             workbook.Save(Util.StringEx.AppendToFileName(Xlsx, ".upd"));
         }
-        
+    }
+
+    [Verb("upjfxx", HelpText = "更新xlsx中个人缴纳信息")]
+    class UpJfxx : ICommand
+    {
+        [Value(0, HelpText = "xlsx文件",
+            Required = true, MetaName = "xslx")]
+        public string Xlsx { get; set; }
+
+        [Value(1, HelpText = "数据开始行, 从1开始",
+            Required = true, MetaName = "beginRow")]
+        public int BeginRow { get; set; }
+
+        [Value(2, HelpText = "数据结束行(包含), 从1开始",
+            Required = true, MetaName = "endRow")]
+        public int EndRow { get; set; }
+
+        [Value(3, HelpText = "身份证号码所在列, 例如：A",
+            Required = true, MetaName = "idCardCol")]
+        public string IdCardCol { get; set; }
+
+        [Value(4, HelpText = "居保缴费信息保存列, 例如：A",
+            Required = true, MetaName = "infoSaveCol")]
+        public string InfoSaveCol { get; set; }
+
+        public void Execute()
+        {
+            var workbook = ExcelExtension.LoadExcel(Xlsx);
+            var sheet = workbook.GetSheetAt(0);
+
+            Session.Use(session =>
+            {
+                for (var i = BeginRow - 1; i < EndRow; i++)
+                {
+                    var row = sheet.GetRow(i);
+                    var idcard = row.Cell(IdCardCol).Value().ToUpper();
+
+                    var jfbz = "有缴费记录";
+                    session.SendService(new JfxxQuery(idcard));
+                    var result = session.GetResult<JbJfxx>();
+                    if (result.IsEmpty ||
+                        (result.Count == 1 && result[0].year == null))
+                        jfbz = "无缴费记录";
+
+                    row.Cell(InfoSaveCol).SetValue(jfbz);
+                    WriteLine($"{i - BeginRow + 2} {idcard} {jfbz}");
+                }
+            });
+
+            workbook.Save(Util.StringEx.AppendToFileName(Xlsx, ".upd"));
+        }
     }
 }
