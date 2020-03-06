@@ -67,9 +67,37 @@ namespace Yhsb.Jb.Treatment
                                  select e;
                     if (fpData.Any())
                     {
-                        var record = fpData.First();
+                        string type = "", name = "";
+                        foreach (var record in fpData)
+                        {
+                            if (record.Type == "贫困人口")
+                            {
+                                name = record.Name;
+                                type = record.Type;
+                                break;
+                            }
+                            else if (record.Type == "特困人员" &&
+                                     type != "贫困人口")
+                            {
+                                name = record.Name;
+                                type = record.Type;
+                            }
+                            else if (record.Type == "全额低保人员" && 
+                                     type != "贫困人口" && 
+                                     type != "特困人员")
+                            {
+                                name = record.Name;
+                                type = record.Type;
+                            }
+                            else if (record.Type == "差额低保人员" &&
+                                     string.IsNullOrEmpty(type))
+                            {
+                                name = record.Name;
+                                type = record.Type;
+                            }
+                        }
                         WriteLine(
-                            $"{currentRow - startRow + 1} {data.idcard} {data.name} {record.Type}");
+                            $"{currentRow - startRow + 1} {data.idcard} {data.name} {type}");
 
                         var qjns = data.Yjnx - data.Sjnx;
                         if (qjns < 0) qjns = 0;
@@ -82,8 +110,8 @@ namespace Yhsb.Jb.Treatment
                         row.Cell("E").SetValue(data.birthDay);
                         row.Cell("F").SetValue(data.sex.ToString());
                         row.Cell("G").SetValue(data.hjClass.ToString());
-                        row.Cell("H").SetValue(record.Name);
-                        row.Cell("I").SetValue(record.Type);
+                        row.Cell("H").SetValue(name);
+                        row.Cell("I").SetValue(type);
                         row.Cell("J").SetValue(data.JBState);
                         row.Cell("K").SetValue(data.lqny);
                         row.Cell("L").SetValue(data.Yjnx);
@@ -133,11 +161,39 @@ namespace Yhsb.Jb.Treatment
                                  select e;
                     if (fpData.Any())
                     {
-                        var record = fpData.First();
                         data.bz = "按人社厅发〔2018〕111号文办理";
-                        data.fpName = record.Name;
-                        data.fpType = record.Type;
-                        data.fpDate = record.Date;
+                        foreach (var record in fpData)
+                        {
+                            if (record.Type == "贫困人口")
+                            {
+                                data.fpName = record.Name;
+                                data.fpType = record.Type;
+                                data.fpDate = record.Date;
+                                break;
+                            }
+                            else if (record.Type == "特困人员" &&
+                                     data.fpType != "贫困人口")
+                            {
+                                data.fpName = record.Name;
+                                data.fpType = record.Type;
+                                data.fpDate = record.Date;
+                            }
+                            else if (record.Type == "全额低保人员" && 
+                                     data.fpType != "贫困人口" && 
+                                     data.fpType != "特困人员")
+                            {
+                                data.fpName = record.Name;
+                                data.fpType = record.Type;
+                                data.fpDate = record.Date;
+                            }
+                            else if (record.Type == "差额低保人员" &&
+                                     string.IsNullOrEmpty(data.fpType))
+                            {
+                                data.fpName = record.Name;
+                                data.fpType = record.Type;
+                                data.fpDate = record.Date;
+                            }
+                        }
                     }
                 }
             }
