@@ -46,7 +46,7 @@ namespace Yhsb.Net
 
         public void Write(byte[] buffer) => _stream.Write(buffer);
 
-        public void Write(String s) => _stream.Write(Encoding.GetBytes(s));
+        public void Write(string s) => _stream.Write(Encoding.GetBytes(s));
 
         public (byte[] buffer, int length) Read(int size)
         {
@@ -239,13 +239,13 @@ namespace Yhsb.Net
             if (header != null) _header.Add(header);
         }
 
-        public HttpRequest AddHeader(String name, String value)
+        public HttpRequest AddHeader(string name, string value)
         {
             _header.Add(name, value);
             return this;
         }
 
-        public HttpRequest AddBody(String body)
+        public HttpRequest AddBody(string body)
         {
             var buffer = _encoding.GetBytes(body);
             _body.Write(buffer, 0, buffer.Length);
