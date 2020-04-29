@@ -156,18 +156,18 @@ namespace Yhsb.Util
             return ret;
         }
 
-        public class SpecialChars 
+        public class SpecialChars
         {
             public (int Start, int End) Range { get; }
             public int Width { get; }
             
-            public SpecialChars((int Start, int End) range, int width) 
+            public SpecialChars((int Start, int End) range, int width)
             {
                 Range = range;
                 Width = width;
             }
 
-            public int? GetWidth(char c) 
+            public int? GetWidth(char c)
             {
                 if (c >= Range.Start && c <= Range.End)
                     return Width;
@@ -175,7 +175,7 @@ namespace Yhsb.Util
             }
         }
 
-        static int PadCount(string s, int width, SpecialChars[] specialChars) 
+        static int PadCount(string s, int width, SpecialChars[] specialChars)
         {
             if (specialChars == null || specialChars.Length == 0)
                 return width - s.Length;
@@ -184,7 +184,7 @@ namespace Yhsb.Util
             foreach (var c in s)
             {
                 int? w = null;
-                foreach (var r in specialChars) 
+                foreach (var r in specialChars)
                 {
                     w = r.GetWidth(c);
                     if (w != null) break;
@@ -196,9 +196,9 @@ namespace Yhsb.Util
 
         static string Pad(bool left, string s, int width, char c = ' ', SpecialChars[] specialChars = null)
         {
-            void times(char c, int n, StringBuilder sb) 
+            void times(char c, int n, StringBuilder sb)
             {
-                while (n-- > 0) 
+                while (n-- > 0)
                 {
                     sb.Append(c);
                 }
