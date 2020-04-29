@@ -213,10 +213,10 @@ namespace Yhsb.Util
             return sb.ToString();
         }
 
-        public static string PadLeft(this string s, int width, char c = ' ')
-            => Pad(true, s, width, c, new []{new SpecialChars(('\u4e00', '\u9fa5'), 2)});
+        public static string PadLeft(this string s, int width, char c = ' ', params SpecialChars[] specialChars)
+            => Pad(true, s, width, c, specialChars.Length > 0 ? specialChars : new []{new SpecialChars(('\u4e00', '\u9fa5'), 2)});
 
-        public static string PadRight(this string s, int width, char c = ' ')
-            => Pad(false, s, width, c, new []{new SpecialChars(('\u4e00', '\u9fa5'), 2)});
+        public static string PadRight(this string s, int width, char c = ' ', params SpecialChars[] specialChars)
+            => Pad(false, s, width, c, specialChars.Length > 0 ? specialChars : new []{new SpecialChars(('\u4e00', '\u9fa5'), 2)});
     }
 }
