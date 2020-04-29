@@ -99,29 +99,34 @@ namespace Yhsb.Util.Excel
         public static IWorkbook LoadExcel(
             string fileName, Type type = Type.AUTO)
         {
-            Stream stream = new MemoryStream();
-            using (var file = new FileStream(
-                fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            static Stream LoadFile(string fileName) 
             {
-                file.CopyTo(stream);
-                stream.Seek(0, SeekOrigin.Begin);
-            }
-            if (type == Type.AUTO)
-            {
-                var ext = Path.GetExtension(fileName).ToLower();
-                type = ext switch
+                Stream stream = new MemoryStream();
+                using (var file = new FileStream(
+                    fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
-                    ".xls" => Type.XLS,
-                    ".xlsx" => Type.XLSX,
-                    _ => throw new ArgumentException("Unknown excel type"),
-                };
+                    file.CopyTo(stream);
+                    stream.Seek(0, SeekOrigin.Begin);
+                }
+                return stream;
             }
-            return type switch
+
+            switch (type)
             {
-                Type.XLS => new HSSFWorkbook(stream),
-                Type.XLSX => new XSSFWorkbook(stream),
-                _ => throw new ArgumentException("Unknown excel type")
-            };
+                case Type.XLS:
+                    return new HSSFWorkbook(LoadFile(fileName));
+                case Type.XLSX:
+                    return new XSSFWorkbook(LoadFile(fileName));
+                case Type.AUTO:
+                    var ext = Path.GetExtension(fileName).ToLower();
+                    if (ext == ".xls")
+                        return  new HSSFWorkbook(LoadFile(fileName));
+                    else if (ext == ".xlsx")
+                        return new XSSFWorkbook(LoadFile(fileName));
+                    goto default;
+                default:
+                    throw new ArgumentException("Unknown excel type");
+            }
         }
 
         public static void Save(
