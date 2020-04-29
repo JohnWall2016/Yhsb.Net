@@ -4,6 +4,7 @@ using System.Numerics;
 using System.Reflection;
 using System.Linq;
 using System.Collections.Generic;
+using System.Text;
 
 namespace Yhsb.Util
 {
@@ -134,20 +135,88 @@ namespace Yhsb.Util
             {
                 ret += whole;
             }
-            else if (fraction % 10 == 0) // .D0
-            {
-                if (zero) ret += bigN[0];
-                ret += bigN[(int)(fraction / 10)] + units[1] + whole;
-            }
             else
             {
-                if (zero || fraction / 10 == 0) // .0D or .DD
-                    ret += bigN[0];
-                if (fraction / 10 != 0) // .0D
-                    ret += bigN[(int)(fraction / 10)] + units[1];
-                ret += bigN[(int)(fraction % 10)] + units[2];
+                var quotient = fraction / 10;
+                var remainder = fraction % 10;
+                if (remainder == 0) // .D0
+                {
+                    if (zero) ret += bigN[0];
+                    ret += bigN[(int)quotient] + units[1] + whole;
+                }
+                else
+                {
+                    if (zero || quotient == 0) // .0D or .DD
+                        ret += bigN[0];
+                    if (quotient != 0) // .0D
+                        ret += bigN[(int)quotient] + units[1];
+                    ret += bigN[(int)remainder] + units[2];
+                }
             }
             return ret;
         }
+
+        public class SpecialChars 
+        {
+            public (int Start, int End) Range { get; }
+            public int Width { get; }
+            
+            public SpecialChars((int Start, int End) range, int width) 
+            {
+                Range = range;
+                Width = width;
+            }
+
+            public int? GetWidth(char c) 
+            {
+                if (c >= Range.Start && c <= Range.End)
+                    return Width;
+                return null;
+            }
+        }
+
+        static int PadCount(string s, int width, SpecialChars[] specialChars) 
+        {
+            if (specialChars == null || specialChars.Length == 0)
+                return width - s.Length;
+
+            var n = 0;
+            foreach (var c in s)
+            {
+                int? w = null;
+                foreach (var r in specialChars) 
+                {
+                    w = r.GetWidth(c);
+                    if (w != null) break;
+                }
+                n += w ?? 1;
+            }
+            return width - n;
+        }
+
+        static string Pad(bool left, string s, int width, char c = ' ', SpecialChars[] specialChars = null)
+        {
+            void times(char c, int n, StringBuilder sb) 
+            {
+                while (n-- > 0) 
+                {
+                    sb.Append(c);
+                }
+            }
+
+            var count = PadCount(s, width, specialChars);
+            if (count <= 0) return s;
+            var sb = new StringBuilder();
+            if (left) times(c, count, sb);
+            sb.Append(s);
+            if (!left) times(c, count, sb);
+            return sb.ToString();
+        }
+
+        public static string PadLeft(this string s, int width, char c = ' ')
+            => Pad(true, s, width, c, new []{new SpecialChars(('\u4e00', '\u9fa5'), 2)});
+
+        public static string PadRight(this string s, int width, char c = ' ')
+            => Pad(false, s, width, c, new []{new SpecialChars(('\u4e00', '\u9fa5'), 2)});
     }
 }
