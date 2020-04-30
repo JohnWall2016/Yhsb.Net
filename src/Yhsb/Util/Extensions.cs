@@ -158,10 +158,10 @@ namespace Yhsb.Util
 
         public class SpecialChars
         {
-            public (int Start, int End) Range { get; }
+            public (char Start, char End) Range { get; }
             public int Width { get; }
             
-            public SpecialChars((int Start, int End) range, int width)
+            public SpecialChars((char Start, char End) range, int width)
             {
                 Range = range;
                 Width = width;

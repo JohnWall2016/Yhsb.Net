@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 
 using CommandLine;
+using Yhsb.Util;
 using Yhsb.Util.Command;
 using Yhsb.Util.Excel;
 using Yhsb.Jb.Network;
@@ -88,7 +89,7 @@ namespace Yhsb.Jb.Audit
                         {
                             var info = data.First();
                             WriteLine(
-                                $"{cbsh.idcard} {cbsh.name} {cbsh.birthDay} {info.Jbrdsf} " +
+                                $"{cbsh.idcard} {cbsh.name.PackRight(6)} {cbsh.birthDay} {info.Jbrdsf} " +
                                 $"{(info.Name != cbsh.name ? info.Name : "")}");
                             var row = sheet.GetOrCopyRow(index++, copyIndex, false);
                             row.Cell("B").SetValue(cbsh.idcard);
@@ -98,7 +99,7 @@ namespace Yhsb.Jb.Audit
                         }
                         else
                         {
-                            WriteLine($"{cbsh.idcard} {cbsh.name} {cbsh.birthDay}");
+                            WriteLine($"{cbsh.idcard} {cbsh.name.PackRight(6)} {cbsh.birthDay}");
                         }
                     }
                     if (export)
