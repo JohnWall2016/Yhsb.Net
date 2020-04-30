@@ -35,6 +35,9 @@ namespace Yhsb.Jb.Audit
             MetaName = "endDate")]
         public string EndDate { get; set; }
 
+        [Option('e', "export", HelpText = "是否导出身份变更数据表")]
+        public bool Export { get; set; } = false;
+
         readonly static Map _jbClassMap = new Map
         {
             ["贫困人口一级"] = "051",
@@ -102,8 +105,9 @@ namespace Yhsb.Jb.Audit
                             WriteLine($"{cbsh.idcard} {cbsh.name.PackRight(6)} {cbsh.birthDay}");
                         }
                     }
-                    if (export)
+                    if (Export && export)
                     {
+                        WriteLine($"导出 批量信息变更{timeSpan}.xls");
                         workbook.Save(
                             Path.Join(dir, $"批量信息变更{timeSpan}.xls"), true);
                     }
