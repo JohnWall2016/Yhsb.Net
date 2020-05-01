@@ -175,7 +175,7 @@ namespace Yhsb.Util
             }
         }
 
-        static int PadCount(string s, int width, SpecialChars[] specialChars)
+        static int FillCount(string s, int width, SpecialChars[] specialChars)
         {
             if (specialChars == null || specialChars.Length == 0)
                 return width - s.Length;
@@ -194,7 +194,7 @@ namespace Yhsb.Util
             return width - n;
         }
 
-        static string Pad(bool left, string s, int width, char c = ' ', SpecialChars[] specialChars = null)
+        static string Fill(bool left, string s, int width, char c = ' ', SpecialChars[] specialChars = null)
         {
             void times(char c, int n, StringBuilder sb)
             {
@@ -204,7 +204,7 @@ namespace Yhsb.Util
                 }
             }
 
-            var count = PadCount(s, width, specialChars);
+            var count = FillCount(s, width, specialChars);
             if (count <= 0) return s;
             var sb = new StringBuilder();
             if (left) times(c, count, sb);
@@ -213,10 +213,10 @@ namespace Yhsb.Util
             return sb.ToString();
         }
 
-        public static string PackLeft(this string s, int width, char c = ' ', params SpecialChars[] specialChars)
-            => Pad(true, s, width, c, specialChars.Length > 0 ? specialChars : new []{new SpecialChars(('\u4e00', '\u9fa5'), 2)});
+        public static string FillLeft(this string s, int width, char c = ' ', params SpecialChars[] specialChars)
+            => Fill(true, s, width, c, specialChars.Length > 0 ? specialChars : new []{new SpecialChars(('\u4e00', '\u9fa5'), 2)});
 
-        public static string PackRight(this string s, int width, char c = ' ', params SpecialChars[] specialChars)
-            => Pad(false, s, width, c, specialChars.Length > 0 ? specialChars : new []{new SpecialChars(('\u4e00', '\u9fa5'), 2)});
+        public static string FillRight(this string s, int width, char c = ' ', params SpecialChars[] specialChars)
+            => Fill(false, s, width, c, specialChars.Length > 0 ? specialChars : new []{new SpecialChars(('\u4e00', '\u9fa5'), 2)});
     }
 }

@@ -92,7 +92,7 @@ namespace Yhsb.Jb.Audit
                         {
                             var info = data.First();
                             WriteLine(
-                                $"{cbsh.idcard} {cbsh.name.PackRight(6)} {cbsh.birthDay} {info.Jbrdsf} " +
+                                $"{cbsh.idcard} {cbsh.name.FillRight(6)} {cbsh.birthDay} {info.Jbrdsf} " +
                                 $"{(info.Name != cbsh.name ? info.Name : "")}");
                             var row = sheet.GetOrCopyRow(index++, copyIndex, false);
                             row.Cell("B").SetValue(cbsh.idcard);
@@ -102,7 +102,7 @@ namespace Yhsb.Jb.Audit
                         }
                         else
                         {
-                            WriteLine($"{cbsh.idcard} {cbsh.name.PackRight(6)} {cbsh.birthDay}");
+                            WriteLine($"{cbsh.idcard} {cbsh.name.FillRight(6)} {cbsh.birthDay}");
                         }
                     }
                     if (Export && export)
