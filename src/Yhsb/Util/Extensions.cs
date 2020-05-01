@@ -196,7 +196,7 @@ namespace Yhsb.Util
 
         static string Fill(bool left, string s, int width, char c = ' ', SpecialChars[] specialChars = null)
         {
-            void times(char c, int n, StringBuilder sb)
+            static void times(char c, int n, StringBuilder sb)
             {
                 while (n-- > 0)
                 {
