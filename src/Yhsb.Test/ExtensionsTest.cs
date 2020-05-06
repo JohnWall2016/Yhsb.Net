@@ -3,11 +3,11 @@ using static System.Console;
 
 public class ExtensionsTest
 {
-    public static void TestPad()
+    public static void TestFill()
     {
-        WriteLine("我们abc".PackLeft(8));
-        WriteLine("ABCabc".PackLeft(8));
-        WriteLine("我们abc".PackRight(8));
-        WriteLine("ABCabc".PackRight(8));
+        WriteLine("我们abc".FillLeft(8));
+        WriteLine("ABCabc".FillLeft(8));
+        WriteLine("我们abc".FillRight(8));
+        WriteLine("ABCabc".FillRight(8));
     }
 }
