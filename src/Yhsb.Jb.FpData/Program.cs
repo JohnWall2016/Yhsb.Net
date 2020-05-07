@@ -3,6 +3,7 @@ using Yhsb.Database;
 using Yhsb.Jb.Database.Jzfp2020;
 using Yhsb.Util.Excel;
 using Yhsb.Util.Command;
+using Yhsb.Util;
 using System.Linq;
 using System.Collections.Generic;
 using System.IO;
@@ -28,7 +29,7 @@ namespace Yhsb.Jb.FpData
             using var context = new FpDbContext();
             foreach (var record in records)
             {
-                WriteLine($"{index++} {record.Idcard} {record.Name} {record.Type}");
+                WriteLine($"{index++} {record.Idcard} {record.Name.FillRight(6)} {record.Type}");
                 if (!string.IsNullOrEmpty(record.Idcard))
                 {
                     var fpData = from e in context.FpRawData
@@ -626,13 +627,13 @@ namespace Yhsb.Jb.FpData
                     if (!string.IsNullOrEmpty(d.Jbrdsf))
                     {
                         WriteLine(
-                            $"{i++} {d.Idcard} {d.Name} {jbrdsf} <= {d.Jbrdsf}");
+                            $"{i++} {d.Idcard} {d.Name.FillRight(6)} {jbrdsf} <= {d.Jbrdsf}");
                         d.Jbrdsf = jbrdsf;
                         d.JbrdsfLastDate = Date;
                     }
                     else
                     {
-                        WriteLine($"{i++} {d.Idcard} {d.Name} {jbrdsf}");
+                        WriteLine($"{i++} {d.Idcard} {d.Name.FillRight(6)} {jbrdsf}");
                         d.Jbrdsf = jbrdsf;
                         d.JbrdsfFirstDate = Date;
                     }
@@ -893,7 +894,7 @@ namespace Yhsb.Jb.FpData
                                  select fp;
                     if (!inData.Any())
                     {
-                        WriteLine($"{i + 1} {d.Idcard} {d.Name}");
+                        WriteLine($"{i + 1} {d.Idcard} {d.Name.FillRight(6)}");
 
                         if (i++ % rowsPerXlsx == 0)
                         {
