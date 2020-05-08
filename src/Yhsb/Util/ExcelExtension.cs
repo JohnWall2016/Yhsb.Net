@@ -199,9 +199,10 @@ namespace Yhsb.Util.Excel
             }
             else
             {
-                if (sheet.LastRowNum >= index)
+                System.Console.WriteLine($"{sheet.LastRowNum} {index}");
+                /*if (sheet.LastRowNum >= index)
                     sheet.ShiftRows(
-                        index, sheet.LastRowNum, 1, true, false);
+                        index, sheet.LastRowNum, 1, true, false);*/
                 dstRow = sheet.CopyRow(copyIndex, index);
                 var srcRow = sheet.GetRow(copyIndex);
                 dstRow.Height = srcRow.Height;
