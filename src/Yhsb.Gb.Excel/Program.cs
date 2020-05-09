@@ -68,10 +68,14 @@ namespace Yhsb.Gb.Excel
                         WriteLine($"{total} 合计 {hj} {lx}");
                         
                         var outRow = outSheet.GetOrCopyRow(currentRow++, startRow);
-                        outRow.Cell("B").SetValue(total);
+                        //outRow.Cell("B").SetValue(total);
+                        outRow.Cell("B").SetCellFormula(
+                            $"CONCATENATE(\"共 \",SUMPRODUCT(1/COUNTIF(C5:C{currentRow-1},C5:C{currentRow-1})),\" 人\")");
                         outRow.Cell("H").SetValue("合计");
-                        outRow.Cell("I").SetCellValue(hj);
-                        outRow.Cell("J").SetCellValue(lx);
+                        //outRow.Cell("I").SetCellValue(hj);
+                        outRow.Cell("I").SetCellFormula($"SUM(I5:I{currentRow-1})");
+                        //outRow.Cell("J").SetCellValue(lx);
+                        outRow.Cell("J").SetCellFormula($"SUM(J5:J{currentRow-1})");
                         break;
                     }
                 }
