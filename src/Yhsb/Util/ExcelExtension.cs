@@ -199,7 +199,7 @@ namespace Yhsb.Util.Excel
             }
             else
             {
-                System.Console.WriteLine($"{sheet.LastRowNum} {index}");
+                //System.Console.WriteLine($"{sheet.LastRowNum} {index}");
                 /*if (sheet.LastRowNum >= index)
                     sheet.ShiftRows(
                         index, sheet.LastRowNum, 1, true, false);*/
