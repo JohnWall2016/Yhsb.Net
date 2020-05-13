@@ -20,7 +20,7 @@ namespace Yhsb.Jb.FullCover
         [App(Name = "全覆盖处理程序")]
         static void Main(string[] args)
         {
-            Command.Parse<Split>(args);
+            Command.Parse<Split, ImportDist>(args);
         }
     }
 
@@ -92,8 +92,8 @@ namespace Yhsb.Jb.FullCover
         }
     }
 
-    [Verb("dryxfsj", HelpText = "导入已下发程序")]
-    class Dryxfsj : ICommand
+    [Verb("importDist", HelpText = "导入已下发程序")]
+    class ImportDist : ICommand
     {
         [Value(0, HelpText = "导入目录",
             Required = true, MetaName = "inputDir")]
@@ -103,17 +103,19 @@ namespace Yhsb.Jb.FullCover
             Required = true, MetaName = "distNO")]
         public string DistNO { get; set; }
 
-        [Option("clear", HelpText = "是否清除数据表")]
+        [Option("clearAll", HelpText = "是否清除所有该批次数据")]
+        public bool ClearAll { get; set; } = false;
+
+        [Option("clear", HelpText = "是否清除导入单位该批次数据")]
         public bool Clear { get; set; } = false;
 
         public void Execute()
         {
             using var db = new Context();
-            if (Clear)
+            if (ClearAll)
             {
-                WriteLine("开始清除数据表: 已下发数据表");
-                db.DeleteAll<Yxfsj>(printSql: true);
-                WriteLine("结束清除数据表: 已下发数据表");
+                WriteLine($"开始清除下发数据表: {DistNO}");
+                db.Delete<Yxfsj>(where: $"xfpc = '{DistNO}'", printSql: true);
             }
 
             WriteLine($"开始导入已下发数据表: {DistNO}, {InputDir}");
@@ -122,34 +124,40 @@ namespace Yhsb.Jb.FullCover
             {
                 ImportExcel(db, file);
             }
-            
-            WriteLine("结束导入已下发数据表");
         }
 
         public void ImportExcel(DbContext db, string excel)
         {
+            var ident = "  ";
             var fileName = Path.GetFileName(excel);
-            WriteLine($"  导入数据表: {fileName}");
+            WriteLine($"{ident}导入数据表: {fileName}");
 
-            var m = Regex.Match(excel, @"(.*?)(\d+)\.xls[x]?$", RegexOptions.IgnoreCase);
+            var m = Regex.Match(fileName, @"^(.*?)(\d+)\.xls[x]?$", RegexOptions.IgnoreCase);
+            ident += ident;
             if (!m.Success)
             {
-                WriteLine($"无法获得数据条数: {fileName}, {excel}");
+                WriteLine($"{ident}无法获得数据条数: {fileName}, {excel}");
             }
             else
             {
                 var dwmc = m.Groups[1].Value;
                 var count = m.Groups[2].Value;
-                WriteLine($"    {dwmc}: {count}");
 
+                if (Clear)
+                {
+                    WriteLine($"{ident}开始清除下发批次: {DistNO}");
+                    db.Delete<Yxfsj>(where: $"dwmc = '{dwmc}' and xfpc = '{DistNO}'", printSql: true, ident);
+                }
+                
+                WriteLine($"{ident}导入 {dwmc}: {count}");
                 var beginRow = 2;
                 var endRow = int.Parse(count) + 1;
 
                 db.LoadExcel<Yxfsj>(
                     excel, beginRow, endRow,
-                    new List<string> { dwmc, DistNO, "A", "B", "C", "D", "E", "F", "G" },
+                    new List<string> { dwmc, DistNO, "A", "B", "C", "D", "E", "F", "G", "", "", "", "" },
                     new List<string> { "A" },
-                    true);
+                    true, ident);
             }
         }
     }

@@ -17,3 +17,12 @@ CREATE TABLE IF NOT EXISTS `fc_yxfsj`(
    `wcbyy` VARCHAR(100), -- 未参保原因
    PRIMARY KEY ( `idcard` )
 ) DEFAULT CHARSET=utf8;
+
+SELECT * FROM `fullcover2020`.`fc_yxfsj` where idcard='430321196405261520';
+SELECT * FROM `fullcover2020`.`fc_yxfsj` where idcard='430302200006273065';
+SELECT * FROM `fullcover2020`.`fc_yxfsj` where idcard='430321200103172214';
+SELECT * FROM `fullcover2020`.`fc_yxfsj` where idcard='430321200104162210';
+
+select dwmc, count(dwmc) from `fullcover2020`.`fc_yxfsj` group by dwmc;
+
+select count(*) from `fullcover2020`.`fc_yxfsj` where xfpc = '第一批';

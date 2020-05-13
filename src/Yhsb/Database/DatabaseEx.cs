@@ -29,9 +29,9 @@ namespace Yhsb.Database
         }
 
         public static int ExecuteSql(
-            this DbContext context, string sql, bool printSql = false)
+            this DbContext context, string sql, bool printSql = false, string ident = "")
         {
-            if (printSql) WriteLine("SQL: " + sql);
+            if (printSql) WriteLine(ident + "SQL: " + sql);
             return context.Database.ExecuteSqlRaw(sql);
         }
 
@@ -43,7 +43,7 @@ namespace Yhsb.Database
         public static int LoadExcel<T>(
             this DbContext context, string fileName, int startRow,
             int endRow, List<string> fields, List<string> noQuotes = null,
-            bool printSql = false)
+            bool printSql = false, string ident = "")
             where T : class
         {
             var workbook = ExcelExtension.LoadExcel(fileName);
@@ -78,7 +78,7 @@ namespace Yhsb.Database
                 @"CHARACTER SET utf8 FIELDS TERMINATED BY ',' OPTIONALLY " +
                 @"ENCLOSED BY '\'' LINES TERMINATED BY '\n';";
             
-            var result = context.ExecuteSql(sql, printSql);
+            var result = context.ExecuteSql(sql, printSql, ident);
 
             if (File.Exists(tmpFileName))
                 File.Delete(tmpFileName);
@@ -87,15 +87,15 @@ namespace Yhsb.Database
         }
 
         public static int DeleteAll<T>(
-            this DbContext context, bool printSql = false)
+            this DbContext context, bool printSql = false, string ident = "")
             where T : class
         {
             var sql = $"delete from {context.GetTableName<T>()};";
-            return context.ExecuteSql(sql, printSql);
+            return context.ExecuteSql(sql, printSql, ident);
         }
 
         public static int Delete<T>(
-            this DbContext context, string where = null, bool printSql = false)
+            this DbContext context, string where = null, bool printSql = false, string ident = "")
             where T : class
         {
             if (!string.IsNullOrWhiteSpace(where))
@@ -104,7 +104,7 @@ namespace Yhsb.Database
                 where = "";
 
             var sql = $"delete from {context.GetTableName<T>()}{where};";
-            return context.ExecuteSql(sql, printSql);
+            return context.ExecuteSql(sql, printSql, ident);
         }
     }
 }
