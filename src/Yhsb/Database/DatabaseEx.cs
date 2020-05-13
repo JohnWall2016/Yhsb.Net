@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
-using static System.Console;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
+using static System.Console;
+
 using Microsoft.EntityFrameworkCore;
+
 using Yhsb.Util.Excel;
 
 namespace Yhsb.Database
@@ -32,6 +35,11 @@ namespace Yhsb.Database
             return context.Database.ExecuteSqlRaw(sql);
         }
 
+        /// <summary>将Excel表格导入数据库</summary>
+        ///
+        /// <param name="startRow">开始行(从1开始)</param>
+        /// <param name="endRow">结束行(包含)</param>
+        ///
         public static int LoadExcel<T>(
             this DbContext context, string fileName, int startRow,
             int endRow, List<string> fields, List<string> noQuotes = null,
@@ -40,6 +48,7 @@ namespace Yhsb.Database
         {
             var workbook = ExcelExtension.LoadExcel(fileName);
             var sheet = workbook.GetSheetAt(0);
+            var regex = new Regex("^[A-z]+$", RegexOptions.IgnoreCase);
 
             var builder = new StringBuilder();
             for (var index = startRow - 1; index < endRow; index++)
@@ -47,7 +56,11 @@ namespace Yhsb.Database
                 var values = new List<string>();
                 foreach (var row in fields)
                 {
-                    var value = sheet.Row(index).Cell(row).Value();
+                    string value = row;
+                    if (regex.IsMatch(row))
+                    {
+                        value = sheet.Row(index).Cell(row).Value();
+                    } 
                     if (noQuotes != null && noQuotes.Contains(row))
                         value = $"'{value}'";
                     values.Add(value);

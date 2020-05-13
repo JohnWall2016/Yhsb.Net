@@ -34,9 +34,6 @@ namespace Yhsb.Jb.Database.FullCover2020
         /// 村社区
         public string Csq { get; set; }
 
-        /// 年龄
-        public int Age { get; set; }
-
         /// 是否已参保("是", "否")
         public string Sfycb { get; set; }
 

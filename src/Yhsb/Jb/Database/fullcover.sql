@@ -11,7 +11,6 @@ CREATE TABLE IF NOT EXISTS `fc_yxfsj`(
    `tcq` VARCHAR(100), -- 统筹区
    `xzj` VARCHAR(100), -- 乡镇街
    `csq` VARCHAR(100), -- 村社区
-   `age` INT, -- 年龄
    `sfycb` VARCHAR(10), -- 是否已参保("是", "否")
    `cbsj` VARCHAR(20), -- 参保时间
    `shsj` VARCHAR(20), -- 审核时间

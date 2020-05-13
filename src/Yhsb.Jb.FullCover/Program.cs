@@ -1,8 +1,15 @@
 ﻿using CommandLine;
-using Yhsb.Util.Command;
-using Yhsb.Util.Excel;
 using System.IO;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using System.Linq;
+
+using Yhsb.Database;
+using Yhsb.Jb.Database.FullCover2020;
+using Yhsb.Util.Command;
+using Yhsb.Util.Excel;
+
+using Microsoft.EntityFrameworkCore;
 
 using static System.Console;
 
@@ -81,6 +88,68 @@ namespace Yhsb.Jb.FullCover
                 outWorkbook.Save(
                     Path.Join(OutDir, $"{xzj}{map[xzj].Count}.xls"));
                 //break;
+            }
+        }
+    }
+
+    [Verb("dryxfsj", HelpText = "导入已下发程序")]
+    class Dryxfsj : ICommand
+    {
+        [Value(0, HelpText = "导入目录",
+            Required = true, MetaName = "inputDir")]
+        public string InputDir { get; set; }
+
+        [Value(1, HelpText = "下发批次, 例如: 第一批, ...",
+            Required = true, MetaName = "distNO")]
+        public string DistNO { get; set; }
+
+        [Option("clear", HelpText = "是否清除数据表")]
+        public bool Clear { get; set; } = false;
+
+        public void Execute()
+        {
+            using var db = new Context();
+            if (Clear)
+            {
+                WriteLine("开始清除数据表: 已下发数据表");
+                db.DeleteAll<Yxfsj>(printSql: true);
+                WriteLine("结束清除数据表: 已下发数据表");
+            }
+
+            WriteLine($"开始导入已下发数据表: {DistNO}, {InputDir}");
+
+            foreach (var file in Directory.GetFiles(InputDir))
+            {
+                ImportExcel(db, file);
+            }
+            
+            WriteLine("结束导入已下发数据表");
+        }
+
+        public void ImportExcel(DbContext db, string excel)
+        {
+            var fileName = Path.GetFileName(excel);
+            WriteLine($"  导入数据表: {fileName}");
+
+            var m = Regex.Match(excel, @"(.*?)(\d+)\.xls[x]?$", RegexOptions.IgnoreCase);
+            if (!m.Success)
+            {
+                WriteLine($"无法获得数据条数: {fileName}, {excel}");
+            }
+            else
+            {
+                var dwmc = m.Groups[1].Value;
+                var count = m.Groups[2].Value;
+                WriteLine($"    {dwmc}: {count}");
+
+                var beginRow = 2;
+                var endRow = int.Parse(count) + 1;
+
+                db.LoadExcel<Yxfsj>(
+                    excel, beginRow, endRow,
+                    new List<string> { dwmc, DistNO, "A", "B", "C", "D", "E", "F", "G" },
+                    new List<string> { "A" },
+                    true);
             }
         }
     }
