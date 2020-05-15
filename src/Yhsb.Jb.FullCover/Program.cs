@@ -38,7 +38,7 @@ namespace Yhsb.Jb.FullCover
         [Value(2, HelpText = "结束行(包含)，从1开始",
             Required = true)]
         public int EndRow { get; set; }
-        
+
         [Value(3, HelpText = "分组模板表路径",
             Required = true, MetaName = "TemplateExcel")]
         public string TemplateExcel { get; set; }
@@ -47,6 +47,13 @@ namespace Yhsb.Jb.FullCover
             Required = true, MetaName = "OutDir")]
         public string OutDir { get; set; }
 
+        [Value(5, HelpText = "用于分组的数据列",
+            Required = true)]
+        public string DistCol { get; set; }
+
+        [Value(6, HelpText = "用于分组的匹配语句")]
+        public string DistPattern { get; set; } = ".*";
+        
         public void Execute()
         {
             var workbook = ExcelExtension.LoadExcel(SourceExcel);
@@ -56,10 +63,13 @@ namespace Yhsb.Jb.FullCover
             var map = new Dictionary<string, List<int>>();
             for (var index = BeginRow - 1; index < EndRow; index++)
             {
-                var xzj = sheet.Row(index).Cell("F").Value();
-                if (!map.ContainsKey(xzj))
-                    map[xzj] = new List<int>();
-                map[xzj].Add(index);
+                var xzj = sheet.Row(index).Cell(DistCol).Value();
+                if (Regex.IsMatch(xzj, DistPattern))
+                {
+                    if (!map.ContainsKey(xzj))
+                        map[xzj] = new List<int>();
+                    map[xzj].Add(index);
+                }
             }
 
             WriteLine("生成分组数据表");
