@@ -81,3 +81,15 @@ SELECT * FROM `fullcover2020`.`fc_yxfsj` LIMIT 100;
 SELECT count(*) FROM `fullcover2020`.`fc_yxfsj` where wcbyy='' and Sfycb<>'是';
 
 SELECT * FROM `fullcover2020`.`fc_yxfsj` where wcbyy='' and Sfycb<>'是' order by ;
+
+update`fullcover2020`.`fc_yxfsj` set wcbyy='16岁以上在校生' where wcbyy='16岁以上在校学生';
+
+update`fullcover2020`.`fc_yxfsj` set wcbyy='参职保（含退休）' where wcbyy='参职保(含退休)';
+
+update`fullcover2020`.`fc_yxfsj` set wcbyy='服刑人员' where wcbyy='服刑';
+
+update`fullcover2020`.`fc_yxfsj` set wcbyy='已录入居保' where wcbyy='已参居保';
+
+select a.*, b.name as jbname from `fullcover2020`.`fc_yxfsj` as a, `fullcover2020`.`jbrymx` as b where a.idcard=b.idcard and a.name<>b.name;
+
+update `fullcover2020`.`jbrymx` set name='张新伟' where idcard='43030319680412001X';

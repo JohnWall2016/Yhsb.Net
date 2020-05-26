@@ -323,18 +323,18 @@ namespace Yhsb.Jb.FullCover
         }
     }
 
-    [Verb("exportDC", HelpText = "导出未参保落实底册")]
+    [Verb("exportDC", HelpText = "导出未参保落实台账")]
     class exportDC : ICommand
     {
-        const string tmplXlsx = @"D:\参保管理\参保全覆盖\雨湖区未参保落实底册模板.xlsx";
+        const string tmplXlsx = @"D:\参保管理\参保全覆盖\雨湖区未参保落实台账模板.xlsx";
 
         public void Execute()
         {
             using var db = new Context();
 
-            var saveXlsx = $@"D:\参保管理\参保全覆盖\雨湖区未参保落实底册{Util.DateTime.FormatedDate()}.xlsx";
+            var saveXlsx = $@"D:\参保管理\参保全覆盖\雨湖区未参保落实台账{Util.DateTime.FormatedDate()}.xlsx";
 
-            WriteLine($"开始导出未参保落实底册: =>{saveXlsx}");
+            WriteLine($"开始导出未参保落实台账: =>{saveXlsx}");
 
             var workbook = ExcelExtension.LoadExcel(tmplXlsx);
             var sheet = workbook.GetSheetAt(0);
@@ -369,7 +369,7 @@ namespace Yhsb.Jb.FullCover
 
             workbook.Save(saveXlsx);
 
-            WriteLine($"结束导出未参保落实底册: =>{saveXlsx}");
+            WriteLine($"结束导出未参保落实台账: =>{saveXlsx}");
         }
     }
 }
