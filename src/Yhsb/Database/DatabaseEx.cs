@@ -53,20 +53,27 @@ namespace Yhsb.Database
             var builder = new StringBuilder();
             for (var index = startRow - 1; index < endRow; index++)
             {
-                var values = new List<string>();
-                foreach (var row in fields)
+                try
                 {
-                    string value = row;
-                    if (regex.IsMatch(row))
+                    var values = new List<string>();
+                    foreach (var row in fields)
                     {
-                        value = sheet.Row(index).Cell(row).Value();
-                    } 
-                    if (noQuotes != null && noQuotes.Contains(row))
-                        value = $"'{value}'";
-                    values.Add(value);
+                        string value = row;
+                        if (regex.IsMatch(row))
+                        {
+                            value = sheet.Row(index).Cell(row).Value();
+                        } 
+                        if (noQuotes != null && noQuotes.Contains(row))
+                            value = $"'{value}'";
+                        values.Add(value);
+                    }
+                    builder.Append(string.Join(',', values));
+                    builder.Append("\n");
                 }
-                builder.Append(string.Join(',', values));
-                builder.Append("\n");
+                catch (Exception ex)
+                {
+                    throw new Exception($"LoadExcel error at row {index + 1}", ex);
+                }
             }
 
             var tmpFileName = Path.GetTempFileName();

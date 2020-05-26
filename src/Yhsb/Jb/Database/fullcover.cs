@@ -47,6 +47,59 @@ namespace Yhsb.Jb.Database.FullCover2020
         public string Wcbyy { get; set; }
     }
 
+    /// 落实总台账
+    [Table("fc_books")] public class Books
+    {
+        /// 单位名称
+        public string Dwmc { get; set; }
+
+        /// 身份证号码
+        [Key] public string Idcard { get; set; }
+
+        /// 姓名
+        public string Name { get; set; }
+
+        /// 地址
+        public string Address { get; set; }
+
+        /// 核实情况
+        public string Hsqk { get; set; }
+    }
+
+    /// 居保参保人员明细表
+    public class Jbrymx
+    {
+        /// 身份证号码
+        [Key]
+        public string Idcard { get; set; }
+
+        /// 行政区划
+        public string Xzqh { get; set; }
+
+        /// 户籍性质
+        public string Hjxz { get; set; }
+
+        /// 姓名
+        public string Name { get; set; }
+
+        /// 性别
+        public string Sex { get; set; }
+
+        /// 出生日期
+        public string BirthDay { get; set; }
+
+        /// 参保身份
+        public string Cbsf { get; set; }
+
+        /// 参保状态
+        public string Cbzt { get; set; }
+
+        /// 缴费状态
+        public string Jfzt { get; set; }
+
+        /// 参保时间
+        public string Cbsj { get; set; }
+    }
     
     public class Context : DbContext
     {
@@ -60,5 +113,7 @@ namespace Yhsb.Jb.Database.FullCover2020
                 optionsBuilder.UseMySql(_internal.Database.FullCover2020);
 
         public DbSet<Yxfsj> Yxfsjs { get; set; }
+        public DbSet<Books> Books { get; set; }
+        public DbSet<Jbrymx> Jbrymx { get; set; }
     }
 }
