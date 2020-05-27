@@ -328,22 +328,40 @@ namespace Yhsb.Jb.FullCover
     {
         const string tmplXlsx = @"D:\参保管理\参保全覆盖\雨湖区未参保落实台账模板.xlsx";
 
+        [Option("where", HelpText = "导出条件语句")]
+        public string Where { get; set; } = null;
+
+        [Option("out", HelpText = "导出文件名")]
+        public string FileName { get; set; } = null;
+
         public void Execute()
         {
             using var db = new Context();
 
             var saveXlsx = $@"D:\参保管理\参保全覆盖\雨湖区未参保落实台账{Util.DateTime.FormatedDate()}.xlsx";
 
+            if (!string.IsNullOrEmpty(FileName))
+            {
+                saveXlsx = $@"D:\参保管理\参保全覆盖\{FileName}";
+            }
+
+            var sql = "SELECT * FROM fc_yxfsj ";
+            if (!string.IsNullOrEmpty(Where))
+            {
+                sql += $" where {Where} ";
+            }
+            sql += " ORDER BY CONVERT(dwmc USING gbk), " +
+                "FIELD(SUBSTRING(xfpc,2,1),'一','二','三','四','五','六','七','八','九'), no";
+
+            // WriteLine($"{sql}, ${saveXlsx}"); return;
+
+            IQueryable<Yxfsj> data = db.Yxfsjs.FromSqlRaw(sql);
+            
             WriteLine($"开始导出未参保落实台账: =>{saveXlsx}");
 
             var workbook = ExcelExtension.LoadExcel(tmplXlsx);
             var sheet = workbook.GetSheetAt(0);
             int startRow = 2, currentRow = 2;
-
-            IQueryable<Yxfsj> data = db.Yxfsjs.FromSqlRaw(
-                "SELECT * FROM fc_yxfsj ORDER BY CONVERT(dwmc USING gbk), " +
-                "FIELD(SUBSTRING(xfpc,2,1),'一','二','三','四','五','六','七','八','九'), no"
-            );
 
             foreach (var d in data)
             {

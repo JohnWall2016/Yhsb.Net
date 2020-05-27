@@ -93,3 +93,11 @@ update`fullcover2020`.`fc_yxfsj` set wcbyy='已录入居保' where wcbyy='已参
 select a.*, b.name as jbname from `fullcover2020`.`fc_yxfsj` as a, `fullcover2020`.`jbrymx` as b where a.idcard=b.idcard and a.name<>b.name;
 
 update `fullcover2020`.`jbrymx` set name='张新伟' where idcard='43030319680412001X';
+
+update`fullcover2020`.`fc_books` set hsqk='16岁以上在校生' where hsqk='16岁以上在校学生';
+
+update`fullcover2020`.`fc_books` set hsqk='参职保（含退休）' where hsqk='参职保(含退休)';
+
+update`fullcover2020`.`fc_books` set hsqk='服刑人员' where hsqk='服刑';
+
+update`fullcover2020`.`fc_books` set hsqk='已录入居保' where hsqk='已参居保';
