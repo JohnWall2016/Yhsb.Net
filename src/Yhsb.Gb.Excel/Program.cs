@@ -12,8 +12,8 @@ namespace Yhsb.Gb.Excel
     {
         static void Main(string[] args)
         {
-            var srcDir = @"E:\机关养老保险\原数据";
-            var outDir = @"E:\机关养老保险\新数据";
+            var srcDir = @"E:\机关养老保险\0527确认表";
+            var outDir = @"E:\机关养老保险\0527确认表（新表）";
             var tmpXls = @"E:\机关养老保险\（模板）试点期间参保人员缴费确认表.xls";
 
             foreach (var xls in Directory.EnumerateFiles(srcDir))

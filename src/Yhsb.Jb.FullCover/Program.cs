@@ -9,6 +9,8 @@ using Yhsb.Jb.Database.FullCover2020;
 using Yhsb.Util.Command;
 using Yhsb.Util.Excel;
 
+using Yhsb.Util;
+
 using Microsoft.EntityFrameworkCore;
 
 using static System.Console;
@@ -21,7 +23,7 @@ namespace Yhsb.Jb.FullCover
         static void Main(string[] args)
         {
             Command.Parse<Split, ImportDist, ImportBooks, ImportJB, 
-                UpdateJB, UpdateYY, exportDC>(args);
+                UpdateBooks, UpdateJB, UpdateYY, exportDC>(args);
         }
     }
 
@@ -312,11 +314,16 @@ namespace Yhsb.Jb.FullCover
             var yxfsj = db.GetTableName<Yxfsj>();
             var books = db.GetTableName<Books>();
 
-            var sql =
-                    $"update {yxfsj}, {books}\n" +
-                    $"   set {yxfsj}.wcbyy={books}.hsqk\n" +
-                    $" where {yxfsj}.Idcard={books}.Idcard\n" +
-                    $"   and {yxfsj}.Sfycb<>'是'\n";
+            var sql = 
+                    $"update {yxfsj}\n" +
+                    $"   set {yxfsj}.wcbyy=''\n" +
+                    $" where {yxfsj}.Sfycb='是'\n";
+            db.ExecuteSql(sql, printSql: true);
+            sql =
+                $"update {yxfsj}, {books}\n" +
+                $"   set {yxfsj}.wcbyy={books}.hsqk\n" +
+                $" where {yxfsj}.Idcard={books}.Idcard\n" +
+                $"   and {yxfsj}.Sfycb<>'是'\n";
             db.ExecuteSql(sql, printSql: true);
 
             WriteLine($"结束未参保原因");
@@ -388,6 +395,66 @@ namespace Yhsb.Jb.FullCover
             workbook.Save(saveXlsx);
 
             WriteLine($"结束导出未参保落实台账: =>{saveXlsx}");
+        }
+    }
+
+    [Verb("updateBooks", HelpText = "更新落实总台账")]
+    class UpdateBooks : ICommand
+    {
+        [Value(0, HelpText = "xlsx文件",
+            Required = true, MetaName = "xslx")]
+        public string Xlsx { get; set; }
+
+        [Value(1, HelpText = "数据开始行, 从1开始",
+            Required = true, MetaName = "beginRow")]
+        public int BeginRow { get; set; }
+
+        [Value(2, HelpText = "数据结束行(包含), 从1开始",
+            Required = true, MetaName = "endRow")]
+        public int EndRow { get; set; }
+
+        public void Execute()
+        {
+            using var db = new Context();
+
+            WriteLine("开始更新落实总台账");
+
+            var workbook = ExcelExtension.LoadExcel(Xlsx);
+            var sheet = workbook.GetSheetAt(0);
+
+            for (var index = BeginRow - 1; index < EndRow; index++)
+            {
+                var row = sheet.Row(index);
+                var no = row.Cell("A").Value();
+                var book = new Books
+                {
+                    Dwmc = row.Cell("B").Value(),
+                    Name = row.Cell("C").Value(),
+                    Idcard = row.Cell("D").Value(),
+                    Address = row.Cell("E").Value(),
+                    Hsqk = row.Cell("F").Value(),
+                };
+
+                WriteLine($"{no} {book.Idcard} {book.Name.FillRight(6)}");
+                
+                var fcbook = from b in db.Books
+                             where b.Idcard == book.Idcard
+                             select b;
+                if (fcbook.Any())
+                {
+                    foreach (var fb in fcbook)
+                    {
+                        db.Entry(fb).CurrentValues.SetValues(book);
+                    }
+                }
+                else
+                {
+                    db.Add(book);
+                }
+                db.SaveChanges();
+            }
+
+            WriteLine("结束更新落实总台账");
         }
     }
 }

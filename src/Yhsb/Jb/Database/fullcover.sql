@@ -62,7 +62,9 @@ SELECT * FROM `fullcover2020`.`fc_yxfsj` where idcard='430302199011234778';
 
 SELECT * FROM `fullcover2020`.`fc_books` where dwmc='广场街道';
 
-SELECT * FROM `fullcover2020`.`fc_books` where idcard='430321200111102216';
+SELECT * FROM `fullcover2020`.`fc_books` where idcard='340822193710180741';
+
+update `fullcover2020`.`fc_books` set hsqk='已录入未审核'   where idcard='340822193710180741';
 
 SELECT count(*) FROM `fullcover2020`.`fc_books`;
 SELECT count(*) FROM `fullcover2020`.`fc_yxfsj`;
@@ -90,14 +92,30 @@ update`fullcover2020`.`fc_yxfsj` set wcbyy='服刑人员' where wcbyy='服刑';
 
 update`fullcover2020`.`fc_yxfsj` set wcbyy='已录入居保' where wcbyy='已参居保';
 
+update`fullcover2020`.`fc_yxfsj` set wcbyy='死亡（失踪）' where wcbyy='死亡';
+
 select a.*, b.name as jbname from `fullcover2020`.`fc_yxfsj` as a, `fullcover2020`.`jbrymx` as b where a.idcard=b.idcard and a.name<>b.name;
 
 update `fullcover2020`.`jbrymx` set name='张新伟' where idcard='43030319680412001X';
 
 update`fullcover2020`.`fc_books` set hsqk='16岁以上在校生' where hsqk='16岁以上在校学生';
 
+update`fullcover2020`.`fc_books` set hsqk='死亡（失踪）' where hsqk like ' 死亡';
+
 update`fullcover2020`.`fc_books` set hsqk='参职保（含退休）' where hsqk='参职保(含退休)';
 
 update`fullcover2020`.`fc_books` set hsqk='服刑人员' where hsqk='服刑';
 
 update`fullcover2020`.`fc_books` set hsqk='已录入居保' where hsqk='已参居保';
+
+update`fullcover2020`.`fc_books` set hsqk='异地居保' where hsqk='外省居保';
+
+select * from `fullcover2020`.`fc_yxfsj` where idcard='430302196305253778';
+
+dotnet run --project src\Yhsb.Jb.FullCover -- importJB --clear D:\参保管理\参保全覆盖\居保参保人员明细表20200526A.xlsx 2 35501
+dotnet run --project src\Yhsb.Jb.FullCover -- importJB D:\参保管理\参保全覆盖\居保参保人员明细表20200526B.xlsx 2 46685
+dotnet run --project src\Yhsb.Jb.FullCover -- importJB D:\参保管理\参保全覆盖\居保参保人员明细表20200528C.xlsx 2 36384
+
+dotnet run --project src\Yhsb.Jb.FullCover -- exportDC --where "sfycb<>'是' and (wcbyy is null or wcbyy='')" --out 1.已下发但乡镇街道未落实人员明细20200528.xlsx
+
+dotnet run --project src\Yhsb.Jb.FullCover -- exportDC --where "sfycb<>'是' and (wcbyy like '已录入居保')" --out 2.乡镇街上报应录入实际未录入人员明细20200528.xlsx
