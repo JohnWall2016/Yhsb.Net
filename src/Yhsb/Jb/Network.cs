@@ -703,7 +703,6 @@ namespace Yhsb.Jb.Network
     {
         public static string[] regex =
             {
-                
                 "湘潭市雨湖区((.*?乡)(.*?社区))",
                 "湘潭市雨湖区((.*?乡)(.*?村))",
                 "湘潭市雨湖区((.*?乡)(.*?政府机关))",
