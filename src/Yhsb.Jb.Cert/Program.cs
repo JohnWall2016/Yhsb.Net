@@ -169,7 +169,7 @@ namespace Yhsb.Jb.Cert
                     });
 
                     outWorkbook.Save(
-                        Path.Join(OutputDir, xzj, $"{csq}.xlsx"));
+                        Path.Join(OutputDir, xzj, $"{csq}.xls"));
                 }
             }
             WriteLine($"{"合计:".FillRight(11)} {total}");
