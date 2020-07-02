@@ -23,7 +23,7 @@ namespace Yhsb.Jb.FullCover
         static void Main(string[] args)
         {
             Command.Parse<Split, ImportDist, ImportBooks, ImportJB, 
-                UpdateBooks, UpdateJB, UpdateYY, exportDC>(args);
+                UpdateBooks, UpdateJB, UpdateYY, exportDC, GenCompareData>(args);
         }
     }
 
@@ -455,6 +455,70 @@ namespace Yhsb.Jb.FullCover
             }
 
             WriteLine("结束更新落实总台账");
+        }
+    }
+
+    [Verb("genCData", HelpText = "生成比对上传数据程序")]
+    class GenCompareData : ICommand
+    {
+        public void Execute()
+        {
+            const string tmplXlsx = @"D:\参保管理\参保全覆盖2\243030220200701000001Q020310.xls";
+            string[] files = new string[] 
+            {
+                @"D:\参保管理\参保全覆盖2\原始下发数据\雨湖区未参加城乡居保.xls", 
+                @"D:\参保管理\参保全覆盖2\原始下发数据\雨湖区未参加城乡居保１.xls"
+            };
+
+            const string dir = @"D:\参保管理\参保全覆盖2\上传比对数据\";
+
+            int serialNO = 1;
+
+            void genCData(string file, string tmpl) 
+            {
+                var workbook = ExcelExtension.LoadExcel(file);
+                for (int i = 0; i < workbook.NumberOfSheets; i++)
+                {
+                    var sheetName = workbook.GetSheetName(i);
+                    WriteLine($"生成比对上传数据: {sheetName}");
+
+                    var outWorkbook = ExcelExtension.LoadExcel(tmpl);
+                    var outSheet = outWorkbook.GetSheetAt(0);
+
+                    int startRow = 3, currentRow = 3;
+
+                    var sheet = workbook.GetSheetAt(i);
+                    for (int r = 0; r <= sheet.LastRowNum; r++)
+                    {
+                        var row = sheet.Row(r);
+                        var idcard = row.Cell("D").Value();
+                        var name = row.Cell("C").Value();
+                        var type = "170";
+                        var xzqh = "430302";
+
+                        if (string.IsNullOrEmpty(idcard)) break;
+                        WriteLine($"{currentRow - startRow + 1} {idcard} {name}");
+
+                        var outRow = outSheet.GetOrCopyRow(currentRow++, startRow);
+                        outRow.Cell("A").SetValue(idcard);
+                        outRow.Cell("B").SetValue(name);
+                        outRow.Cell("C").SetValue(type);
+                        outRow.Cell("D").SetValue(xzqh);
+                    }
+
+                    var NO = Util.StringEx.FillLeft($"{serialNO++}", 6, '0');
+                    var outFile = $"{2}{430302}{Util.DateTime.FormatedDate()}{NO}{"Q02031"}{0}.xls";
+                    var path = Path.Join(dir, outFile);
+
+                    WriteLine($"保存至: {path}");
+                    outWorkbook.Save(path);
+                }
+            }
+
+            foreach (var file in files)
+            {
+                genCData(file, tmplXlsx);
+            }
         }
     }
 }
