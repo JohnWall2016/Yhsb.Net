@@ -23,7 +23,8 @@ namespace Yhsb.Jb.FullCover
         static void Main(string[] args)
         {
             Command.Parse<Split, ImportDist, ImportBooks, ImportJB, 
-                UpdateBooks, UpdateJB, UpdateYY, exportDC, GenCompareData>(args);
+                UpdateBooks, UpdateJB, UpdateYY, exportDC, GenCompareData,
+                ImportFC2, ImportBdjg, ImportZxxs>(args);
         }
     }
 
@@ -519,6 +520,139 @@ namespace Yhsb.Jb.FullCover
             {
                 genCData(file, tmplXlsx);
             }
+        }
+    }
+
+    [Verb("importFC2", HelpText = "导入全覆盖2省厅下发数据")]
+    class ImportFC2 : ICommand
+    {
+        [Value(0, HelpText = "xlsx文件",
+            Required = true, MetaName = "xslx")]
+        public string Xlsx { get; set; }
+
+        [Value(1, HelpText = "数据开始行, 从1开始",
+            Required = true, MetaName = "beginRow")]
+        public int BeginRow { get; set; }
+
+        [Value(2, HelpText = "数据结束行(包含), 从1开始",
+            Required = true, MetaName = "endRow")]
+        public int EndRow { get; set; }
+
+        [Value(3, HelpText = "在xlsx中表格序号, 默认为: 0", 
+            MetaName = "tableIndex")]
+        public int tableIndex { get; set; } = 0;
+
+        [Option("clear", HelpText = "是否清除数据表")]
+        public bool Clear { get; set; } = false;
+
+        public void Execute()
+        {
+            using var db = new Context();
+
+            if (Clear)
+            {
+                WriteLine("开始清除数据表: 全覆盖2省厅下发数据");
+                db.DeleteAll<FC2Stxfsj>(printSql: true);
+                WriteLine("结束清除数据表: 全覆盖2省厅下发数据");
+            }
+
+            WriteLine("开始导入下发数据表");
+            db.LoadExcel<FC2Stxfsj>(Xlsx, BeginRow, EndRow,
+                new List<string>
+                { "A", "E", "D", "F", "G", "H", "0", "0", "0", "0", "", "", "" },
+                new List<string> { "A" },
+                printSql: true,
+                tableIndex: tableIndex);
+            WriteLine("结束导入下发数据表");
+        }
+    }
+
+    [Verb("importBdjg", HelpText = "导入全覆盖2全国信息比对结果")]
+    class ImportBdjg : ICommand
+    {
+        [Value(0, HelpText = "xlsx文件",
+            Required = true, MetaName = "xslx")]
+        public string Xlsx { get; set; }
+
+        [Value(1, HelpText = "数据开始行, 从1开始",
+            Required = true, MetaName = "beginRow")]
+        public int BeginRow { get; set; }
+
+        [Value(2, HelpText = "数据结束行(包含), 从1开始",
+            Required = true, MetaName = "endRow")]
+        public int EndRow { get; set; }
+
+        [Value(3, HelpText = "在xlsx中表格序号, 默认为: 0", 
+            MetaName = "tableIndex")]
+        public int tableIndex { get; set; } = 0;
+
+        [Option("clear", HelpText = "是否清除数据表")]
+        public bool Clear { get; set; } = false;
+
+        public void Execute()
+        {
+            using var db = new Context();
+
+            if (Clear)
+            {
+                WriteLine("开始清除数据表: 全覆盖2全国信息比对结果");
+                db.DeleteAll<FC2Qgbdjg>(printSql: true);
+                WriteLine("结束清除数据表: 全覆盖2全国信息比对结果");
+            }
+
+            WriteLine("开始导入全国信息比对结果表");
+            db.LoadExcel<FC2Qgbdjg>(Xlsx, BeginRow, EndRow,
+                new List<string>
+                { @"\N", "A", "E", "F", "G", "H", "I", "J", "K", "L", "" },
+                //new List<string> { "A" },
+                printSql: true,
+                tableIndex: tableIndex);
+            WriteLine("结束导入全国信息比对结果表");
+        }
+    }
+
+    
+    [Verb("importZxxs", HelpText = "导入在校学生数据")]
+    class ImportZxxs : ICommand
+    {
+        [Value(0, HelpText = "xlsx文件",
+            Required = true, MetaName = "xslx")]
+        public string Xlsx { get; set; }
+
+        [Value(1, HelpText = "数据开始行, 从1开始",
+            Required = true, MetaName = "beginRow")]
+        public int BeginRow { get; set; }
+
+        [Value(2, HelpText = "数据结束行(包含), 从1开始",
+            Required = true, MetaName = "endRow")]
+        public int EndRow { get; set; }
+
+        [Value(3, HelpText = "在xlsx中表格序号, 默认为: 0", 
+            MetaName = "tableIndex")]
+        public int tableIndex { get; set; } = 0;
+
+        [Option("clear", HelpText = "是否清除数据表")]
+        public bool Clear { get; set; } = false;
+
+        public void Execute()
+        {
+            using var db = new Context();
+
+            if (Clear)
+            {
+                WriteLine("开始清除数据表: 在校学生数据");
+                db.DeleteAll<Zxxssj>(printSql: true);
+                WriteLine("结束清除数据表: 在校学生数据");
+            }
+
+            WriteLine("开始导入在校学生数据");
+            db.LoadExcel<Zxxssj>(Xlsx, BeginRow, EndRow,
+                new List<string>
+                { "A", "B", "C", "D", "E", "F", "G" },
+                new List<string> { "A" },
+                printSql: true,
+                tableIndex: tableIndex);
+            WriteLine("结束导入在校学生数据");
         }
     }
 }

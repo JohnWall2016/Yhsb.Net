@@ -43,12 +43,12 @@ namespace Yhsb.Database
         public static int LoadExcel<T>(
             this DbContext context, string fileName, int startRow,
             int endRow, List<string> fields, List<string> noQuotes = null,
-            bool printSql = false, string ident = "")
+            bool printSql = false, string ident = "", int tableIndex = 0)
             where T : class
         {
             var workbook = ExcelExtension.LoadExcel(fileName);
-            var sheet = workbook.GetSheetAt(0);
-            var regex = new Regex("^[A-z]+$", RegexOptions.IgnoreCase);
+            var sheet = workbook.GetSheetAt(tableIndex);
+            var regex = new Regex("^[A-Z]+$", RegexOptions.IgnoreCase);
 
             var builder = new StringBuilder();
             for (var index = startRow - 1; index < endRow; index++)
@@ -62,9 +62,9 @@ namespace Yhsb.Database
                         if (regex.IsMatch(row))
                         {
                             value = sheet.Row(index).Cell(row).Value();
-                        } 
-                        if (noQuotes != null && noQuotes.Contains(row))
-                            value = $"'{value}'";
+                            if (noQuotes == null || !noQuotes.Contains(row))
+                                value = $"'{value}'";
+                        }
                         values.Add(value);
                     }
                     builder.Append(string.Join(',', values));

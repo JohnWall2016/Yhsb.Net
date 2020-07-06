@@ -100,7 +100,111 @@ namespace Yhsb.Jb.Database.FullCover2020
         /// 参保时间
         public string Cbsj { get; set; }
     }
-    
+
+    /// 全覆盖2省厅下发数据
+    [Table("fc2_stxfsj")] public class FC2Stxfsj
+    {
+        public int Id { get; set; }
+
+        /// 身份证号码
+        [Key]
+        public string Idcard { get; set; }
+        
+        /// 姓名
+        public string Name { get; set; }
+
+        /// 户籍地址
+        public string Address { get; set; }
+
+        /// 管理状态代码
+        public string ManageCode { get; set; }
+
+        /// 管理状态名称
+        public string ManageName { get; set; }
+
+        /// 是否在之前全覆盖落实总台账中 '0'-否, '1'-是
+        public string InFcbooks { get; set; }
+
+        /// 是否在全国信息比对结果中
+        public string InQgbdjg { get; set; }
+
+        /// 是否在在校学生数据中
+        public string InZxxssj { get; set; }
+
+        /// 是否在我区参加居保
+        public string InSfwqjb { get; set; }
+
+        /// 单位名称
+        public string Dwmc { get; set; }
+
+        /// 下发批次("第一批", "第二批", ...)
+        public string Xfpc { get; set; }
+
+        /// 未参保原因
+        public string Wcbyy { get; set; }
+    }
+
+    /// 全覆盖2全国信息比对结果
+    [Table("fc2_qgbdjg")] public class FC2Qgbdjg
+    {
+        [Key]
+        public int Id { get; set; }
+
+        /// 身份证号码
+        public string Idcard { get; set; }
+        
+        /// 姓名
+        public string Name { get; set; }
+
+        /// 参保日期
+        public string Cbrq { get; set; }
+
+        /// 建立个人账户日期
+        public string Jzrq { get; set; }
+
+        /// 缴费状态
+        public string Jfzt { get; set; }
+
+        /// 断缴原因
+        public string Djyy { get; set; }
+
+        /// 行政区划
+        public string Xzqh { get; set; }
+
+        /// 数据期别
+        public string Sjqb { get; set; }
+
+        /// 险种类型
+        public string Xzlx { get; set; }
+
+        /// 备注
+        public string Bz { get; set; }
+    }
+
+    /// 在校学生数据
+    [Table("fc_zxxssj")] public class Zxxssj
+    {
+        public int Id { get; set; }
+
+        /// 身份证号码
+        public string Idcard { get; set; }
+        
+        /// 姓名
+        public string Name { get; set; }
+
+        /// 险种
+        public string Xz { get; set; }
+
+        /// 统筹区
+        public string Tcq { get; set; }
+
+        /// 乡镇街
+        public string Xzj { get; set; }
+
+        /// 村社区
+        public string Csq { get; set; }
+    }
+
     public class Context : DbContext
     {
         public Context() : base()
@@ -115,5 +219,8 @@ namespace Yhsb.Jb.Database.FullCover2020
         public DbSet<Yxfsj> Yxfsjs { get; set; }
         public DbSet<Books> Books { get; set; }
         public DbSet<Jbrymx> Jbrymx { get; set; }
+        public DbSet<FC2Stxfsj> FC2Xtxfsj { get; set; }
+        public DbSet<FC2Qgbdjg> Fc2Qgbdjg { get; set; }
+        public DbSet<Zxxssj> Zxxssj { get; set; }
     }
 }
