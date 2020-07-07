@@ -6,15 +6,38 @@ CREATE TABLE IF NOT EXISTS `fullcover2020`.`fc2_stxfsj`(
     `address` VARCHAR(100), -- 户籍地址
     `manage_code` VARCHAR(8), -- 管理状态代码
     `manage_name` VARCHAR(20), -- 管理状态名称
-    `in_fcbooks` VARCHAR(2), -- 是否在之前全覆盖落实总台账中 '0'-否, '1'-是
+    `in_fcbooks` VARCHAR(2), -- 是否在之前全覆盖落实总台账中: '0'-否, '1'-是
     `in_qgbdjg` VARCHAR(2), -- 是否在全国信息比对结果中
     `in_zxxssj` VARCHAR(2), -- 是否在在校学生数据中
     `in_sfwqjb` VARCHAR(2), -- 是否在我区参加居保
     `dwmc` VARCHAR(100), -- 单位名称
     `xfpc` VARCHAR(20), -- 下发批次("第一批", "第二批", ...)
     `wcbyy` VARCHAR(100), -- 未参保原因
+    
+    `hsqk` VARCHAR(50), -- 之前全覆盖落实总台账中 核实情况
+    `slcb` VARCHAR(50), -- 省内参保类型: '机关事业', '企业职工', '城乡居民'
+    `swcb` VARCHAR(50), -- 省外参保类型: '机关事业', '企业职工', '城乡居民'
+
     PRIMARY KEY (`idcard`)
 ) DEFAULT CHARSET=utf8;
+
+ALTER TABLE `fullcover2020`.`fc2_stxfsj`
+ADD `hsqk` VARCHAR(50),
+ADD `slcb` VARCHAR(50),
+ADD `swcb` VARCHAR(50);
+
+update fc2_stxfsj a join fc2_qgbdjg b on a.idcard = b.idcard
+   set a.slcb = b.slcb
+ where b.slcb is not null;
+
+update fc2_stxfsj a join fc2_qgbdjg b on a.idcard = b.idcard
+   set a.swcb = b.swcb
+ where b.swcb is not null;
+
+select hsqk from fc_books group by hsqk;
+
+update fc2_stxfsj a join fc_books b on a.idcard = b.idcard
+   set a.hsqk = b.hsqk;
 
 -- 全覆盖2全国信息比对结果
 CREATE TABLE IF NOT EXISTS `fullcover2020`.`fc2_qgbdjg`(
@@ -29,8 +52,52 @@ CREATE TABLE IF NOT EXISTS `fullcover2020`.`fc2_qgbdjg`(
     `sjqb` VARCHAR(20), -- 数据期别
     `xzlx` VARCHAR(50), -- 险种类型
     `bz` VARCHAR(100), -- 备注
+    
+    `slcb` VARCHAR(50), -- 省内参保类型: '机关事业', '企业职工', '城乡居民'
+    `swcb` VARCHAR(50), -- 省外参保类型: '机关事业', '企业职工', '城乡居民'
+
     PRIMARY KEY ( `id` )
 ) DEFAULT CHARSET=utf8;
+
+ALTER TABLE `fullcover2020`.`fc2_qgbdjg`
+ADD `slcb` VARCHAR(50),
+ADD `swcb` VARCHAR(50);
+
+UPDATE `fullcover2020`.`fc2_qgbdjg`
+   SET `slcb` = `xzlx`
+ WHERE substr(`xzqh`, 1, 2) = '湖南';
+
+UPDATE `fullcover2020`.`fc2_qgbdjg`
+   SET `swcb` = `xzlx`
+ WHERE substr(`xzqh`, 1, 2) <> '湖南';
+
+UPDATE `fullcover2020`.`fc2_qgbdjg`
+   SET slcb = '城乡居民'
+ WHERE slcb = '城乡居民社会养老保险';
+
+UPDATE `fullcover2020`.`fc2_qgbdjg`
+   SET slcb = '企业职工'
+ WHERE slcb = '城镇企业职工基本养老保险';
+
+UPDATE `fullcover2020`.`fc2_qgbdjg`
+   SET slcb = '机关事业'
+ WHERE slcb = '机关事业单位养老保险';
+
+select slcb, count(slcb) from fc2_qgbdjg group by slcb;
+
+UPDATE `fullcover2020`.`fc2_qgbdjg`
+   SET swcb = '城乡居民'
+ WHERE swcb = '城乡居民社会养老保险';
+
+UPDATE `fullcover2020`.`fc2_qgbdjg`
+   SET swcb = '企业职工'
+ WHERE swcb = '城镇企业职工基本养老保险';
+
+UPDATE `fullcover2020`.`fc2_qgbdjg`
+   SET swcb = '机关事业'
+ WHERE swcb = '机关事业单位养老保险';
+
+select swcb, count(swcb) from fc2_qgbdjg group by swcb;
 
 -- 在校学生数据
 CREATE TABLE IF NOT EXISTS `fullcover2020`.`fc_zxxssj`(

@@ -24,7 +24,7 @@ namespace Yhsb.Jb.FullCover
         {
             Command.Parse<Split, ImportDist, ImportBooks, ImportJB, 
                 UpdateBooks, UpdateJB, UpdateYY, exportDC, GenCompareData,
-                ImportFC2, ImportBdjg, ImportZxxs>(args);
+                ImportFC2, ImportBdjg, ImportZxxs, ExportXfsj>(args);
         }
     }
 
@@ -653,6 +653,79 @@ namespace Yhsb.Jb.FullCover
                 printSql: true,
                 tableIndex: tableIndex);
             WriteLine("结束导入在校学生数据");
+        }
+    }
+
+    [Verb("exportXfsj", HelpText = "导出全覆盖2下发数据清册")]
+    class ExportXfsj : ICommand
+    {
+        const string tmplXlsx = @"D:\参保管理\参保全覆盖2\雨湖区全覆盖下发数据清册模板.xlsx";
+
+        const int countPerExcel = 60000;
+
+        [Value(0, HelpText = "导出目录", Required = true)]
+        public string outputDir { get; set; } = null;
+
+        public void Execute()
+        {
+            if (Directory.Exists(outputDir))
+                Directory.Move(outputDir, outputDir + ".orig");
+            Directory.CreateDirectory(outputDir);
+
+            using var db = new Context();
+
+            var sql = "SELECT * FROM fc2_stxfsj ORDER BY id";
+
+            IQueryable<FC2Stxfsj> data = db.FC2Stxfsj.FromSqlRaw(sql);
+            var dataCount = data.Count();
+
+            var excelCount = dataCount / countPerExcel;
+            if (dataCount - excelCount * countPerExcel > 0) excelCount += 1;
+
+            WriteLine($"全覆盖下发数据共计: {dataCount}, 共分为 {excelCount} 个excel文件");
+
+            for (var excelNO = 1; excelNO <= excelCount; excelNO ++)
+            {
+                sql = $"SELECT * FROM fc2_stxfsj ORDER BY id LIMIT {(excelNO - 1) * countPerExcel}, {countPerExcel}";
+
+                data = db.FC2Stxfsj.FromSqlRaw(sql);
+
+                var fileName = $"雨湖区全覆盖下发数据清册{excelNO}.xlsx";
+                var filePath = Path.Join(outputDir, fileName);
+
+                WriteLine($"开始导出第 {excelNO} 个文件: => {fileName}");
+
+                var workbook = ExcelExtension.LoadExcel(tmplXlsx);
+                var sheet = workbook.GetSheetAt(0);
+                int startRow = 2, currentRow = 2;
+
+                foreach (var d in data)
+                {
+                    var index = currentRow - startRow + 1;
+
+                    WriteLine($"{index} {d.Id} {d.Idcard} {d.Name}");
+
+                    var row = sheet.GetOrCopyRow(currentRow++, startRow);
+
+                    row.Cell("A").SetValue(d.Id);
+                    row.Cell("B").SetValue(d.Name);
+                    row.Cell("C").SetValue(d.Idcard);
+                    row.Cell("D").SetValue(d.Address);
+                    row.Cell("E").SetValue(d.ManageName);
+                    row.Cell("F").SetValue(d.Hsqk);
+                    row.Cell("G").SetValue(d.Slcb);
+                    row.Cell("H").SetValue(d.Swcb);
+                    row.Cell("I").SetValue(d.InZxxssj == "1" ? "是" : "");
+                    row.Cell("J").SetValue(d.InSfwqjb == "1" ? "是" : "");
+
+                    if (index >= countPerExcel)
+                        break;
+                }
+
+                workbook.Save(filePath);
+
+                WriteLine($"结束导出第 {excelNO} 个文件: => {fileName}");
+            }
         }
     }
 }

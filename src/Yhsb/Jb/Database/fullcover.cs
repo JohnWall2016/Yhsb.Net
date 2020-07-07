@@ -117,21 +117,27 @@ namespace Yhsb.Jb.Database.FullCover2020
         public string Address { get; set; }
 
         /// 管理状态代码
+        [Column("manage_code")]
         public string ManageCode { get; set; }
 
         /// 管理状态名称
+        [Column("manage_name")]
         public string ManageName { get; set; }
 
         /// 是否在之前全覆盖落实总台账中 '0'-否, '1'-是
+        [Column("in_fcbooks")]
         public string InFcbooks { get; set; }
 
         /// 是否在全国信息比对结果中
+        [Column("in_qgbdjg")]
         public string InQgbdjg { get; set; }
 
         /// 是否在在校学生数据中
+        [Column("in_zxxssj")]
         public string InZxxssj { get; set; }
 
         /// 是否在我区参加居保
+        [Column("in_sfwqjb")]
         public string InSfwqjb { get; set; }
 
         /// 单位名称
@@ -142,6 +148,15 @@ namespace Yhsb.Jb.Database.FullCover2020
 
         /// 未参保原因
         public string Wcbyy { get; set; }
+
+        /// 之前全覆盖落实总台账中 核实情况
+        public string Hsqk { get; set; }
+
+        /// 省内参保类型: '机关事业', '企业职工', '城乡居民'
+        public string Slcb { get; set; }
+
+        /// 省外参保类型: '机关事业', '企业职工', '城乡居民'
+        public string Swcb { get; set; }
     }
 
     /// 全覆盖2全国信息比对结果
@@ -219,7 +234,7 @@ namespace Yhsb.Jb.Database.FullCover2020
         public DbSet<Yxfsj> Yxfsjs { get; set; }
         public DbSet<Books> Books { get; set; }
         public DbSet<Jbrymx> Jbrymx { get; set; }
-        public DbSet<FC2Stxfsj> FC2Xtxfsj { get; set; }
+        public DbSet<FC2Stxfsj> FC2Stxfsj { get; set; }
         public DbSet<FC2Qgbdjg> Fc2Qgbdjg { get; set; }
         public DbSet<Zxxssj> Zxxssj { get; set; }
     }
