@@ -105,3 +105,11 @@ group by manage_name;
   其它：         6
 管理中：     65730
 */
+
+select count(*) from fc2_stxfsj 
+where in_fcbooks <> '1'
+  and in_qgbdjg <> '1'
+  and in_zxxssj <> '1'
+  and in_sfwqjb <> '1'
+  and manage_name = '管理中'
+  and substr(idcard, 7, 8) <= '20041231';

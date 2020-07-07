@@ -166,6 +166,7 @@ namespace Yhsb.Jb.Cert
                         row.Cell("C").SetValue((inRow.Cell("E").Value() == "1") ? "男" : "女");
                         row.Cell("D").SetValue(inRow.Cell("D").Value());
                         row.Cell("E").SetValue(inRow.Cell("A").Value());
+                        row.Cell("M").SetValue(inRow.Cell("I").Value());
                     });
 
                     outWorkbook.Save(
