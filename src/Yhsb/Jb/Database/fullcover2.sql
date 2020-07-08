@@ -39,6 +39,9 @@ select hsqk from fc_books group by hsqk;
 update fc2_stxfsj a join fc_books b on a.idcard = b.idcard
    set a.hsqk = b.hsqk;
 
+update fc2_stxfsj a join fc_books b on a.idcard = b.idcard
+   set a.dwmc = b.dwmc;
+
 -- 全覆盖2全国信息比对结果
 CREATE TABLE IF NOT EXISTS `fullcover2020`.`fc2_qgbdjg`(
     `id` INT(11) NOT NULL AUTO_INCREMENT,

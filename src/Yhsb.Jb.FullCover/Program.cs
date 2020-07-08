@@ -24,7 +24,7 @@ namespace Yhsb.Jb.FullCover
         {
             Command.Parse<Split, ImportDist, ImportBooks, ImportJB, 
                 UpdateBooks, UpdateJB, UpdateYY, exportDC, GenCompareData,
-                ImportFC2, ImportBdjg, ImportZxxs, ExportXfsj>(args);
+                ImportFC2, ImportBdjg, ImportZxxs, ExportXfsj, GenDwmc>(args);
         }
     }
 
@@ -611,7 +611,6 @@ namespace Yhsb.Jb.FullCover
         }
     }
 
-    
     [Verb("importZxxs", HelpText = "导入在校学生数据")]
     class ImportZxxs : ICommand
     {
@@ -717,6 +716,7 @@ namespace Yhsb.Jb.FullCover
                     row.Cell("H").SetValue(d.Swcb);
                     row.Cell("I").SetValue(d.InZxxssj == "1" ? "是" : "");
                     row.Cell("J").SetValue(d.InSfwqjb == "1" ? "是" : "");
+                    row.Cell("K").SetValue(d.Dwmc);
 
                     if (index >= countPerExcel)
                         break;
@@ -726,6 +726,71 @@ namespace Yhsb.Jb.FullCover
 
                 WriteLine($"结束导出第 {excelNO} 个文件: => {fileName}");
             }
+        }
+    }
+
+    [Verb("gendwmc", HelpText = "生成单位名称")]
+    class GenDwmc : ICommand
+    {
+        [Value(0, HelpText = "xlsx文件",
+            Required = true, MetaName = "xslx")]
+        public string Xlsx { get; set; }
+
+        [Value(1, HelpText = "数据开始行, 从1开始",
+            Required = true, MetaName = "beginRow")]
+        public int BeginRow { get; set; }
+
+        [Value(2, HelpText = "数据结束行(包含), 从1开始",
+            Required = true, MetaName = "endRow")]
+        public int EndRow { get; set; }
+
+        [Value(3, HelpText = "行政区划所在列, 例如：A",
+            Required = true, MetaName = "xzqhCol")]
+        public string XzqhCol { get; set; }
+
+        [Value(4, HelpText = "单位名称保存列, 例如：A",
+            Required = true, MetaName = "dwmcCol")]
+        public string DwmcCol { get; set; }
+
+        public static string[] regex =
+            {
+                "湖南省湘潭市雨湖区(.*?乡).*",
+                "湖南省湘潭市雨湖区(.*?镇).*",
+                "湖南省湘潭市雨湖区(.*?街道).*",
+            };
+
+        public void Execute()
+        {
+            var workbook = ExcelExtension.LoadExcel(Xlsx);
+            var sheet = workbook.GetSheetAt(0);
+
+            for (var i = BeginRow - 1; i < EndRow; i++)
+            {
+                var row = sheet.GetRow(i);
+                var xzqh = row.Cell(XzqhCol).Value();
+
+                if (!string.IsNullOrEmpty(row.Cell(DwmcCol).Value()))
+                    continue;
+
+                var dwmc = "";
+
+                Match match = null;
+                foreach (var regex in regex)
+                {
+                    match = Regex.Match(xzqh, regex);
+                    if (match.Success)
+                    {
+                        dwmc = match.Groups[1].Value;
+                        break;
+                    }
+                }
+
+                WriteLine($"{i} {xzqh} => {dwmc}");
+                
+                row.Cell(DwmcCol).SetValue(dwmc);
+            }
+
+            workbook.Save(Util.StringEx.AppendToFileName(Xlsx, ".upd"));
         }
     }
 }
