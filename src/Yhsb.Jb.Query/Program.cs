@@ -16,7 +16,7 @@ namespace Yhsb.Jb.Query
         [App(Name = "信息查询程序")]
         static void Main(string[] args)
         {
-            Command.Parse<Jfxx, UpInfo, Doc, UpJfxx>(args);
+            Command.Parse<Jfxx, UpInfo, Doc, UpJfxx, UpBankInfo>(args);
         }
     }
 
@@ -363,6 +363,58 @@ namespace Yhsb.Jb.Query
 
                     row.Cell(InfoSaveCol).SetValue(jfbz);
                     WriteLine($"{i - BeginRow + 2} {idcard} {jfbz}");
+                }
+            });
+
+            workbook.Save(Util.StringEx.AppendToFileName(Xlsx, ".upd"));
+        }
+    }
+
+    [Verb("upBankInfo", HelpText = "更新xlsx中银行信息")]
+    class UpBankInfo : ICommand
+    {
+        [Value(0, HelpText = "xlsx文件",
+            Required = true, MetaName = "xslx")]
+        public string Xlsx { get; set; }
+
+        [Value(1, HelpText = "数据开始行, 从1开始",
+            Required = true, MetaName = "beginRow")]
+        public int BeginRow { get; set; }
+
+        [Value(2, HelpText = "数据结束行(包含), 从1开始",
+            Required = true, MetaName = "endRow")]
+        public int EndRow { get; set; }
+
+        [Value(3, HelpText = "身份证号码所在列, 例如：A",
+            Required = true, MetaName = "idCardCol")]
+        public string IdCardCol { get; set; }
+
+        [Value(4, HelpText = "银行信息保存列, 例如：A",
+            Required = true, MetaName = "infoSaveCol")]
+        public string InfoSaveCol { get; set; }
+
+        public void Execute()
+        {
+            var workbook = ExcelExtension.LoadExcel(Xlsx);
+            var sheet = workbook.GetSheetAt(0);
+
+            Session.Use(session =>
+            {
+                for (var i = BeginRow - 1; i < EndRow; i++)
+                {
+                    var row = sheet.GetRow(i);
+                    var idcard = row.Cell(IdCardCol).Value().ToUpper();
+
+                    var bankInfo = "";
+                    session.SendService(new BankInfoQuery(idcard));
+                    var bankInfoResult = session.GetResult<BankInfo>();
+                    if (!bankInfoResult.IsEmpty)
+                    {
+                        var biResult = bankInfoResult[0];
+                        bankInfo = biResult.BankName;                        
+                    }
+                    row.Cell(InfoSaveCol).SetValue(bankInfo);
+                    WriteLine($"{i - BeginRow + 2} {idcard} {bankInfo}");
                 }
             });
 
