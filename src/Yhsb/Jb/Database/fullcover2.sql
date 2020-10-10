@@ -17,7 +17,8 @@ CREATE TABLE IF NOT EXISTS `fullcover2020`.`fc2_stxfsj`(
     `hsqk` VARCHAR(50), -- 之前全覆盖落实总台账中 核实情况
     `slcb` VARCHAR(50), -- 省内参保类型: '机关事业', '企业职工', '城乡居民'
     `swcb` VARCHAR(50), -- 省外参保类型: '机关事业', '企业职工', '城乡居民'
-
+    `wqjbsf` VARCHAR(20), -- 我区居保身份: '011'...
+    `sfydsj` VARCHAR(2), -- 是否异地数据: '1'-是
     PRIMARY KEY (`idcard`)
 ) DEFAULT CHARSET=utf8;
 
@@ -25,6 +26,9 @@ ALTER TABLE `fullcover2020`.`fc2_stxfsj`
 ADD `hsqk` VARCHAR(50),
 ADD `slcb` VARCHAR(50),
 ADD `swcb` VARCHAR(50);
+
+ALTER TABLE `fullcover2020`.`fc2_stxfsj`
+ADD `sfydsj` VARCHAR(2);
 
 update fc2_stxfsj a join fc2_qgbdjg b on a.idcard = b.idcard
    set a.slcb = b.slcb
@@ -137,7 +141,7 @@ where b.idcard is not null;
 select count(*) from fc2_stxfsj where in_zxxssj = '1';
 
 update fc2_stxfsj a join jbrymx b on a.idcard = b.idcard
-set a.in_sfwqjb = '1'
+set a.in_sfwqjb = '1', a.wqjbsf = b.cbsf
 where b.idcard is not null;
 
 select count(*) from fc2_stxfsj where in_sfwqjb = '1';
@@ -183,3 +187,36 @@ where in_fcbooks <> '1'
   and in_sfwqjb <> '1'
   and manage_name = '管理中'
   and substr(idcard, 7, 8) <= '20041231';
+
+
+CREATE TABLE IF NOT EXISTS `fullcover2020`.`jbsf_code`(
+    `code` VARCHAR(10) NOT NULL, -- 编码
+    `name` VARCHAR(50) NOT NULL, -- 名称
+     PRIMARY KEY (`code`)
+) DEFAULT CHARSET=utf8;
+
+INSERT INTO `fullcover2020`.`jbsf_code`(`code`, `name`) values ('011', '普通参保人员');
+INSERT INTO `fullcover2020`.`jbsf_code`(`code`, `name`) values ('021', '残一级');
+INSERT INTO `fullcover2020`.`jbsf_code`(`code`, `name`) values ('022', '残二级');
+INSERT INTO `fullcover2020`.`jbsf_code`(`code`, `name`) values ('023', '残三级');
+INSERT INTO `fullcover2020`.`jbsf_code`(`code`, `name`) values ('031', '特困一级');
+INSERT INTO `fullcover2020`.`jbsf_code`(`code`, `name`) values ('032', '特困二级');
+INSERT INTO `fullcover2020`.`jbsf_code`(`code`, `name`) values ('033', '特困三级');
+INSERT INTO `fullcover2020`.`jbsf_code`(`code`, `name`) values ('051', '贫困人口一级');
+INSERT INTO `fullcover2020`.`jbsf_code`(`code`, `name`) values ('052', '贫困人口二级');
+INSERT INTO `fullcover2020`.`jbsf_code`(`code`, `name`) values ('053', '贫困人口三级');
+INSERT INTO `fullcover2020`.`jbsf_code`(`code`, `name`) values ('061', '低保对象一级');
+INSERT INTO `fullcover2020`.`jbsf_code`(`code`, `name`) values ('062', '低保对象二级');
+INSERT INTO `fullcover2020`.`jbsf_code`(`code`, `name`) values ('063', '低保对象三级');
+INSERT INTO `fullcover2020`.`jbsf_code`(`code`, `name`) values ('071', '计生特扶人员');
+INSERT INTO `fullcover2020`.`jbsf_code`(`code`, `name`) values ('090', '其他');
+
+-- 全覆盖2省厅下发原始数据
+CREATE TABLE IF NOT EXISTS `fullcover2020`.`fc2_stxfyssj`(
+    `idcard` VARCHAR(18) NOT NULL, -- 身份证号码
+    `name` VARCHAR(20) NOT NULL, -- 姓名
+    `address` VARCHAR(100), -- 户籍地址
+    `manage_code` VARCHAR(8), -- 管理状态代码
+    `manage_name` VARCHAR(20), -- 管理状态名称
+    PRIMARY KEY (`idcard`)
+) DEFAULT CHARSET=utf8;

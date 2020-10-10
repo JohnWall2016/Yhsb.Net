@@ -367,12 +367,14 @@ namespace Yhsb.Jb.Treatment
                 var bankInfoResult = session.GetResult<BankInfo>();
 
                 var payInfo = result[0].PaymentInfo;
+                //Console.WriteLine(payInfo.Success);
                 while (!payInfo.Success)
                 {
-                    if (--retry > 1)
+                    if (--retry > 0)
                         payInfo = result[0].PaymentInfo;
                     else
                         throw new ApplicationException("养老金计算信息无效");
+                    //Console.WriteLine(payInfo.Success);
                 }
                 var workbook = ExcelExtension.LoadExcel(Program.payInfoXlsx);
                 var sheet = workbook.GetSheetAt(0);
@@ -380,8 +382,8 @@ namespace Yhsb.Jb.Treatment
                 sheet.Cell("B5").SetValue(payInfo.Groups[2].Value);
                 sheet.Cell("C5").SetValue(payInfo.Groups[3].Value);
                 sheet.Cell("F5").SetValue(payInfo.Groups[4].Value);
-                sheet.Cell("H5").SetValue(payInfo.Groups[5].Value);
-                sheet.Cell("K5").SetValue(payInfo.Groups[6].Value);
+                sheet.Cell("I5").SetValue(payInfo.Groups[5].Value);
+                sheet.Cell("L5").SetValue(payInfo.Groups[6].Value);
                 sheet.Cell("A8").SetValue(payInfo.Groups[7].Value);
                 sheet.Cell("B8").SetValue(payInfo.Groups[8].Value);
                 sheet.Cell("C8").SetValue(payInfo.Groups[9].Value);
@@ -393,19 +395,21 @@ namespace Yhsb.Jb.Treatment
                 sheet.Cell("J8").SetValue(payInfo.Groups[15].Value);
                 sheet.Cell("K8").SetValue(payInfo.Groups[16].Value);
                 sheet.Cell("L8").SetValue(payInfo.Groups[17].Value);
-                sheet.Cell("A11").SetValue(payInfo.Groups[18].Value);
-                sheet.Cell("B11").SetValue(payInfo.Groups[19].Value);
-                sheet.Cell("C11").SetValue(payInfo.Groups[20].Value);
-                sheet.Cell("D11").SetValue(payInfo.Groups[21].Value);
-                sheet.Cell("E11").SetValue(payInfo.Groups[22].Value);
-                sheet.Cell("F11").SetValue(payInfo.Groups[23].Value);
-                sheet.Cell("G11").SetValue(payInfo.Groups[24].Value);
-                sheet.Cell("H11").SetValue(payInfo.Groups[25].Value);
-                sheet.Cell("I11").SetValue(payInfo.Groups[26].Value);
-                sheet.Cell("J11").SetValue(payInfo.Groups[27].Value);
-                sheet.Cell("K11").SetValue(payInfo.Groups[28].Value);
-                sheet.Cell("L11").SetValue(payInfo.Groups[29].Value);
-                sheet.Cell("H12").SetValue(
+                sheet.Cell("M8").SetValue(payInfo.Groups[18].Value);
+                sheet.Cell("A11").SetValue(payInfo.Groups[19].Value);
+                sheet.Cell("B11").SetValue(payInfo.Groups[20].Value);
+                sheet.Cell("C11").SetValue(payInfo.Groups[21].Value);
+                sheet.Cell("D11").SetValue(payInfo.Groups[22].Value);
+                sheet.Cell("E11").SetValue(payInfo.Groups[23].Value);
+                sheet.Cell("F11").SetValue(payInfo.Groups[24].Value);
+                sheet.Cell("G11").SetValue(payInfo.Groups[25].Value);
+                sheet.Cell("H11").SetValue(payInfo.Groups[26].Value);
+                sheet.Cell("I11").SetValue(payInfo.Groups[27].Value);
+                sheet.Cell("J11").SetValue(payInfo.Groups[28].Value);
+                sheet.Cell("K11").SetValue(payInfo.Groups[29].Value);
+                sheet.Cell("L11").SetValue(payInfo.Groups[30].Value);
+                sheet.Cell("M11").SetValue(payInfo.Groups[31].Value);
+                sheet.Cell("I12").SetValue(
                     System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
 
                 if (!bankInfoResult.IsEmpty)

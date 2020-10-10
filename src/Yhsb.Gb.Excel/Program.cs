@@ -12,8 +12,8 @@ namespace Yhsb.Gb.Excel
     {
         static void Main(string[] args)
         {
-            var srcDir = @"E:\机关养老保险\0528确认表";
-            var outDir = @"E:\机关养老保险\0528确认表（新表）";
+            var srcDir = @"E:\机关养老保险\1010确认表";
+            var outDir = @"E:\机关养老保险\1010确认表（新表）";
             var tmpXls = @"E:\机关养老保险\（模板）试点期间参保人员缴费确认表.xls";
 
             foreach (var xls in Directory.EnumerateFiles(srcDir))
@@ -70,7 +70,7 @@ namespace Yhsb.Gb.Excel
                         var outRow = outSheet.GetOrCopyRow(currentRow++, startRow);
                         //outRow.Cell("B").SetValue(total);
                         outRow.Cell("B").SetCellFormula(
-                            $"CONCATENATE(\"共 \",SUMPRODUCT(1/COUNTIF(C5:C{currentRow-1},C5:C{currentRow-1})),\" 人\")");
+                            $"CONCATENATE(\"共 \",SUMPRODUCT(1/COUNTIF(C5:C{currentRow-1},C5:C{currentRow-1}&\"*\")),\" 人\")");
                         outRow.Cell("H").SetValue("合计");
                         //outRow.Cell("I").SetCellValue(hj);
                         outRow.Cell("I").SetCellFormula($"SUM(I5:I{currentRow-1})");

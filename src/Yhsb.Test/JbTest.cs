@@ -49,9 +49,9 @@ public class JbTest
         {
             // sessoin.SendService(new DyfhQuery(shzt: "1", qsshsj: "20191031"));
             // Console.WriteLine(sessoin.ReadBody());
-            sessoin.SendService(new DyfhQuery(idcard: "430302195908151522", shzt: "1", qsshsj: "20191031"));
+            sessoin.SendService(new DyfhQuery(idcard: "430321196009090520"));
             Console.WriteLine(sessoin.ReadBody());
-            sessoin.SendService(new DyfhQuery(idcard: "430302195908151522", shzt: "1", qsshsj: "20191031"));
+            sessoin.SendService(new DyfhQuery(idcard: "430321196009090520"));
             var result = sessoin.GetResult<Dyfh>();
             if (!result.IsEmpty)
             {
