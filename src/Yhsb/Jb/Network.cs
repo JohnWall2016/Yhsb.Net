@@ -754,13 +754,18 @@ namespace Yhsb.Jb.Network
 
         public int aaz170, aaz159, aaz157;
 
+        static string Escape(object str) =>
+                    HttpUtility.UrlEncode(str.ToString());
+
+        public string PaymentInfoUrl =>
+                    "/hncjb/reports?method=htmlcontent&name=yljjs&" +
+                    $"aaz170={Escape(aaz170)}&aaz159={Escape(aaz159)}&aac001={Escape(grbh)}&" +
+                    $"aaz157={Escape(aaz157)}&aaa129={Escape(dwmc)}&aae211={Escape(accountMonth)}";
+
         public Match PaymentInfo
         {
             get
             {
-                static string Escape(object str) =>
-                    HttpUtility.UrlEncode(str.ToString());
-
                 var path =
                     "/hncjb/reports?method=htmlcontent&name=yljjs&" +
                     $"aaz170={Escape(aaz170)}&aaz159={Escape(aaz159)}&aac001={Escape(grbh)}&" +
@@ -769,7 +774,9 @@ namespace Yhsb.Jb.Network
                 using var sock = new HttpSocket(
                     _internal.Session.Host, _internal.Session.Port);
                 var content = sock.GetHttp(path);
-                return Regex.Match(content, _regexPaymentInfo);
+                return Regex.Match(
+                    content.Replace("\r", "").Replace("\n", "").Replace("\t", "        "), 
+                    _regexPaymentInfo);
             }
         }
 
@@ -780,7 +787,7 @@ namespace Yhsb.Jb.Network
         <td align=""center"" colspan=""3"" id=""5"">身份证</td>
         <td align=""center"" colspan=""3"" id=""6"">困难级别</td>
         <td align=""center"" colspan=""3"" id=""7"">户籍所在地</td>
-        <td align=""center"" colspan=""2"" id=""8"">所在地行政区划编码</td>
+        <td align=""center"" colspan=""3"" id=""8"">所在地行政区划编码</td>
       </tr>
       <tr class=""detail"" component=""detail"" id=""76"">
         <td height=""39"" align=""center"" id=""9"">(.+?)</td>
@@ -788,7 +795,7 @@ namespace Yhsb.Jb.Network
         <td align=""center"" colspan=""3"" id=""11"">(.+?)</td>
         <td align=""center"" colspan=""3"" id=""12"">(.+?)</td>
         <td align=""center"" colspan=""3"" id=""13""(?:/>|>(.+?)</td>)
-        <td align=""center"" colspan=""2"" id=""14"">(.+?)</td>
+        <td align=""center"" colspan=""3"" id=""14"">(.+?)</td>
       </tr>
       <tr id=""77"">
         <td height=""77"" align=""center"" rowspan=""2"" id=""15"">缴费起始年月</td>
@@ -856,7 +863,7 @@ namespace Yhsb.Jb.Network
         <td align=""center"" id=""62"">(.+?)</td>
         <td align=""center"" id=""62"">(.+?)</td>
         <td align=""center"" id=""63"">(.+?)</td>
-      </tr>".Replace("\r\n", "\n");/*
+      </tr>".Replace("\r", "").Replace("\n", "").Replace("\t", "        ");/*
 /*
    @"<tr>
         <td height=""32"" align=""center"">姓名</td>

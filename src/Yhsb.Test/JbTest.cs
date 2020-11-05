@@ -49,13 +49,14 @@ public class JbTest
         {
             // sessoin.SendService(new DyfhQuery(shzt: "1", qsshsj: "20191031"));
             // Console.WriteLine(sessoin.ReadBody());
-            sessoin.SendService(new DyfhQuery(idcard: "430321196009090520"));
+            sessoin.SendService(new DyfhQuery(idcard: "43031119601016052X"));
             Console.WriteLine(sessoin.ReadBody());
-            sessoin.SendService(new DyfhQuery(idcard: "430321196009090520"));
+            sessoin.SendService(new DyfhQuery(idcard: "43031119601016052X"));
             var result = sessoin.GetResult<Dyfh>();
             if (!result.IsEmpty)
             {
                 var dyfh = result.Data[0];
+                Console.WriteLine(dyfh.PaymentInfoUrl);
                 Console.WriteLine(dyfh.PaymentInfo.Success);
                 Console.WriteLine(dyfh.PaymentInfo.Groups[1]);
             }
