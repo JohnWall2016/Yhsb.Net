@@ -1,6 +1,6 @@
 ﻿using CommandLine;
 using Yhsb.Database;
-using Yhsb.Jb.Database.Jzfp2021;
+using Yhsb.Jb.Database.Jzfp2020;
 using Yhsb.Util.Excel;
 using Yhsb.Util.Command;
 using Yhsb.Util;
@@ -98,7 +98,7 @@ namespace Yhsb.Jb.FpData
             var sheet = workbook.GetSheetAt(0);
             int startRow = 2, currentRow = 2;
 
-            IQueryable<Database.Jzfp2021.FpData> data = null;
+            IQueryable<Database.Jzfp2020.FpData> data = null;
 
             if (monthOrAll.ToUpper() == "ALL")
             {
@@ -492,7 +492,7 @@ namespace Yhsb.Jb.FpData
                 {
                     var historyData = new FpHistoryData();
                     foreach (var rawData in groups)
-                        Database.Jzfp2021.FpData.Merge(historyData, rawData);
+                        Database.Jzfp2020.FpData.Merge(historyData, rawData);
                     db.Add(historyData);
                 }
             }
@@ -550,7 +550,7 @@ namespace Yhsb.Jb.FpData
                 {
                     var data = new FpMonthData() { Month = Date };
                     foreach (var rawData in groups)
-                        Database.Jzfp2021.FpData.Merge(data, rawData);
+                        Database.Jzfp2020.FpData.Merge(data, rawData);
                     db.Add(data);
                 }
             }
@@ -577,7 +577,7 @@ namespace Yhsb.Jb.FpData
 
             WriteLine($"开始认定参保人员身份: {MonthOrAll}扶贫数据底册");
 
-            IEnumerable<Database.Jzfp2021.FpData> fpData;
+            IEnumerable<Database.Jzfp2020.FpData> fpData;
 
             if (MonthOrAll.ToUpper() == "ALL")
                 fpData = from d in db.FpHistoryData
